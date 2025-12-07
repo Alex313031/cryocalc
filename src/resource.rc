@@ -1,0 +1,156 @@
+// Microsoft Visual C++ generated resource script.
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+// Generated from the TEXTINCLUDE resource.
+
+#ifndef APSTUDIO_INVOKED
+#include "version.h"
+#endif // APSTUDIO_INVOKED
+
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include <windows.h>
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#include <winres.h>
+
+#ifdef __MINGW32__
+#include <winuser.h>
+#endif // __MINGW32__
+
+#undef APSTUDIO_READONLY_SYMBOLS
+
+// Embed manifest for common controls and DPI support
+#ifdef __MINGW32__
+APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
+#endif // __MINGW32__
+
+// Application Icons
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+
+IDI_CRYOCALC   ICON  "cryocalc.ico"
+IDI_SMALL      ICON  "small.ico"
+
+#ifdef APSTUDIO_INVOKED
+// TEXTINCLUDE
+
+1 TEXTINCLUDE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""version.h""\r\n"
+    "#endif\r\n"
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+#endif // APSTUDIO_INVOKED
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+
+// String Table
+
+STRINGTABLE
+BEGIN
+   IDC_CRYOCALC  L"CryoCalcClass"
+END
+
+// Main Application Menu
+
+IDC_CRYOCALC MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",   IDM_EXIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",  IDM_ABOUT
+    END
+END
+
+// Keyboard Accelerators
+
+IDC_CRYOCALC ACCELERATORS
+BEGIN
+    "?",       IDM_ABOUT,  ASCII,    ALT // "?"
+    VK_OEM_2,  IDM_ABOUT,  VIRTKEY,  ALT // "/"
+    0x51,      IDM_EXIT,   VIRTKEY,  CONTROL // "Q"
+END
+
+// About Dialog Box
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION ABOUT_TITLE
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            IDI_ABOUTWIN, IDC_STATIC, 14, 14, 21, 20
+    LTEXT           ABOUT_CONTENT, IDC_STATIC, 42, 14, 114, 8, SS_NOPREFIX
+    LTEXT           ABOUT_COPYRIGHT, IDC_STATIC, 42, 26, 114, 8
+    DEFPUSHBUTTON   "OK", IDOK, 113, 41, 50, 14, WS_GROUP
+END
+
+// Dialog DESIGNINFO
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN,   7
+        RIGHTMARGIN,  163
+        TOPMARGIN,    7
+        BOTTOMMARGIN, 55
+    END
+END
+#endif
+
+#endif
+
+// Version Information
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION
+ PRODUCTVERSION MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG // 0x00000010L
+#else // Release mode
+ FILEFLAGS 0x00000000L // Normal?
+#endif  // _DEBUG
+ // Windows NT
+ FILEOS VOS_NT_WINDOWS32 // 0x00040004L
+ FILETYPE VFT_APP // 0x00000001L
+ FILESUBTYPE VFT2_UNKNOWN // 0x00000000L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0" // English Unicode
+        BEGIN
+            VALUE "Comments", "https://github.com/Alex313031/cryocalc"
+            VALUE "CompanyName", "Alex313031"
+            VALUE "FileDescription", "Win32 Temperature Unit Converter"
+            VALUE "FileVersion", VERSION_STRING
+            VALUE "InternalName", "cryocalc"
+            VALUE "LegalCopyright", LEGAL_COPYRIGHT
+            VALUE "LegalTrademarks", "BSD-3"
+            VALUE "OriginalFilename", "cryocalc.exe"
+            VALUE "ProductName", "CryoCalc"
+            VALUE "ProductVersion", VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
