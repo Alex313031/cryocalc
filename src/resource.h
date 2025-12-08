@@ -17,21 +17,24 @@
 #define IDM_ABOUT				            200
 #define IDM_EXIT				            201
 #define IDM_HELP				            202
+#define IDM_CLEAR				            203
 
 // Controls
-#define IDC_BUTTON1   			        300
-#define IDC_CELSIUS  	              301
-#define IDC_KELVIN  	              302
-#define IDC_FAHRENHEIT              303
-#define IDC_RANKINE                 304
-#define IDC_LABEL_C                 305
-#define IDC_LABEL_K                 306
-#define IDC_LABEL_F                 307
-#define IDC_LABEL_R                 308
+#define IDC_CONVERT_BUTTON   			  300
+#define IDC_ABOUT_BUTTON   		   	  301
+#define IDC_INPUT    	              302
+#define IDC_SCALE    	              303
+#define IDC_CELSIUS  	              304
+#define IDC_KELVIN  	              305
+#define IDC_FAHRENHEIT              306
+#define IDC_RANKINE                 307
+#define IDC_LABEL_INPUT             308
+#define IDC_LABEL_C                 309
+#define IDC_LABEL_K                 310
+#define IDC_LABEL_F                 311
+#define IDC_LABEL_R                 312
 
-// Static values
-#define CW_MAINWIDTH                200
-#define CW_MAINHEIGHT               400
+#define CRYOCALC_MAIN_WNDCLASS      L"CryoCalcClass"
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC
