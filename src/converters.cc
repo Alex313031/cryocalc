@@ -4,7 +4,6 @@
 /* functions that return Kelvin */
 long double kelvin::fromCelsius(long double in_celsius) {
   long double retval = in_celsius + KELVIN_OFFSET;
-  std::wcout << L"retval " << retval << std::endl << std::endl;
   return retval;
 }
 
