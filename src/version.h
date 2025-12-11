@@ -17,13 +17,13 @@
 #endif // __MINGW32__
 
 #ifndef _WIN32_WINNT
- #define _WIN32_WINNT 0x0501 // Windows XP x86
+ #define _WIN32_WINNT 0x0500 // Windows 2000
 #endif // _WIN32_WINNT
 #ifndef _WIN64_WINNT
 #define _WIN64_WINNT 0x0502 // Minimum version for 64 bit, Windows Server 2003
 #endif // _WIN64_WINNT
 #ifndef _WIN32_IE
-#define _WIN32_IE 0x0600 // Minimum Internet Explorer version for common controls
+#define _WIN32_IE 0x0501 // Minimum Internet Explorer version for common controls
 #endif // _WIN32_IE
 
 #ifndef _ATL_XP_TARGETING
@@ -50,13 +50,13 @@
 // Adhere to semver > semver.org
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 0
-#define BUILD_VERSION 1
+#define BUILD_VERSION 2
 
 #ifndef VERSION_STRING
  #define VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
  #define ABOUT_TITLE L"About CryoCalc"
  #define ABOUT_CONTENT L"CryoCalc ver. " VERSION_STRING
- #define ABOUT_COPYRIGHT L"Copyright \251 2025 Alex313031" // \251 is the © symbol
+ #define ABOUT_COPYRIGHT L"\251 2025 Alex313031" // \251 is the © symbol
  #define LEGAL_COPYRIGHT L"\251 2025 Alex313031"
 #endif // VERSION_STRING
 

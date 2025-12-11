@@ -4,19 +4,40 @@
 // Global instance
 HINSTANCE hInst;
 
-// Edit instances
-HWND hCelsiusEdit;
-HWND hKelvinEdit;
-HWND hFahrenheitEdit;
-HWND hRankineEdit;
+bool debug_mode = false;
+bool show_version = false;
+bool show_help = false;
 
-// Static labels
-static HWND hCelsiusLabel;  
-static HWND hKelvinLabel;
-static HWND hFahrenheitLabel;
-static HWND hRankineLabel;
-// Convert button handle
-static HWND hConvButton;
+bool ParseCommandLine(int argc, LPWSTR argv[]) {
+  bool parsed = false;
+  if (argv) {
+    for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
+      wchar_t* arg = argv[i];
+      const bool is_debug_mode =
+          ((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
+           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0));
+      const bool is_version_mode =
+          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) || (wcscmp(arg, L"-ver")) == 0
+           || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
+      const bool is_help_mode =
+          ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) || (wcscmp(arg, L"-?") == 0)
+           || (wcscmp(arg, L"/h") == 0) || (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
+      if (is_debug_mode) {
+        debug_mode = true;
+      }
+      if (is_version_mode && !is_help_mode) {
+        show_version = true;
+      }
+      if (is_help_mode) {
+        show_help = true;
+      }
+    }
+    parsed = true;
+  } else {
+    parsed = false;
+  }
+  return parsed;
+}
 
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
@@ -26,23 +47,45 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   // Initialize common controls
   InitCommonControls();
 
-  // Allow and allocate conhost for cmd.exe logging window
-  if (!AllocConsole()) {
-    return 1;
-  }
+  int argc = 0;
+  LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-  // File handler pointer to a dummy file, possibly an actual logfile
-  FILE* fNonExistFile = fDummyFile;
-#ifndef __MINGW32__
-  freopen_s(&fNonExistFile, "CONOUT$", "w", stdout); // Standard error
-  freopen_s(&fNonExistFile, "CONOUT$", "w", stderr); // Standard out
-#else
-  // freopen_s doesn't exist in MinGW...
-  fNonExistFile = freopen("CONOUT$", "w", stdout); // Standard error
-  fNonExistFile = freopen("CONOUT$", "w", stderr); // Standard out
-#endif // __MINGW32__
-  if (!fNonExistFile) {
+  if (!ParseCommandLine(argc, argv)) {
+    LocalFree(argv);
     return 1;
+  } else {
+    LocalFree(argv);
+
+    if (show_version || debug_mode) {
+      // Allow and allocate conhost for cmd.exe logging window
+      if (!AllocConsole()) {
+        return 1;
+      }
+     // File handler pointer to a dummy file, possibly an actual logfile
+      FILE* fNonExistFile = fDummyFile;
+#ifndef __MINGW32__
+      freopen_s(&fNonExistFile, "CONOUT$", "w", stdout); // Standard error
+      freopen_s(&fNonExistFile, "CONOUT$", "w", stderr); // Standard out
+#else
+      // freopen_s doesn't exist in MinGW...
+      fNonExistFile = freopen("CONOUT$", "w", stdout); // Standard error
+      fNonExistFile = freopen("CONOUT$", "w", stderr); // Standard out
+#endif // __MINGW32__
+      if (!fNonExistFile) {
+        return 1;
+      }
+    }
+
+    static const std::wstring ver = GetVersionWstring();
+    if (show_help) {
+      return ShowHelpAndExit();
+    }
+    if (show_version) {
+      return ShowVersionAndExit();
+    }
+    if (debug_mode) {
+      HandleDebugMode();
+    }
   }
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
@@ -51,6 +94,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   RegisterWndClass(hInstance);
 
   if (!InitInstance(hInstance, nCmdShow)) {
+    std::wcerr << L"InitInstance() failed!" << std::endl;
     return 2;
   }
 
@@ -83,22 +127,23 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.hInstance      = hInstance; // This instance
   wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load our main app icon
   wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
-  wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1); // Choose window client area background color
+  wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW); // Choose window client area background color
   wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName  = szWindowClass; // Use our unique window class name
-  wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL)); // Load titlebar icon
+  wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load titlebar icon
 
   // Returns a "class atom", a win32 specific data type.
   return RegisterClassExW(&wcex);
 }
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
+  bool success = false;
   hInst = hInstance;
   // Create the main window
   HWND hwnd = CreateWindowExW(WS_EX_WINDOWEDGE,
                               szWindowClass,
                               CAPTION_TITLE,
-                              WS_OVERLAPPEDWINDOW,
+                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
                               512,
                               512,
                               CW_MAINWIDTH,
@@ -109,95 +154,27 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
                               nullptr);
 
   if (!hwnd) {
-    return false;
+    success = false;
   } else {
-    // Label (Static Control)
-    hCelsiusLabel = CreateWindowEx(
-        0,                      // Optional window styles
-        L"STATIC",              // Predefined class: Static
-        L"Celsius:",            // Text
-        WS_CHILD | WS_VISIBLE | SS_LEFT, // Styles
-        15,                     // x position
-        25,                     // y position
-        50,                     // Width
-        20,                     // Height
-        hwnd,                   // Parent window
-        (HMENU)IDC_LABEL_C,     // No menu, but control ID
-        hInst,                  // This window instance
-        nullptr                 // Additional app data
-    );
-    // Create the Edit controls
-    hCelsiusEdit = CreateWindowEx(
-        WS_EX_CLIENTEDGE, L"EDIT", L"77",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        85,
-        25,
-        75,
-        20,
-        hwnd, (HMENU)IDC_CELSIUS, hInst, nullptr
-    );
-    hKelvinLabel = CreateWindowEx(
-        0,
-        L"STATIC",
-        L"Kelvin:",
-        WS_CHILD | WS_VISIBLE | SS_LEFT,
-        15,
-        50,
-        50,
-        20,
-        hwnd,
-        (HMENU)IDC_LABEL_K,
-        hInst,
-        nullptr
-    );
-    hKelvinEdit = CreateWindowEx(
-        WS_EX_CLIENTEDGE, L"EDIT", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        85,
-        50,
-        75,
-        20,
-        hwnd, (HMENU)IDC_KELVIN, hInst, nullptr
-    );
-    hFahrenheitLabel = CreateWindowEx(
-        0,
-        L"STATIC",
-        L"Fahren:",
-        WS_CHILD | WS_VISIBLE | SS_LEFT,
-        15,
-        75,
-        50,
-        20,
-        hwnd,
-        (HMENU)IDC_LABEL_F,
-        hInst,
-        nullptr
-    );
-    hFahrenheitEdit = CreateWindowEx(
-        WS_EX_CLIENTEDGE, L"EDIT", L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
-        85,
-        75,
-        75,
-        20,
-        hwnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
-    );
-
-    // Create the Start Button control
-    hConvButton = CreateWindow(
-        L"BUTTON", CONV_BUTTON,
-        WS_CHILD | WS_VISIBLE,
-        62,
-        300,
-        75,
-        30,
-        hwnd, (HMENU)IDC_BUTTON1, hInst, nullptr
-    );
+    InitControls(hwnd);
 
     // Show the window
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
+    success = true;
+  }
+
+  return success;
+}
+
+bool LaunchHelp(HWND hWnd) {
+  std::wcout << L"Opened help" << std::endl;
+  const int retval =
+      MessageBoxW(hWnd, L"No Help implemented for CryoCalc yet...", L"Help", MB_OK | MB_ICONINFORMATION);\
+  if (retval == 1) {
     return true;
+  } else {
+    return false;
   }
 }
 
@@ -207,21 +184,46 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_COMMAND: {
       int wmId = LOWORD(wParam);
       switch (wmId) {
-        case IDC_CELSIUS:
+        case IDC_INPUT:
+          InputEntered(hWnd);
           break;
-        case IDC_KELVIN:
+        case IDC_CONVERT: {
+          HandleConvert(hWnd);
           break;
-        case IDC_BUTTON1:
+        }
+        case IDC_CONVERT_BUTTON: {
           OnStartButtonClick(hWnd);
           break;
+        }
+        case IDC_CLEAR_BUTTON: {
+          const bool can_clear = ConfirmClearControls(hWnd);
+          if (can_clear) {
+            ClearControls(hWnd);
+          }
+        } break;
+        case IDC_ABOUT_BUTTON:
+          AboutButtonClicked(hWnd);
+          break;
         case IDM_ABOUT:
-          // Show "About" dialog box
-          DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+          ShowAboutDialog(hWnd);
+          break;
+        case IDM_HELP:
+          LaunchHelp(hWnd);
           break;
         case IDM_EXIT:
           // Send WM_DESTROY message to close window 
           DestroyWindow(hWnd);
           break;
+        case IDM_CEXIT:
+          // Confirm before exiting
+          ConfirmExit(hWnd);
+          break;
+        case IDM_CLEAR: {
+          const bool can_clear = ConfirmClearControls(hWnd);
+          if (can_clear) {
+            ClearControls(hWnd);
+          }
+        } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
@@ -235,61 +237,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
   return 0;
 }
 
-bool OnStartButtonClick(HWND hWnd) {
-  bool success = false;
-  // Get the length of the text in the edit control
-  DWORD dwSize = GetWindowTextLength(hCelsiusEdit);
-  std::wstring out;
-  if (dwSize > 0) {
-    int celsius = 0;
-    // Create a buffer to store the text
-    wchar_t* buffer = new wchar_t[dwSize + 1]; // Allocate memory for the text
-
-    // Get the text from the edit control
-    GetWindowTextW(hCelsiusEdit, buffer, dwSize + 1);
-    std::wcout << L"hCelsiusEdit content = " << buffer << std::endl;
-    celsius = std::stoi(buffer);
-    std::wcout << L"celsius = " << celsius << std::endl;
-    long double testkelvin = kelvin::fromCelsius(celsius);
-    std::wcout << L"fromCelsius = " << testkelvin << std::endl;
-    out = std::to_wstring(testkelvin);
-    success = true;
+HINSTANCE GetGlobalHinst() {
+  if (hInst) {
+    return hInst;
   } else {
-    MessageBoxW(hWnd, L"No text entered!", L"Error", MB_OK | MB_ICONERROR);
-    success = false;
+    __debugbreak();
+    return nullptr;
   }
-  if (success) {
-    std::wcout << L"out = " << out << std::endl;
-    SetWindowTextW(hKelvinEdit, out.c_str());
-  }
-  return success;
-}
-
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-  UNREFERENCED_PARAMETER(lParam);
-
-  bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
-  switch (message) {
-    case WM_INITDIALOG:
-      // Showed the dialog
-      AboutHandled = true;
-      break;
-    case WM_COMMAND:
-      // Exit the dialog
-      if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-        if (EndDialog(hDlg, LOWORD(wParam))) {
-          AboutHandled = true;
-          return (INT_PTR)AboutHandled;
-        } else {
-          AboutHandled = false;
-          break;
-        }
-      } break;
-    default:
-      AboutHandled = false;
-      break;
-  }
-
-  // About dialog failed
-  return (INT_PTR)AboutHandled;
 }

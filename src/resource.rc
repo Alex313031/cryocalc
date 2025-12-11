@@ -74,6 +74,12 @@ BEGIN
         MENUITEM "&Clear",  IDM_CLEAR
         MENUITEM "E&xit",   IDM_EXIT
     END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Cut",    IDM_CUT
+        MENUITEM "&Copy",   IDM_COPY
+        MENUITEM "&Paste",  IDM_PASTE
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&Help",   IDM_HELP
@@ -85,9 +91,11 @@ END
 
 IDC_CRYOCALC ACCELERATORS
 BEGIN
-    "?",       IDM_ABOUT,  ASCII,    ALT // "?"
-    VK_OEM_2,  IDM_ABOUT,  VIRTKEY,  ALT // "/"
-    0x51,      IDM_EXIT,   VIRTKEY,  CONTROL // "Q"
+    "?",       IDM_ABOUT, ASCII,   ALT // "?"
+    VK_OEM_2,  IDM_ABOUT, VIRTKEY, ALT // "/"
+    0x57,      IDM_CLEAR, VIRTKEY, CONTROL // "W"
+    0x51,      IDM_CEXIT, VIRTKEY, CONTROL // "Q"
+    VK_ESCAPE, IDM_CEXIT, VIRTKEY, NOINVERT// "Esc"
 END
 
 // About Dialog Box
