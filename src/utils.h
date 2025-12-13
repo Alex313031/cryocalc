@@ -1,9 +1,13 @@
 #ifndef CRYOCALC_UTILS_H_
 #define CRYOCALC_UTILS_H_
 
+#include <cassert>
+
 #include "constants.h"
 #include "converters.h"
 #include "framework.h"
+
+extern unsigned int g_precision_;
 
 // Temperature helper functions
 std::wstring& GetTempString(long double in_temperature);
@@ -49,5 +53,9 @@ bool IsValidNumericInput(const wchar_t* text);
 // Converts input with decimal point to long double representation
 // for feeding into the actual conversion algorithms.
 long double ConvertInputToLD(const wchar_t* input);
+
+void SetCryoCalcPrecision(unsigned int precision);
+
+const unsigned int GetCryoCalcPrecision();
 
 #endif // CRYOCALC_UTILS_H_

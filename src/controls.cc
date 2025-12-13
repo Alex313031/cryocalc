@@ -25,6 +25,7 @@ static const std::wstring kTempC = L"C";
 static const std::wstring kTempK = L"K";
 static const std::wstring kTempF = L"F";
 static const std::wstring kTempR = L"R";
+static const std::wstring kDummyScale = L"U";
 
 // Button titles
 static const std::wstring CONV_BUTTON  = L"Convert";
@@ -38,6 +39,10 @@ Scale parseScale(const std::wstring& wscale) {
   if (wscale == kTempK) return kScaleKelvin;
   if (wscale == kTempF) return kScaleFahrenheit;
   if (wscale == kTempR) return kScaleRankine;
+  if (wscale == kDummyScale) {
+    std::wcout << L"Using dummy unknown scale \"" << kDummyScale << L"\" for testing" << std::endl;
+    return kScaleUnknown;
+  }
   throw std::invalid_argument("Unknown scale!");
 }
 
@@ -62,6 +67,7 @@ bool HandleConvert(HWND hWnd) {
   // Get the length of the text in the edit control
   DWORD dwInputSize = GetWindowTextLength(hInputEdit);
   DWORD dwScaleSize = GetWindowTextLength(hTempSelectEdit);
+  DWORD dwPrecisionSize = GetWindowTextLength(hPrecisionEdit);
   const bool is_empty = (BOOL)(dwInputSize == 0);
   bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
   const bool bad_temp_scale = (BOOL)(dwScaleSize == 0);
@@ -77,7 +83,8 @@ bool HandleConvert(HWND hWnd) {
     std::wostringstream wostr;
     // Create a buffer to store the text
     wchar_t* input_buff = new wchar_t[dwInputSize + 1]; // Allocate memory for the text
-    wchar_t* scale_buff = new wchar_t[dwScaleSize + 1]; // Allocate memory for the text
+    wchar_t* scale_buff = new wchar_t[dwScaleSize + 1];
+    wchar_t* preci_buff = new wchar_t[dwPrecisionSize + 1];
 
     // Get the text from the edit control
     GetWindowTextW(hInputEdit, input_buff, dwInputSize + 1);
@@ -91,15 +98,30 @@ bool HandleConvert(HWND hWnd) {
        success = false;
        ClearInput(hWnd);
        return success; // Fail on invalid input.
+    } else {
+      input = ConvertInputToLD(input_buff);
+      std::wcout << L"Input = " << std::setprecision(MAX_PRECISION) << input << std::endl;
     }
 
     GetWindowTextW(hTempSelectEdit, scale_buff, dwScaleSize + 1);
-    input = ConvertInputToLD(input_buff);
+    GetWindowTextW(hPrecisionEdit, preci_buff, dwPrecisionSize + 1);
+
     std::wstring scale(scale_buff);
-    std::wcout << L"Input = " << std::fixed
-               << std::setprecision(CRYOCALC_PRECISION) << input << std::endl;
+    std::wstring preci(preci_buff);
+
+    unsigned int precision_ = std::stoi(preci);
+    if (precision_ >= MIN_PRECISION && precision_ <= MAX_PRECISION) {
+      std::wcout << L"Precision = " << precision_ << std::endl;
+    } else {
+      std::wcerr << L"Precision out of range " << MIN_PRECISION 
+                 << L" - " << MAX_PRECISION << L" Setting precision to max: " 
+                 << MAX_PRECISION << std::endl;
+      precision_ = MAX_PRECISION;
+    }
+    SetCryoCalcPrecision(precision_);
 
     Scale selected_scale = parseScale(scale);
+    assert(((selected_scale >= kScaleCelsius && selected_scale < kMaxScale) || (selected_scale != kScaleUnknown)) && "Scale out of range");
     std::wstring kChosenScale;
     switch (selected_scale) {
       case kScaleCelsius:
@@ -135,16 +157,17 @@ bool HandleConvert(HWND hWnd) {
         MessageBoxW(hWnd, L"Temp scale not handled", L"Error", MB_OK | MB_ICONERROR);
     }
     std::wcout << L"Scale = " << kChosenScale << std::endl;
-    wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << convCelsius;
+    const unsigned int precision = GetCryoCalcPrecision();
+    wostr << std::fixed << std::setprecision(precision) << convCelsius;
     kCelsius = wostr.str();
     wostr.str(L"");
-    wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << convKelvin;
+    wostr << std::fixed << std::setprecision(precision) << convKelvin;
     kKelvin = wostr.str();
     wostr.str(L"");
-    wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << convFahrenheit;
+    wostr << std::fixed << std::setprecision(precision) << convFahrenheit;
     kFahrenheit = wostr.str();
     wostr.str(L"");
-    wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << convRankine;
+    wostr << std::fixed << std::setprecision(precision) << convRankine;
     kRankine = wostr.str();
     wostr.str(L"");
     wostr.clear();
@@ -160,6 +183,8 @@ bool HandleConvert(HWND hWnd) {
     SetWindowTextW(hFahrenheitEdit, kFahrenheit.c_str());
     SetWindowTextW(hRankineEdit, kRankine.c_str());
   }
+  const unsigned int found_prec = GetCryoCalcPrecision();
+  std::wcout << L"found_prec = " << found_prec << std::endl;
   return success;
 }
 
@@ -182,7 +207,7 @@ void InitControls(HWND hWnd) {
 
   // Temperature input
   hInputEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"",
+      WS_EX_CLIENTEDGE, WC_EDIT, L"77",
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       EDIT_LEFT,
       25,
@@ -332,6 +357,7 @@ void InitControls(HWND hWnd) {
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempK.c_str()); // Kelvin
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempF.c_str()); // Fahrenheit
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempR.c_str()); // Rankine
+  SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Rankine
   // Precision combobox options
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"0");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"1");
@@ -340,7 +366,7 @@ void InitControls(HWND hWnd) {
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"4");
   // Set default selections
   SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0);
-  SendMessageW(hPrecisionEdit, CB_SETCURSEL, 3, 0);
+  SendMessageW(hPrecisionEdit, CB_SETCURSEL, static_cast<int>(CRYOCALC_PRECISION), 0);
 }
 
 static const wchar_t* kBlank = L"";

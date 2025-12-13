@@ -10,10 +10,12 @@
 extern bool _about_handled;
 
 enum Scale {
-  kScaleCelsius,
-  kScaleKelvin,
-  kScaleFahrenheit,
-  kScaleRankine
+  kScaleCelsius = 0,
+  kScaleKelvin = 1,
+  kScaleFahrenheit = 2,
+  kScaleRankine = 3,
+  kScaleUnknown = -1,
+  kMaxScale = 4
 };
 
 Scale parseScale(const std::wstring& wscale);

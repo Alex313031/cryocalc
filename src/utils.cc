@@ -2,11 +2,14 @@
 
 #include "converters.h"
 
+unsigned int g_precision_;
+
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
   static const long double str = in_temperature;
   std::wostringstream wostr;
-  wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << str;
+  static const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << str;
   static std::wstring retval = wostr.str();
   return retval;
 }
@@ -16,7 +19,8 @@ std::wstring fromCelsius(long double in_celsius) {
   long double out_fahrenheit = fahrenheit::fromCelsius(in_celsius);
   long double out_rankine = rankine::fromCelsius(in_celsius);
   std::wostringstream wostr;
-  wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << "  " << in_celsius << L" \u00B0 Celsius \n"
+  static const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << "  " << in_celsius << L" \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
@@ -29,7 +33,8 @@ std::wstring fromKelvin(long double in_kelvin) {
   long double out_fahrenheit = fahrenheit::fromKelvin(in_kelvin);
   long double out_rankine = rankine::fromKelvin(in_kelvin);
   std::wostringstream wostr;
-  wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << "  " << in_kelvin << L" \u00B0 Kelvin \n"
+  static const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << "  " << in_kelvin << L" \u00B0 Kelvin \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
@@ -42,7 +47,8 @@ std::wstring fromFahrenheit(long double in_fahrenheit) {
   long double out_kelvin = kelvin::fromFahrenheit(in_fahrenheit);
   long double out_rankine = rankine::fromFahrenheit(in_fahrenheit);
   std::wostringstream wostr;
-  wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << "  " << in_fahrenheit << L" \u00B0 Fahrenheit \n"
+  static const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << "  " << in_fahrenheit << L" \u00B0 Fahrenheit \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
@@ -55,7 +61,8 @@ std::wstring fromRankine(long double in_rankine) {
   long double out_kelvin = kelvin::fromRankine(in_rankine);
   long double out_fahrenheit = fahrenheit::fromRankine(in_rankine);
   std::wostringstream wostr;
-  wostr << std::fixed << std::setprecision(CRYOCALC_PRECISION) << "  " << in_rankine << L" \u00B0 Rankine \n"
+  static const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << "  " << in_rankine << L" \u00B0 Rankine \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n";
@@ -165,6 +172,7 @@ void HandleDebugMode() {
 }
 
 bool IsValidNumericInput(const wchar_t* text) {
+  assert(text);
   bool decimalFound = false;
   for (const wchar_t* p = text; *p != L'\0'; ++p) {
     if (*p >= L'0' && *p <= L'9') {
@@ -184,7 +192,17 @@ bool IsValidNumericInput(const wchar_t* text) {
 }
 
 long double ConvertInputToLD(const wchar_t* input) {
-  const long double retval =
-      static_cast<long double>(std::stoi(input));
+  wchar_t* endPtr;
+  long double retval;
+  retval = std::wcstold(input, &endPtr);
+  return retval;
+}
+
+void SetCryoCalcPrecision(unsigned int precision) {
+  g_precision_ = precision;
+}
+
+const unsigned int GetCryoCalcPrecision() {
+  const unsigned int retval = g_precision_;
   return retval;
 }

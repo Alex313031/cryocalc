@@ -1,4 +1,5 @@
 #include "cryocalc.h"
+#include <os_info.h>
 #include "utils.h"
 
 // Global instance
@@ -87,6 +88,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
       HandleDebugMode();
     }
   }
+  const unsigned long long nt_ver = GetOsInfo(0L);
+  std::wcout << std::fixed << std::showbase << std::hex << L"GetOsInfo result = " << nt_ver << std::dec << std::defaultfloat << std::endl;
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 

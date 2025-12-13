@@ -3,7 +3,11 @@
 
 #include "globals.h"
 
-constexpr unsigned int CRYOCALC_PRECISION = 3;
+constexpr unsigned int MIN_PRECISION = 0;
+
+constexpr unsigned int MAX_PRECISION = 4;
+
+constexpr unsigned int CRYOCALC_PRECISION = 2;
 
 constexpr long double KELVIN_OFFSET = 273.150L;
 
