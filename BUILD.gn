@@ -36,7 +36,7 @@ executable("cryocalc") {
   ]
   include_dirs = [
     "src",
-    "src/osinfo",
+    "osinfo",
   ]
   deps = [
     ":osinfo",
@@ -62,12 +62,13 @@ shared_library("osinfo") {
   configs += [ "//build/config/win:windowed_subsystem" ]
 
   sources = [
-    "src/osinfo/export.h",
-    "src/osinfo/os_info.cc",
-    "src/osinfo/os_info.h",
-    "src/osinfo/resource.rc",
-    "src/osinfo/stdafx.h",
-    "src/osinfo/version.h",
+    "osinfo/export.h",
+    "osinfo/os_info.cc",
+    "osinfo/os_info.h",
+    "osinfo/os_info_dll.h",
+    "osinfo/resource.rc",
+    "osinfo/stdafx.h",
+    "osinfo/version.h",
   ]
 }
 

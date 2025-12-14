@@ -16,8 +16,6 @@ DLL_EXPORT std::string const __cdecl GetWinVersionA();
 
 DLL_EXPORT std::wstring const __cdecl GetWinVersionW();
 
-DLL_EXPORT
-
 }
 
 #endif // OSINFO_DLL_OS_INFO_DLL_H_
