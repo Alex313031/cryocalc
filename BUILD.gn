@@ -1,0 +1,74 @@
+# Copyright 2025 Alex313031
+
+group("cryocalc_all") {
+  public_deps = [
+    ":cryocalc",
+    ":osinfo_dll",
+  ]
+}
+group("osinfo_dll") {
+  public_deps = [
+    ":osinfo",
+  ]
+}
+
+executable("cryocalc") {
+  configs -= [ "//build/config/win:console_subsystem" ]
+  configs += [
+    "//build/config/win:windowed_subsystem",
+    ":cryocalc_config",
+  ]
+  sources = [
+    "src/constants.h",
+    "src/controls.cc",
+    "src/controls.h",
+    "src/converters.cc",
+    "src/converters.h",
+    "src/cryocalc.cc",
+    "src/cryocalc.h",
+    "src/framework.h",
+    "src/globals.h",
+    "src/resource.h",
+    "src/resource.rc",
+    "src/utils.cc",
+    "src/utils.h",
+    "src/version.h",
+  ]
+  include_dirs = [
+    "src",
+    "src/osinfo",
+  ]
+  deps = [
+    ":osinfo",
+  ]
+}
+
+config("cryocalc_config") {
+  include_dirs = [
+    "./src",
+  ]
+  #deps = [
+    #":cryocalc_static",
+  #]
+}
+
+static_library("cryocalc_static") {
+  sources = [
+    "version.h"
+  ]
+}
+
+shared_library("osinfo") {
+  configs += [ "//build/config/win:windowed_subsystem" ]
+
+  sources = [
+    "src/osinfo/export.h",
+    "src/osinfo/os_info.cc",
+    "src/osinfo/os_info.h",
+    "src/osinfo/resource.rc",
+    "src/osinfo/stdafx.h",
+    "src/osinfo/version.h",
+  ]
+}
+
+
