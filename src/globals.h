@@ -24,8 +24,22 @@ extern HWND hConvButton;
 // Clear button handle
 extern HWND hClearButton;
 
+// Input box for CPU stressor for number of threads
+extern HWND hThreadsEdit;
+
+// Start button handle for CPU stresser
+extern HWND hStartStresButton; // Intentionally called stres to make fun of
+                               // winternals program called CPUSTRES.exe with
+                               // product name of "Cpustrese.exe". LOL
+
+// Stop button handle for CPU stresser
+extern HWND hStopStresButton;
+
 // About button handle
 extern HWND hAboutButton;
+
+// Our status bar
+extern HWND hStatusBar;
 
 // Gets our global hInst for the main Window
 extern HINSTANCE GetGlobalHinst();

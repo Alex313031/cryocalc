@@ -50,12 +50,13 @@
 // Adhere to semver > semver.org
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 0
-#define BUILD_VERSION 2
+#define BUILD_VERSION 3
 
 #ifndef VERSION_STRING
  #define VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
  #define ABOUT_TITLE L"About CryoCalc"
  #define ABOUT_CONTENT L"CryoCalc ver. " VERSION_STRING
+ // TODO: Rebuilt win32devkit with UTF8 rc support and convert to ©
  #define ABOUT_COPYRIGHT L"\251 2025 Alex313031" // \251 is the © symbol
  #define LEGAL_COPYRIGHT L"\251 2025 Alex313031"
 #endif // VERSION_STRING

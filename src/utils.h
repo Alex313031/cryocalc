@@ -58,4 +58,10 @@ void SetCryoCalcPrecision(unsigned int precision);
 
 const unsigned int GetCryoCalcPrecision();
 
+const int GetPercentInt(const int in, const float percent);
+
+const int GetXOffset(const int in, const int offset, const float percent);
+
+const int GetYOffset(const int in, const int offset, const float percent);
+
 #endif // CRYOCALC_UTILS_H_

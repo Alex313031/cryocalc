@@ -206,3 +206,26 @@ const unsigned int GetCryoCalcPrecision() {
   const unsigned int retval = g_precision_;
   return retval;
 }
+
+const int GetPercentInt(const int in, const float percent) {
+  if (percent > 1.0f || percent <= 0.0f) {
+    std::wcerr << L"Percentage " << percent 
+               << L" is too large or zero!" << std::endl;
+    return in;    
+  } else {
+    const int retval = static_cast<int>(in * percent);
+    return retval;
+  }
+}
+
+const int GetXOffset(const int in, const int offset, const float percent) {
+  const int init = GetPercentInt(in, percent);
+  const int retval = init + offset;
+  return retval;
+}
+
+const int GetYOffset(const int in, const int offset, const float percent) {
+  const int init = GetPercentInt(in, percent);
+  const int retval = init + offset;
+  return retval;
+}

@@ -1,5 +1,5 @@
 #include "cryocalc.h"
-#include <os_info.h>
+#include <os_info_dll.h>
 #include "utils.h"
 
 // Global instance
@@ -11,10 +11,16 @@ bool show_help = false;
 
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
   bool parsed = false;
+  bool is_debug_mode =
+#ifdef _DEBUG
+    true;
+#else
+    false;
+#endif
   if (argv) {
     for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
       wchar_t* arg = argv[i];
-      const bool is_debug_mode =
+      is_debug_mode =
           ((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
            || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0));
       const bool is_version_mode =
@@ -23,9 +29,6 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
       const bool is_help_mode =
           ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) || (wcscmp(arg, L"-?") == 0)
            || (wcscmp(arg, L"/h") == 0) || (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
-      if (is_debug_mode) {
-        debug_mode = true;
-      }
       if (is_version_mode && !is_help_mode) {
         show_version = true;
       }
@@ -36,6 +39,9 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
     parsed = true;
   } else {
     parsed = false;
+  }
+  if (is_debug_mode) {
+    debug_mode = true;
   }
   return parsed;
 }
@@ -88,8 +94,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
       HandleDebugMode();
     }
   }
-  const unsigned long long nt_ver = GetOsInfo(0L);
+  const unsigned long long nt_ver = 0L;
   std::wcout << std::fixed << std::showbase << std::hex << L"GetOsInfo result = " << nt_ver << std::dec << std::defaultfloat << std::endl;
+  std::wcout << L"Windows Version: " << GetWinVersionW()
+             << L" " << GetOSNameW() << std::endl;
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 
@@ -159,7 +167,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   if (!hwnd) {
     success = false;
   } else {
-    InitControls(hwnd);
+    InitControls(hwnd, hInst);
 
     // Show the window
     ShowWindow(hwnd, nCmdShow);
@@ -183,6 +191,7 @@ bool LaunchHelp(HWND hWnd) {
 
 // Window procedure for handling messages
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  const HINSTANCE paintHinst = GetGlobalHinst();
   switch (uMsg) {
     case WM_COMMAND: {
       int wmId = LOWORD(wParam);
@@ -229,6 +238,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
+      }
+    } break;
+    case WM_PAINT:
+      SetClientRects(hWnd, paintHinst);
+      break;
+    case WM_SIZE: {
+      SetClientRects(hWnd, paintHinst);
+      if (hStatusBar) {
+        SendMessageW(hStatusBar, WM_SIZE, 0, 0);
       }
     } break;
     case WM_DESTROY:

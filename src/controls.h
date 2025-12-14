@@ -30,7 +30,13 @@ bool OnStartButtonClick(HWND hWnd);
 bool HandleConvert(HWND hWnd);
 
 // Creates main controls
-void InitControls(HWND hWnd);
+void InitControls(HWND hWnd, HINSTANCE hInst);
+
+// Creates the status bar
+void InitStatusBar(HWND hWnd, HINSTANCE hInst);
+
+// Set client rects for future resizing
+void SetClientRects(HWND hWnd, HINSTANCE hInst);
 
 // Clears the input box
 void ClearInput(HWND hWnd);
