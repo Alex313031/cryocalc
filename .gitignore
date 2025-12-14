@@ -31,3 +31,4 @@ Thumbs.db
 *Release/
 cryocalc.exe
 osinfo.dll
+/osinfo.def
