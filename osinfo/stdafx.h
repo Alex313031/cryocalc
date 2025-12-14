@@ -19,10 +19,13 @@
 
 // Windows Header Files
 #include <windows.h> // Main Windows header
+#include <ntstatus.h> // Main Windows header
+#include <winternl.h> // Main Windows header
 #include <commctrl.h> // Common controls header
 #include <mmsystem.h> // For playing sounds
 
 // C Runtime Headers
+#include <cmath> // For TCHAR, and automatically deducing wchar_t type
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
 
 // C++ STL Headers
@@ -31,3 +34,4 @@
 #include <sstream> // std::ostringstream std::wostringstream
 #include <string> // std::string std::wstring
 #include <vector> // std::vector
+#include <stdexcept> // exception handline

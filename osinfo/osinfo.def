@@ -1,0 +1,7 @@
+LIBRARY "osinfo.dll"
+EXPORTS
+GetOSNameA
+GetOSNameW
+GetWinVersionA
+GetWinVersionW
+getWinNTVersion
