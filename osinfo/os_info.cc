@@ -39,7 +39,14 @@ DLL_EXPORT bool getWinNTVersion() {
     NT_MAJOR = osInfo.dwMajorVersion;
     NT_MINOR = osInfo.dwMinorVersion;
     NT_BUILD = osInfo.dwBuildNumber;
-    NT_CSD_VERSION = osInfo.szCSDVersion;
+#if _WIN32_WINNT <= 0x0500
+    // Windows 2000 compatible string copy
+    lstrcpynW(NT_CSD_VERSION, osInfo.szCSDVersion, 128);
+#else
+    wcscpy_s(NT_CSD_VERSION, osInfo.szCSDVersion);
+#endif
+    NT_SP_MAJOR = osInfo.wServicePackMajor;
+    NT_SP_MINOR = osInfo.wServicePackMinor;
     NT_SUITE = osInfo.wSuiteMask;
     NT_TYPE = osInfo.wProductType;
     success = true;
@@ -70,13 +77,22 @@ DLL_EXPORT std::string const GetOSNameA() {
   }
 
   // Get the service pack
-  std::string NT_SERVICE_PACK(NT_CSD_VERSION.begin(),
-                              NT_CSD_VERSION.end());
-
+  const bool fallback = NT_MAJOR < 6;
+  std::wstring NT_SP;
+  std::wstring SP(NT_CSD_VERSION);
+  if (fallback) {
+    if (NT_SP_MINOR == 0) {
+      NT_SP = L"Service Pack " + std::to_wstring(NT_SP_MAJOR);
+    } else {
+      NT_SP = L"Service Pack " + std::to_wstring(NT_SP_MAJOR) + L"." + std::to_wstring(NT_SP_MINOR);
+    }
+  } else {
+    NT_SP = SP;
+  }
+  NT_SERVICE_PACK = WstringToString(NT_SP);
   
   if (NT_MAJOR <= 3) {
     NT_FEATURE_VERSION = NT_SERVICE_PACK;
-    NT_POST_STRING = NT_FEATURE_VERSION;
   }
   if (NT_MAJOR == 4) {
     if (NT_BUILD < 1381) {
@@ -88,6 +104,8 @@ DLL_EXPORT std::string const GetOSNameA() {
     } else {
       if (NT_SUITE == VER_SUITE_TERMINAL) {
         NT_FEATURE_VERSION = " (Cairo)";
+      } else {
+        NT_FEATURE_VERSION = " (Hydra)";
       }
     }
   } else if (NT_MAJOR == 5) {
@@ -118,8 +136,11 @@ DLL_EXPORT std::string const GetOSNameA() {
             }
           }
           break;
+      case 5:
+        NT_FEATURE_VERSION = " (Neptune)";
+        break;
       default:
-          NT_FEATURE_VERSION = "";
+          NT_FEATURE_VERSION = NT_SERVICE_PACK;
           break;
     }
   } else if (NT_MAJOR == 6) {
@@ -147,10 +168,9 @@ DLL_EXPORT std::string const GetOSNameA() {
           }
           break;
       default:
-          NT_FEATURE_VERSION = "";
+          NT_FEATURE_VERSION = NT_SERVICE_PACK;
           break;
     }
-    NT_POST_STRING = NT_SERVICE_PACK + NT_FEATURE_VERSION;
     // No such thing as feature releases for Windows 8.1 and below
   } else if (NT_MAJOR >= 10) {
     if (NT_BUILD > 19045) {
@@ -212,7 +232,6 @@ DLL_EXPORT std::string const GetOSNameA() {
     }
   }
   NT_POST_STRING = NT_SERVICE_PACK + NT_FEATURE_VERSION;
-  
 
   if (NT_MAJOR == 3) {
     OsVer = "Windows NT 3.x";
@@ -487,6 +506,11 @@ DLL_EXPORT std::wstring const GetWinVersionW() {
   return wver;
 }
 
+DLL_EXPORT unsigned long long const GetRawNTVer() {
+  const unsigned long long retval = 0x0501LL;
+  return retval;
+}
+
 static std::wstring StringToWstring(const std::string& str) {
   if (str.empty()) {
     return std::wstring();
@@ -508,7 +532,7 @@ static std::wstring StringToWstring(const std::string& str) {
   return result;
 }
 
-[[maybe_unused]] static std::string WstringToString(const std::wstring& wstr) {
+static std::string WstringToString(const std::wstring& wstr) {
   if (wstr.empty()) {
     return std::string();
   }
@@ -558,4 +582,11 @@ inline void NotReachedImpl(std::string func_name) {
   std::string func_string = func_name;
   std::cerr << "NOTREACHED(): " << func_string << std::endl;
   ImmediateDebugCrash();
+}
+
+const std::wstring GetOsInfoDllVersionW() {
+  std::wostringstream wostr;
+  wostr << OSINFO_VERSION_STRING;
+  const std::wstring retval = wostr.str();
+  return retval;
 }
