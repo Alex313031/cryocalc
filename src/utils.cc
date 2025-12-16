@@ -122,7 +122,7 @@ int ConfirmExit(HWND hWnd) {
   int user_response_code;
   user_response_code =
       MessageBoxW(nullptr, L"Are you sure you want to exit?", L"Confirm Exit",
-                  MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON2);
+                  MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
   switch (user_response_code) {
     case IDNO:
     case IDCANCEL:
