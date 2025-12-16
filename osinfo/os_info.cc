@@ -508,7 +508,7 @@ static std::wstring StringToWstring(const std::string& str) {
   return result;
 }
 
-static std::string WstringToString(const std::wstring& wstr) {
+[[maybe_unused]] static std::string WstringToString(const std::wstring& wstr) {
   if (wstr.empty()) {
     return std::string();
   }
