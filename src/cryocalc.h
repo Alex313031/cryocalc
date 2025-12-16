@@ -17,11 +17,6 @@
 // Dummy file output for conhost
 static FILE* fDummyFile;
 
-// Bools set by parsing commandline to control further program behavior
-extern bool debug_mode;
-extern bool show_version;
-extern bool show_help;
-
 // The title bar text
 static const WCHAR* CAPTION_TITLE = L"CryoCalc";
 

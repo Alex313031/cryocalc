@@ -20,6 +20,12 @@ std::wstring fromFahrenheit(long double in_fahrenheit);
 
 std::wstring fromRankine(long double in_rankine);
 
+// Bools set by parsing commandline to control further program behavior
+extern bool debug_mode;
+extern bool enable_logging;
+extern bool show_version;
+extern bool show_help;
+
 // Runs test routines
 bool runTests();
 
@@ -44,7 +50,7 @@ bool ConfirmClearControls(HWND hWnd);
 const int ShowHelpAndExit();
 
 // Handles the debug mode command line flag
-void HandleDebugMode();
+void HandleDebugMode(const bool debug_mode);
 
 // Checks that input only contains 0 - 9 and optionally
 // a decimal point, excluding text and special symbols.
@@ -63,5 +69,8 @@ const int GetPercentInt(const int in, const float percent);
 const int GetXOffset(const int in, const int offset, const float percent);
 
 const int GetYOffset(const int in, const int offset, const float percent);
+
+// Parses command line arguments and sets bools as necessary
+bool ParseCommandLine(int argc, LPWSTR argv[]);
 
 #endif // CRYOCALC_UTILS_H_

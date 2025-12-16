@@ -166,9 +166,15 @@ const int ShowHelpAndExit() {
   return 0;
 }
 
-void HandleDebugMode() {
-  std::wcout << L"This is CryoCalc ver. "
-  << GetVersionWstring() << L" (Debug Mode)" << std::endl;
+void HandleDebugMode(const bool debug_mode) {
+  std::wostringstream wostr;
+  wostr << L"Welcome to CryoCalc ver. " << GetVersionWstring();
+  if (debug_mode) {
+    wostr << L" (Debug Mode)" << std::endl;
+  } else {
+    wostr << std::endl;
+  }
+  std::wcout << wostr.str();
 }
 
 bool IsValidNumericInput(const wchar_t* text) {
@@ -228,4 +234,60 @@ const int GetYOffset(const int in, const int offset, const float percent) {
   const int init = GetPercentInt(in, percent);
   const int retval = init + offset;
   return retval;
+}
+
+bool debug_mode = false;
+bool enable_logging = false;
+bool show_version = false;
+bool show_help = false;
+
+bool ParseCommandLine(int argc, LPWSTR argv[]) {
+  bool parsed = false;
+  bool is_debug_mode =
+#if defined(_DEBUG) || defined(DEBUG)
+    true;
+#else
+    false;
+#endif
+  bool is_version_mode = false;
+  bool is_help_mode = false;
+  bool is_log_mode =
+#if defined(CRYOCALC_LOGBYDEFAULT)
+    true;
+#else
+    false;
+#endif
+  if (argv) {
+    for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
+      wchar_t* arg = argv[i];
+      is_debug_mode =
+          ((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
+           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0));
+      is_log_mode =
+          ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) || (wcscmp(arg, L"-log") == 0)
+           || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
+      is_version_mode =
+          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) || (wcscmp(arg, L"-ver")) == 0
+           || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
+      is_help_mode =
+          ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) || (wcscmp(arg, L"-?") == 0)
+           || (wcscmp(arg, L"/h") == 0) || (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
+    }
+    parsed = true;
+  } else {
+    parsed = false;
+  }
+  if (is_version_mode && !is_help_mode) {
+    show_version = true;
+  }
+  if (is_help_mode) {
+    show_help = true;
+  }
+  if (is_debug_mode) {
+    debug_mode = true;
+  }
+  if (is_log_mode || is_debug_mode || is_version_mode || is_help_mode) {
+    enable_logging = true;
+  }
+  return parsed;
 }

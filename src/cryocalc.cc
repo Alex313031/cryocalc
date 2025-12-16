@@ -5,47 +5,6 @@
 // Global instance
 HINSTANCE hInst;
 
-bool debug_mode = false;
-bool show_version = false;
-bool show_help = false;
-
-bool ParseCommandLine(int argc, LPWSTR argv[]) {
-  bool parsed = false;
-  bool is_debug_mode =
-#ifdef _DEBUG
-    true;
-#else
-    false;
-#endif
-  if (argv) {
-    for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
-      wchar_t* arg = argv[i];
-      is_debug_mode =
-          ((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
-           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0));
-      const bool is_version_mode =
-          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) || (wcscmp(arg, L"-ver")) == 0
-           || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
-      const bool is_help_mode =
-          ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) || (wcscmp(arg, L"-?") == 0)
-           || (wcscmp(arg, L"/h") == 0) || (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
-      if (is_version_mode && !is_help_mode) {
-        show_version = true;
-      }
-      if (is_help_mode) {
-        show_help = true;
-      }
-    }
-    parsed = true;
-  } else {
-    parsed = false;
-  }
-  if (is_debug_mode) {
-    debug_mode = true;
-  }
-  return parsed;
-}
-
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
                       LPWSTR    lpCmdLine,
@@ -63,7 +22,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   } else {
     LocalFree(argv);
 
-    if (show_version || debug_mode) {
+    if (enable_logging) {
       // Allow and allocate conhost for cmd.exe logging window
       if (!AllocConsole()) {
         return 1;
@@ -90,14 +49,14 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     if (show_version) {
       return ShowVersionAndExit();
     }
-    if (debug_mode) {
-      HandleDebugMode();
-    }
+    HandleDebugMode(debug_mode);
   }
-  const unsigned long long nt_ver = 0L;
-  std::wcout << std::fixed << std::showbase << std::hex << L"GetOsInfo result = " << nt_ver << std::dec << std::defaultfloat << std::endl;
+  std::wcout << L"osinfo.dll ver. " << GetOsInfoDllVersionW() << std::endl;
   std::wcout << L"Windows Version: " << GetWinVersionW()
              << L" " << GetOSNameW() << std::endl;
+  const unsigned long long nt_ver = GetRawNTVer();
+  std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
+             << nt_ver << std::dec << std::defaultfloat << std::endl;
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 
