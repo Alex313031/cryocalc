@@ -140,7 +140,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 bool LaunchHelp(HWND hWnd) {
   std::wcout << L"Opened help" << std::endl;
   const int retval =
-      MessageBoxW(hWnd, L"No Help implemented for CryoCalc yet...", L"Help", MB_OK | MB_ICONINFORMATION);\
+      MessageBoxW(hWnd, L"No Help implemented for CryoCalc yet...", L"Help", MB_OK | MB_ICONINFORMATION);
   if (retval == 1) {
     return true;
   } else {
@@ -199,15 +199,29 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
     } break;
+    // Start painting
     case WM_PAINT:
       SetClientRects(hWnd, paintHinst);
       break;
+    // Handle resize events
     case WM_SIZE: {
       SetClientRects(hWnd, paintHinst);
       if (hStatusBar) {
         SendMessageW(hStatusBar, WM_SIZE, 0, 0);
       }
     } break;
+    // Set/get min/max window size
+    case WM_GETMINMAXINFO: {
+      // Set the minimum size for the window
+      LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
+      pMinMaxInfo->ptMinTrackSize.x = 120;
+      pMinMaxInfo->ptMinTrackSize.y = 90;
+    } break;
+    // When close button is pressed
+    case WM_CLOSE:
+      PostQuitMessage(0);
+      break;
+    // Handle destroy message
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
