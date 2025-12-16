@@ -214,8 +214,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
       LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
-      pMinMaxInfo->ptMinTrackSize.x = 120;
-      pMinMaxInfo->ptMinTrackSize.y = 90;
+      pMinMaxInfo->ptMinTrackSize.x = 300;
+      pMinMaxInfo->ptMinTrackSize.y = 150;
     } break;
     // When close button is pressed
     case WM_CLOSE:
