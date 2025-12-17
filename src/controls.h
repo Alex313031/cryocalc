@@ -58,6 +58,6 @@ void SetAboutHandled(bool handled);
 bool ShowAboutDialog(HWND hWnd);
 
 // Message handler for the "About" dialog box.
-INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 #endif // CRYOCALC_CONTROLS_H_

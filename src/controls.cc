@@ -504,7 +504,7 @@ bool ShowAboutDialog(HWND hWnd) {
   const HINSTANCE gHinst = GetGlobalHinst();
   // Show "About" dialog box
   PlaySoundW(L"SystemNotification", nullptr, SND_ASYNC);
-  DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+  DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
   bool handled_dialog = GetAboutHandledState();
   if (handled_dialog) {
     std::wcout << L"Showed about dialog." << std::endl;
@@ -515,7 +515,7 @@ bool ShowAboutDialog(HWND hWnd) {
   }
 }
 
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
   UNREFERENCED_PARAMETER(lParam);
 
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
