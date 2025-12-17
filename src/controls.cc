@@ -519,12 +519,15 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   UNREFERENCED_PARAMETER(lParam);
 
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
+  const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
   switch (message) {
-    case WM_INITDIALOG:
-      // Showed the dialog
+    case WM_INITDIALOG: {
+      // Set icon in titlebar of about dialog
+      SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
+      SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
       AboutHandled = true;
       SetAboutHandled(AboutHandled);
-      break;
+    } break;
     case WM_COMMAND:
       // Exit the dialog
       if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {

@@ -291,3 +291,12 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
   }
   return parsed;
 }
+
+HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
+  // GetWindowLongPtr is the recommended function for 64-bit compatibility
+  LONG_PTR hInstancePtr = GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
+  // Cast the result to HINSTANCE
+  HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(hInstancePtr);
+
+  return hInstance;
+}

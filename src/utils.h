@@ -73,4 +73,6 @@ const int GetYOffset(const int in, const int offset, const float percent);
 // Parses command line arguments and sets bools as necessary
 bool ParseCommandLine(int argc, LPWSTR argv[]);
 
+HINSTANCE GetInstanceFromHwnd(HWND hWnd);
+
 #endif // CRYOCALC_UTILS_H_
