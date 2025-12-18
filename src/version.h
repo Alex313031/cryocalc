@@ -20,10 +20,10 @@
  #define _WIN32_WINNT 0x0500 // Windows 2000
 #endif // _WIN32_WINNT
 #ifndef _WIN64_WINNT
-#define _WIN64_WINNT 0x0502 // Minimum version for 64 bit, Windows Server 2003
+ #define _WIN64_WINNT 0x0502 // Minimum version for 64 bit, Windows Server 2003
 #endif // _WIN64_WINNT
 #ifndef _WIN32_IE
-#define _WIN32_IE 0x0501 // Minimum Internet Explorer version for common controls
+ #define _WIN32_IE 0x0501 // Minimum Internet Explorer version for common controls
 #endif // _WIN32_IE
 
 #ifndef _ATL_XP_TARGETING
