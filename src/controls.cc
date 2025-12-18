@@ -538,7 +538,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         } else {
           AboutHandled = false;
           SetAboutHandled(AboutHandled);
-          return (INT_PTR)AboutHandled;
+          break;
         }
       } break;
     default:

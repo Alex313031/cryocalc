@@ -2,6 +2,8 @@ LIBRARY "osinfo.dll"
 EXPORTS
 GetOSNameA
 GetOSNameW
+GetOsInfoDllVersionW
+GetRawNTVer
 GetWinVersionA
 GetWinVersionW
 getWinNTVersion
