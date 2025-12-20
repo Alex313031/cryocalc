@@ -3,12 +3,7 @@
 group("cryocalc_all") {
   public_deps = [
     ":cryocalc",
-    ":osinfo_dll",
-  ]
-}
-group("osinfo_dll") {
-  public_deps = [
-    ":osinfo",
+    "osinfo:osinfo_dll",
   ]
 }
 
@@ -34,42 +29,17 @@ executable("cryocalc") {
     "src/utils.h",
     "src/version.h",
   ]
-  include_dirs = [
-    "src",
-    "osinfo",
-  ]
   deps = [
-    ":osinfo",
+    "osinfo:osinfo",
+  ]
+  public_deps = [
+    "osinfo:osinfo_dll",
   ]
 }
 
 config("cryocalc_config") {
   include_dirs = [
-    "./src",
-  ]
-  #deps = [
-    #":cryocalc_static",
-  #]
-}
-
-static_library("cryocalc_static") {
-  sources = [
-    "version.h"
+    "src",
+    "osinfo",
   ]
 }
-
-shared_library("osinfo") {
-  configs += [ "//build/config/win:windowed_subsystem" ]
-
-  sources = [
-    "osinfo/export.h",
-    "osinfo/os_info.cc",
-    "osinfo/os_info.h",
-    "osinfo/os_info_dll.h",
-    "osinfo/resource.rc",
-    "osinfo/stdafx.h",
-    "osinfo/version.h",
-  ]
-}
-
-
