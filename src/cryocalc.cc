@@ -199,9 +199,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       }
     } break;
     // Start painting
-    case WM_PAINT:
+    case WM_PAINT: {
       SetClientRects(hWnd, paintHinst);
-      break;
+      PAINTSTRUCT ps;
+      HDC hdc = BeginPaint(hWnd, &ps);
+      // TODO: Add any drawing code that uses hdc here...
+      if (hdc) {
+      }
+      EndPaint(hWnd, &ps);
+    } break;
     // Handle resize events
     case WM_SIZE: {
       SetClientRects(hWnd, paintHinst);
