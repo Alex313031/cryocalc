@@ -5,6 +5,10 @@
 // Global instance
 HINSTANCE hInst;
 
+// Set during WM_SIZE main window message, used to calculate rects of all other controls.
+unsigned int current_width;
+unsigned int current_height;
+
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
                       LPWSTR    lpCmdLine,
@@ -12,6 +16,12 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   UNREFERENCED_PARAMETER(hPrevInstance);
   // Initialize common controls
   InitCommonControls();
+
+  // Check that we can load osinfo.dll and run init function.
+  if (!InitOsInfoDll()) {
+    MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error!", MB_OK | MB_ICONERROR);
+    return -1;
+  }
 
   int argc = 0;
   LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -113,7 +123,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   HWND hwnd = CreateWindowExW(WS_EX_WINDOWEDGE,
                               szWindowClass,
                               CAPTION_TITLE,
-                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
                               512,
                               512,
                               CW_MAINWIDTH,
@@ -210,10 +220,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     } break;
     // Handle resize events
     case WM_SIZE: {
+      current_width = LOWORD(lParam);
+      current_height = HIWORD(lParam);
       SetClientRects(hWnd, paintHinst);
-      if (hStatusBar) {
-        SendMessageW(hStatusBar, WM_SIZE, 0, 0);
-      }
+      HandleResize(hWnd);
     } break;
     // Set/get min/max window size
     case WM_GETMINMAXINFO: {

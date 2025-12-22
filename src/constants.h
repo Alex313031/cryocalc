@@ -31,17 +31,19 @@ constexpr unsigned int CW_EDITCONTROL_HEIGHT = CW_STATICLABEL_HEIGHT; // Height 
 // Padding metrics
 constexpr UINT PADDING_X     = 6;  // Minimum pixels to pad all content on the left and right
 constexpr UINT PADDING_Y     = 6;  // Minimum pixels to pad all content on the left and right
-constexpr INT  STATIC_TOP    = 12;  // Minimum pixels to pad all content from top
-constexpr INT  STATIC_LEFT   = 12;  // How many pixels to pad left side before labels
-constexpr INT  STATIC_RIGHT  = 12;  // How many pixels to pad right side after labels
+constexpr INT STATIC_TOP     = 12;  // Minimum pixels to pad all content from top
+constexpr INT STATIC_LEFT    = 12;  // How many pixels to pad left side before labels
+constexpr INT STATIC_RIGHT   = 12;  // How many pixels to pad right side after labels
+constexpr INT STATIC_BOTTOM  = 12;  // How many pixels to pad bottom
 
 // Control layout metrics
 constexpr UINT LABEL_WIDTH   = 80;  // Width in pixels of a static label
 constexpr UINT EDIT_WIDTH    = 80;  // Width in pixels of an edit control
-constexpr UINT BUTTON_Y      = 175; // Y pixel units from top of frame to position buttons
+constexpr UINT BUTTON_Y      = CW_MAINHEIGHT / 2; // Y pixel units from top of frame to position buttons
 constexpr UINT BUTTON_WIDTH  = 75;  // Width in pixels buttons
 constexpr UINT BUTTON_HEIGHT = 30;  // Height in pixels of buttons
 constexpr UINT COMBO_WIDTH   = 40;  // Width in pixels of comboboxes
 constexpr UINT INTRA_PADDING = 3;   // Value in pixels of intra-item padding
+constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3;   // Minimum height of bottom buttom controls area
 
 #endif // CRYOCALC_CONSTANTS_H_

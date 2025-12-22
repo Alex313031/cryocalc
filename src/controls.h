@@ -20,6 +20,9 @@ enum Scale {
 
 Scale parseScale(const std::wstring& wscale);
 
+extern unsigned int current_width;
+extern unsigned int current_height;
+
 // Handles the About button
 bool AboutButtonClicked(HWND hWnd);
 
@@ -29,11 +32,14 @@ bool OnStartButtonClick(HWND hWnd);
 // Handles conversion events
 bool HandleConvert(HWND hWnd);
 
+// Creates the status bar
+void InitStatusBar(HWND hWnd, HINSTANCE hInst);
+
 // Creates main controls
 void InitControls(HWND hWnd, HINSTANCE hInst);
 
-// Creates the status bar
-void InitStatusBar(HWND hWnd, HINSTANCE hInst);
+// Handles resize events and repaints controls as necessary
+void HandleResize(HWND hWnd);
 
 // Set client rects for future resizing
 void SetClientRects(HWND hWnd, HINSTANCE hInst);

@@ -6,7 +6,7 @@ static HWND hCelsiusLabel;
 static HWND hKelvinLabel;
 static HWND hFahrenheitLabel;
 static HWND hRankineLabel;
-static HWND hFrameLabel;
+static HWND hFrameOutline;
 static HWND hPrecisionLabel;
 
 // Controls/buttons forward decl
@@ -212,12 +212,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kLabelYPad = CW_STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
   const unsigned int kEditYPad = CW_EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
   const unsigned int kFrameBottom = STATIC_TOP + CW_EDITCONTROL_HEIGHT + (kEditYPad * 4);
-  unsigned int kButtonColLeft = PADDING_X + 1;
+  unsigned int kButtonColLeft = PADDING_X;
   const unsigned int kButtonCol2Left = PADDING_X + (BUTTON_WIDTH * 2) + PADDING_X;
   const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2);
   const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + PADDING_Y;
   const int kStopButtonRight = CW_MAINWIDTH - BUTTON_WIDTH - (STATIC_RIGHT + 1);
-  hFrameLabel = CreateWindowExW(
+  hFrameOutline = CreateWindowExW(
       0, WC_STATIC, L"Frame",
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
       PADDING_X,
@@ -437,14 +437,36 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   InitStatusBar(hWnd, hInst);
 }
 
+void HandleResize(HWND hWnd) {
+  if (hWnd == nullptr) {
+    return;
+  } else {
+    const unsigned int width = current_width;
+    const unsigned int height = current_height;
+    const int kStatusSplit = width - LABEL_WIDTH;
+    const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
+    const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+    const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
+    const int kButtonCol2Left = (width / 2) - PADDING_X;
+    MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
+    MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+    MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+    if (hStatusBar) {
+      SendMessageW(hStatusBar, WM_SIZE, 0, 0);
+      SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
+    }
+  }
+}
+
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
-  const LPCWSTR kInitVersionText = GetVersionWstring().c_str();
-  const int kStatusSplit = GetXOffset(CW_MAINWIDTH, -LABEL_WIDTH, 1.0f);
+  std::wstring status_text = L"CryoCalc ver. " + GetVersionWstring();
+  std::wstring status_bubble = L"Status";
+  const int kStatusSplit = CW_MAINWIDTH - LABEL_WIDTH;
   const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
   if (hStatusBar) {
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
-    SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)kInitVersionText);
-    SendMessageW(hStatusBar, SB_SETTEXT, 1, (LPARAM)L"Status");
+    SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)status_text.c_str());
+    SendMessageW(hStatusBar, SB_SETTEXT, 1, (LPARAM)status_bubble.c_str());
   } else {
     std::wcerr << __FUNC__ << L"() failed: hStatusBar not initialized" << std::endl;
   }
