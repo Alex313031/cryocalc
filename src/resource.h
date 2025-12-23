@@ -22,6 +22,8 @@
 #define IDM_CUT                     205
 #define IDM_COPY                    206
 #define IDM_PASTE                   207
+#define IDM_OSINFO                  208
+#define IDM_HELPEX                  209
 
 // Buttons
 #define IDC_CONVERT                 300

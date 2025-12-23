@@ -23,6 +23,8 @@ executable("cryocalc") {
     "src/cryocalc.h",
     "src/framework.h",
     "src/globals.h",
+    "src/osinfo.h",
+    "src/osinfo.cc",
     "src/resource.h",
     "src/resource.rc",
     "src/utils.cc",

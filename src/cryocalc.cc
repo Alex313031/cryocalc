@@ -1,5 +1,4 @@
 #include "cryocalc.h"
-#include <os_info_dll.h>
 #include "utils.h"
 
 // Global instance
@@ -18,8 +17,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   InitCommonControls();
 
   // Check that we can load osinfo.dll and run init function.
-  if (!InitOsInfoDll()) {
-    MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error!", MB_OK | MB_ICONERROR);
+  HMODULE hOsInfoDll = nullptr;
+  hOsInfoDll = LoadLibraryW(L"osinfo.dll");
+  if (!hOsInfoDll) {
+    MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
     return -1;
   }
 
@@ -61,12 +62,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     }
     HandleDebugMode(debug_mode);
   }
-  std::wcout << L"osinfo.dll ver. " << GetOsInfoDllVersionW() << std::endl;
-  std::wcout << L"Windows Version: " << GetWinVersionW()
-             << L" " << GetOSNameW() << std::endl;
-  const unsigned long long nt_ver = GetRawNTVer();
-  std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
-             << nt_ver << std::dec << std::defaultfloat << std::endl;
+  LogOsInfo();
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 
@@ -120,7 +116,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   bool success = false;
   hInst = hInstance;
   // Create the main window
-  HWND hwnd = CreateWindowExW(WS_EX_WINDOWEDGE,
+  HWND hWnd = CreateWindowExW(WS_EX_WINDOWEDGE,
                               szWindowClass,
                               CAPTION_TITLE,
                               WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
@@ -133,14 +129,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
                               hInstance,
                               nullptr);
 
-  if (!hwnd) {
+  if (!hWnd) {
     success = false;
   } else {
-    InitControls(hwnd, hInst);
+    InitControls(hWnd, hInst);
 
     // Show the window
-    ShowWindow(hwnd, nCmdShow);
-    success = UpdateWindow(hwnd);
+    ShowWindow(hWnd, nCmdShow);
+    success = UpdateWindow(hWnd);
   }
 
   return success;
@@ -155,6 +151,11 @@ bool LaunchHelp(HWND hWnd) {
   } else {
     return false;
   }
+}
+
+bool LaunchHelpEx(HWND hWnd) {
+  std::wcout << L"Opened online help" << std::endl;
+  return true;
 }
 
 // Window procedure for handling messages
@@ -186,6 +187,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           break;
         case IDM_ABOUT:
           ShowAboutDialog(hWnd);
+          break;
+        case IDM_OSINFO:
+          ShowOsInfo(hWnd);
+          break;
+        case IDM_PASTE:
+          HandlePaste(hWnd);
+          break;
+        case IDM_HELPEX:
+          LaunchHelpEx(hWnd);
           break;
         case IDM_HELP:
           LaunchHelp(hWnd);
@@ -229,8 +239,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
       LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
-      pMinMaxInfo->ptMinTrackSize.x = 300;
-      pMinMaxInfo->ptMinTrackSize.y = 150;
+      pMinMaxInfo->ptMinTrackSize.x = 260;
+      pMinMaxInfo->ptMinTrackSize.y = 320;
     } break;
     // When close button is pressed
     case WM_CLOSE:

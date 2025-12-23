@@ -1,11 +1,12 @@
 #ifndef CRYOCALC_CONTROLS_H_
 #define CRYOCALC_CONTROLS_H_
 
-#include "utils.h"
 #include "converters.h"
 #include "framework.h"
 #include "resource.h"
 #include "globals.h"
+#include "utils.h"
+#include "osinfo.h"
 
 extern bool _about_handled;
 
@@ -49,6 +50,12 @@ void ClearInput(HWND hWnd);
 
 // Clears output controls for new calculation
 void ClearControls(HWND hWnd);
+
+// Gets system clipboard content
+bool GetClipboardTextW(wchar_t* buffer, size_t bufferSize);
+
+// Handles pasting events from the main menu
+bool HandlePaste(HWND hWnd);
 
 // Handled input from the input edit box and temp selector control
 bool InputEntered(HWND hWnd);

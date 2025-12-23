@@ -60,10 +60,16 @@ bool IsValidNumericInput(const wchar_t* text);
 // for feeding into the actual conversion algorithms.
 long double ConvertInputToLD(const wchar_t* input);
 
+// Appends lines of text to an edit control
+void AppendTextToEditControl(HWND hWnd, const std::wstring line);
+
+// Sets the precision to use for calculations (usually from hPrecisionEdit).
 void SetCryoCalcPrecision(unsigned int precision);
 
+// Gets the precision to use for calculations
 const unsigned int GetCryoCalcPrecision();
 
+// Simple percent calculator
 const int GetPercentInt(const int in, const float percent);
 
 const int GetXOffset(const int in, const int offset, const float percent);
@@ -73,6 +79,7 @@ const int GetYOffset(const int in, const int offset, const float percent);
 // Parses command line arguments and sets bools as necessary
 bool ParseCommandLine(int argc, LPWSTR argv[]);
 
+// Returns an HINSTANCE for a given window HWND
 HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 
 #endif // CRYOCALC_UTILS_H_

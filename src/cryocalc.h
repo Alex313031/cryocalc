@@ -29,8 +29,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
 // Handles about button being clicked
 bool AboutButtonClicked(HWND hWnd);
 
-// Launches help (if any)
+// Launches local .chm help file (if any)
 bool LaunchHelp(HWND hWnd);
+
+// Opens link to online help
+bool LaunchHelpEx(HWND hWnd);
 
 // Window procedure function https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -71,19 +71,29 @@ IDC_CRYOCALC MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Clear",  IDM_CLEAR
-        MENUITEM "E&xit",   IDM_EXIT
+        MENUITEM "&Clear",   IDM_CLEAR
+        MENUITEM "E&xit",    IDM_EXIT
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Cut",    IDM_CUT
-        MENUITEM "&Copy",   IDM_COPY
-        MENUITEM "&Paste",  IDM_PASTE
+        MENUITEM "&Cut",     IDM_CUT, GRAYED
+        MENUITEM "&Copy",    IDM_COPY, GRAYED
+        MENUITEM             SEPARATOR
+        MENUITEM "&Paste",   IDM_PASTE
+    END
+    POPUP "&Dev"
+    BEGIN
+        MENUITEM "&OS Info", IDM_OSINFO
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&Help",   IDM_HELP
-        MENUITEM "&About",  IDM_ABOUT
+        MENUITEM "&Help",    IDM_HELP
+        MENUITEM             SEPARATOR
+        MENUITEM "&About",   IDM_ABOUT
+    END
+    POPUP "?" HELP
+    BEGIN
+        MENUITEM "&Help",    IDM_HELPEX
     END
 END
 

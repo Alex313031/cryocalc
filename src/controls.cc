@@ -310,7 +310,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
 
   hCelsiusEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_STATIC, L"",
+      WS_EX_CLIENTEDGE, WC_EDIT, L"",
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad),
@@ -319,7 +319,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_CELSIUS, hInst, nullptr
   );
   hKelvinEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_STATIC, L"",
+      WS_EX_CLIENTEDGE, WC_EDIT, L"",
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 2),
@@ -328,7 +328,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_KELVIN, hInst, nullptr
   );
   hFahrenheitEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_STATIC, L"",
+      WS_EX_CLIENTEDGE, WC_EDIT, L"",
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * INTRA_PADDING),
@@ -337,7 +337,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
   );
   hRankineEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_STATIC, L"",
+      WS_EX_CLIENTEDGE, WC_EDIT, L"",
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 4),
@@ -390,10 +390,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hStatusBar = CreateWindowExW(
       0, STATUSCLASSNAME, nullptr,
       WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
-      0,
-      0,
-      0,
-      0,
+      0, 0, 0, 0,
       hWnd, nullptr, hInst, nullptr
   );
 
@@ -447,10 +444,14 @@ void HandleResize(HWND hWnd) {
     const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
     const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
     const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
+    const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
     const int kButtonCol2Left = (width / 2) - PADDING_X;
     MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
     MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+    MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
+    MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
     MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+    MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
     if (hStatusBar) {
       SendMessageW(hStatusBar, WM_SIZE, 0, 0);
       SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
@@ -508,6 +509,86 @@ void ClearControls(HWND hWnd) {
   SetWindowTextW(hFahrenheitEdit, kBlank);
   SetWindowTextW(hRankineEdit, kBlank);
   std::wcout << L"Cleared controls" << std::endl;
+}
+
+static errno_t wcsncpy_s_compat(wchar_t* dest, size_t destsz, const wchar_t* src, size_t count) {
+  if (!dest || destsz == 0) {
+    return EINVAL;
+  }
+
+  if (!src) {
+    dest[0] = L'\0';
+    return EINVAL;
+  }
+
+  size_t i = 0;
+
+  if (count == _TRUNCATE) {
+    // Copy until dest is full or src ends
+    for (; i < destsz - 1 && src[i]; ++i) {
+      dest[i] = src[i];
+    }
+
+    dest[i] = L'\0';
+    return 0;  // truncation is NOT an error
+  }
+
+  // Normal bounded copy
+  for (; i < count && i < destsz - 1 && src[i]; ++i) {
+    dest[i] = src[i];
+  }
+
+  dest[i] = L'\0';
+
+  // If we ran out of space before copying count characters → error
+  if (i == destsz - 1 && src[i] && i < count) {
+    return ERANGE;
+  }
+  return 0;
+}
+
+bool GetClipboardTextW(wchar_t* buffer, size_t bufferSize) {
+  bool success = false;
+  if (!buffer || bufferSize == 0) {
+    return false;
+  }
+  if (!OpenClipboard(nullptr)) {
+    return false;
+  }
+
+  HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+  if (hData) {
+    const wchar_t* pText =
+        static_cast<const wchar_t*>(GlobalLock(hData));
+    if (pText) {
+      if (debug_mode) {
+        std::wcout << __FUNC__ << L"() got: " << pText << std::endl;
+      }
+      wcsncpy_s_compat(buffer, bufferSize, pText, _TRUNCATE);
+      GlobalUnlock(hData);
+      success = true;
+    }
+  }
+
+  CloseClipboard();
+  return success;
+}
+
+bool HandlePaste(HWND hWnd) {
+  wchar_t* clpbrd_buff = new wchar_t[255];
+
+  // Get text from clipboard
+  if (!GetClipboardTextW(clpbrd_buff, 255)) {
+    return false;
+  } else {
+    if (!IsValidNumericInput(clpbrd_buff)) {
+      MessageBoxW(hWnd, L"Invalid Paste Input!", L"Error!", MB_OK | MB_ICONWARNING);
+      return false;
+    } else {
+      SetWindowTextW(hInputEdit, clpbrd_buff);
+      return true;
+    }
+  }
 }
 
 bool InputEntered(HWND hWnd) {

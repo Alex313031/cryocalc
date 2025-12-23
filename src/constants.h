@@ -31,6 +31,7 @@ constexpr unsigned int CW_EDITCONTROL_HEIGHT = CW_STATICLABEL_HEIGHT; // Height 
 // Padding metrics
 constexpr UINT PADDING_X     = 6;  // Minimum pixels to pad all content on the left and right
 constexpr UINT PADDING_Y     = 6;  // Minimum pixels to pad all content on the left and right
+constexpr UINT END_PADDING   = PADDING_X + PADDING_Y; // Minimum pixels to pad all content diagonally for resizing
 constexpr INT STATIC_TOP     = 12;  // Minimum pixels to pad all content from top
 constexpr INT STATIC_LEFT    = 12;  // How many pixels to pad left side before labels
 constexpr INT STATIC_RIGHT   = 12;  // How many pixels to pad right side after labels
