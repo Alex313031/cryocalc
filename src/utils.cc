@@ -6,11 +6,11 @@ unsigned int g_precision_;
 
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
-  static const long double str = in_temperature;
   std::wostringstream wostr;
-  static const unsigned int precision = GetCryoCalcPrecision();
-  wostr << std::fixed << std::setprecision(precision) << str;
-  static std::wstring retval = wostr.str();
+  const unsigned int precision = GetCryoCalcPrecision();
+  wostr << std::fixed << std::setprecision(precision) << in_temperature;
+  static std::wstring retval;
+  retval = wostr.str();
   return retval;
 }
 
@@ -19,13 +19,12 @@ std::wstring fromCelsius(long double in_celsius) {
   long double out_fahrenheit = fahrenheit::fromCelsius(in_celsius);
   long double out_rankine = rankine::fromCelsius(in_celsius);
   std::wostringstream wostr;
-  static const unsigned int precision = GetCryoCalcPrecision();
+  const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_celsius << L" \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
-  static std::wstring retval = wostr.str();
-  return retval;
+  return wostr.str();
 }
 
 std::wstring fromKelvin(long double in_kelvin) {
@@ -33,13 +32,12 @@ std::wstring fromKelvin(long double in_kelvin) {
   long double out_fahrenheit = fahrenheit::fromKelvin(in_kelvin);
   long double out_rankine = rankine::fromKelvin(in_kelvin);
   std::wostringstream wostr;
-  static const unsigned int precision = GetCryoCalcPrecision();
+  const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_kelvin << L" \u00B0 Kelvin \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
-  static std::wstring retval = wostr.str();
-  return retval;
+  return wostr.str();
 }
 
 std::wstring fromFahrenheit(long double in_fahrenheit) {
@@ -47,13 +45,12 @@ std::wstring fromFahrenheit(long double in_fahrenheit) {
   long double out_kelvin = kelvin::fromFahrenheit(in_fahrenheit);
   long double out_rankine = rankine::fromFahrenheit(in_fahrenheit);
   std::wostringstream wostr;
-  static const unsigned int precision = GetCryoCalcPrecision();
+  const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_fahrenheit << L" \u00B0 Fahrenheit \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
-  static std::wstring retval = wostr.str();
-  return retval;
+  return wostr.str();
 }
 
 std::wstring fromRankine(long double in_rankine) {
@@ -61,13 +58,12 @@ std::wstring fromRankine(long double in_rankine) {
   long double out_kelvin = kelvin::fromRankine(in_rankine);
   long double out_fahrenheit = fahrenheit::fromRankine(in_rankine);
   std::wostringstream wostr;
-  static const unsigned int precision = GetCryoCalcPrecision();
+  const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_rankine << L" \u00B0 Rankine \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_fahrenheit << L" = \u00B0 Fahrenheit \n";
-  static std::wstring retval = wostr.str();
-  return retval;
+  return wostr.str();
 }
 
 bool runTests() {
@@ -107,8 +103,7 @@ const std::wstring GetExecutableName() {
 const std::wstring GetVersionWstring() {
   std::wostringstream wostr;
   wostr << VERSION_STRING;
-  const std::wstring retval = wostr.str();
-  return retval;
+  return wostr.str();
 }
 
 const int ShowVersionAndExit() {
@@ -136,22 +131,18 @@ int ConfirmExit(HWND hWnd) {
 }
 
 bool ConfirmClearControls(HWND hWnd) {
-  bool can_clear = false;
   int user_response_code =
       MessageBoxW(nullptr, L"Clear All Controls?", L"Confirm Clear",
                   MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
   switch (user_response_code) {
     case IDNO:
     case IDCANCEL:
-      can_clear = false;
-      break;
+      return false;
     case IDOK:
-      can_clear = true;
-      break;
+      return true;
     default:
-      break;
+      return false;
   }
-  return can_clear;
 }
 
 const int ShowHelpAndExit() {
@@ -232,14 +223,12 @@ const int GetPercentInt(const int in, const float percent) {
 }
 
 const int GetXOffset(const int in, const int offset, const float percent) {
-  const int init = GetPercentInt(in, percent);
-  const int retval = init + offset;
+  const int retval = GetPercentInt(in, percent) + offset;
   return retval;
 }
 
 const int GetYOffset(const int in, const int offset, const float percent) {
-  const int init = GetPercentInt(in, percent);
-  const int retval = init + offset;
+  const int retval = GetPercentInt(in, percent) + offset;
   return retval;
 }
 

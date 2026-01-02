@@ -146,11 +146,7 @@ bool LaunchHelp(HWND hWnd) {
   std::wcout << L"Opened help" << std::endl;
   const int retval =
       MessageBoxW(hWnd, L"No Help implemented for CryoCalc yet...", L"Help", MB_OK | MB_ICONINFORMATION);
-  if (retval == 1) {
-    return true;
-  } else {
-    return false;
-  }
+  return retval == 1;
 }
 
 bool LaunchHelpEx(HWND hWnd) {
@@ -176,7 +172,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           OnStartButtonClick(hWnd);
           break;
         }
-        case IDC_CLEAR_BUTTON: {
+        case IDC_CLEAR_BUTTON:
+        case IDM_CLEAR: {
           const bool can_clear = ConfirmClearControls(hWnd);
           if (can_clear) {
             ClearControls(hWnd);
@@ -201,19 +198,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           LaunchHelp(hWnd);
           break;
         case IDM_EXIT:
-          // Send WM_DESTROY message to close window 
+          // Send WM_DESTROY message to close window
           DestroyWindow(hWnd);
           break;
         case IDM_CEXIT:
           // Confirm before exiting
           ConfirmExit(hWnd);
           break;
-        case IDM_CLEAR: {
-          const bool can_clear = ConfirmClearControls(hWnd);
-          if (can_clear) {
-            ClearControls(hWnd);
-          }
-        } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }

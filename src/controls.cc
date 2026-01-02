@@ -57,12 +57,11 @@ Scale parseScale(const std::wstring& wscale) {
 }
 
 bool AboutButtonClicked(HWND hWnd) {
-  if (ShowAboutDialog(hWnd)) {
-    return true;
-  } else {
+  if (!ShowAboutDialog(hWnd)) {
     std::wcerr << L"About Button failed" << std::endl;
     return false;
   }
+  return true;
 }
 
 bool OnStartButtonClick(HWND hWnd) {
@@ -437,25 +436,25 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 void HandleResize(HWND hWnd) {
   if (hWnd == nullptr) {
     return;
-  } else {
-    const unsigned int width = current_width;
-    const unsigned int height = current_height;
-    const int kStatusSplit = width - LABEL_WIDTH;
-    const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
-    const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
-    const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
-    const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
-    const int kButtonCol2Left = (width / 2) - PADDING_X;
-    MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
-    MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-    MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
-    MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
-    MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-    MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-    if (hStatusBar) {
-      SendMessageW(hStatusBar, WM_SIZE, 0, 0);
-      SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
-    }
+  }
+
+  const unsigned int width = current_width;
+  const unsigned int height = current_height;
+  const int kStatusSplit = width - LABEL_WIDTH;
+  const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
+  const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+  const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
+  const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
+  const int kButtonCol2Left = (width / 2) - PADDING_X;
+  MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
+  MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
+  MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  if (hStatusBar) {
+    SendMessageW(hStatusBar, WM_SIZE, 0, 0);
+    SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
   }
 }
 
@@ -580,15 +579,15 @@ bool HandlePaste(HWND hWnd) {
   // Get text from clipboard
   if (!GetClipboardTextW(clpbrd_buff, 255)) {
     return false;
-  } else {
-    if (!IsValidNumericInput(clpbrd_buff)) {
-      MessageBoxW(hWnd, L"Invalid Paste Input!", L"Error!", MB_OK | MB_ICONWARNING);
-      return false;
-    } else {
-      SetWindowTextW(hInputEdit, clpbrd_buff);
-      return true;
-    }
   }
+
+  if (!IsValidNumericInput(clpbrd_buff)) {
+    MessageBoxW(hWnd, L"Invalid Paste Input!", L"Error!", MB_OK | MB_ICONWARNING);
+    return false;
+  }
+
+  SetWindowTextW(hInputEdit, clpbrd_buff);
+  return true;
 }
 
 bool InputEntered(HWND hWnd) {
@@ -611,11 +610,10 @@ bool ShowAboutDialog(HWND hWnd) {
   bool handled_dialog = GetAboutHandledState();
   if (handled_dialog) {
     std::wcout << L"Showed about dialog." << std::endl;
-    return true;
   } else {
     std::wcerr << L"About dialog failed!" << std::endl;
-    return false;
   }
+  return handled_dialog;
 }
 
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
