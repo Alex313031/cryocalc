@@ -13,8 +13,12 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
                       LPWSTR    lpCmdLine,
                       int       nCmdShow) {
   UNREFERENCED_PARAMETER(hPrevInstance);
+
   // Initialize common controls
-  InitCommonControls();
+  INITCOMMONCONTROLSEX icex;
+  icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+  icex.dwICC = ICC_STANDARD_CLASSES | ICC_WIN95_CLASSES | ICC_PROGRESS_CLASS;
+  InitCommonControlsEx(&icex);
 
   // Check that we can load osinfo.dll and run init function.
   HMODULE hOsInfoDll = nullptr;
