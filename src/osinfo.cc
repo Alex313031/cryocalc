@@ -123,7 +123,7 @@ std::wstring GetWinInfo() {
 }
 
 void OutputOsInfo(HWND hWnd) {
-  static std::wstring textout = GetWinInfo();
+  std::wstring textout = GetWinInfo();
   AppendTextToEditControl(hOsInfoTextOut, textout);
   std::wstring kNTVer = L"";
   const unsigned long short_nt_ver = GetShortNTVer();

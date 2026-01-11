@@ -70,7 +70,7 @@ bool OnStartButtonClick(HWND hWnd) {
 
 bool HandleConvert(HWND hWnd) {
   bool success = false;
-  static std::wstring kCelsius, kKelvin, kFahrenheit, kRankine;
+  std::wstring kCelsius, kKelvin, kFahrenheit, kRankine;
   long double convCelsius, convKelvin, convFahrenheit, convRankine;
   long double input = 0.0L;
   // Get the length of the text in the edit control

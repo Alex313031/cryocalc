@@ -14,14 +14,9 @@
 // Maximum size of string that can be loaded from resource table with LoadString().
 #define MAX_LOADSTRING 255
 
-// Dummy file output for conhost
-static FILE* fDummyFile;
-
 // The title bar text
-static const WCHAR* CAPTION_TITLE = L"CryoCalc";
+constexpr const WCHAR* CAPTION_TITLE = L"CryoCalc";
 
-// The main window class name
-static WCHAR szWindowClass[MAX_LOADSTRING];
 
 // Creates the main window with CreateWindowW()
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
@@ -34,9 +29,6 @@ bool LaunchHelp(HWND hWnd);
 
 // Opens link to online help
 bool LaunchHelpEx(HWND hWnd);
-
-// Window procedure function https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
-static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // Registers the window class.
 ATOM RegisterWndClass(HINSTANCE hInstance);

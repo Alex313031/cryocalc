@@ -8,6 +8,15 @@ HINSTANCE hInst;
 unsigned int current_width;
 unsigned int current_height;
 
+// Dummy file output for conhost
+static FILE* fDummyFile;
+
+// The main window class name
+static WCHAR szWindowClass[MAX_LOADSTRING];
+
+// Window procedure function
+static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
                       LPWSTR    lpCmdLine,
