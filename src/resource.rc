@@ -30,8 +30,8 @@ APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 
-IDI_CRYOCALC   ICON  "res\cryocalc.ico"
-IDI_SMALL      ICON  "res\small.ico"
+IDI_CRYOCALC   ICON  "res/cryocalc.ico"
+IDI_SMALL      ICON  "res/small.ico"
 
 #ifdef APSTUDIO_INVOKED
 // TEXTINCLUDE
