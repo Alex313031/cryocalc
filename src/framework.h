@@ -37,5 +37,6 @@
 #include <sstream> // std::ostringstream std::wostringstream
 #include <string> // std::string std::wstring
 #include <vector> // std::vector
+#include <thread> // For threading support
 
 #endif // CRYOCALC_FRAMEWORK_H_

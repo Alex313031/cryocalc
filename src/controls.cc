@@ -460,7 +460,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"3");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"4");
   // Set Progress bar to initially stopped
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 30);
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -694,16 +694,33 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   return (INT_PTR)AboutHandled;
 }
 
+DWORD WINAPI AnimateProg(LPVOID lpParam) {
+  while (true) {
+    SendMessageW(hProgressBar, PBM_DELTAPOS, 25, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SendMessageW(hProgressBar, PBM_DELTAPOS, 50, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SendMessageW(hProgressBar, PBM_DELTAPOS, 75, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SendMessageW(hProgressBar, PBM_DELTAPOS, 100, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SendMessageW(hProgressBar, PBM_DELTAPOS, 0, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
+  return 0;
+}
+
 // Get number of threads and launch them.
 void StartThreads(HWND hWnd) {
   // Start animating the progress bar marquee
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 30);
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
   std::wcout << L"Started stressor threads." << std::endl;
 }
 
 // Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
 void StopThreads(HWND hWnd) {
-  // Stop animating the progress bar
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 30);
+  // Stop animating the progress bar and reset to empty state
+  SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   std::wcout << L"Stopped all stressor threads." << std::endl;
 }
