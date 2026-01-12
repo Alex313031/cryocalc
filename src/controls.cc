@@ -8,6 +8,7 @@ static HWND hFahrenheitLabel;
 static HWND hRankineLabel;
 static HWND hFrameOutline;
 static HWND hPrecisionLabel;
+static HWND hThreadsLabel;
 
 // Controls/buttons forward decl
 HWND hInputEdit;
@@ -211,8 +212,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kEditYPad = CW_EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
   const unsigned int kFrameBottom = STATIC_TOP + CW_EDITCONTROL_HEIGHT + (kEditYPad * 4);
   unsigned int kButtonColLeft = PADDING_X;
-  const unsigned int kButtonCol2Left = PADDING_X + (BUTTON_WIDTH * 2) + PADDING_X;
-  const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2);
+  const unsigned int kButtonCol2Left = (CW_MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
+  const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
+  const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + PADDING_Y;
   const int kStopButtonRight = CW_MAINWIDTH - BUTTON_WIDTH - (STATIC_RIGHT + 1);
   hFrameOutline = CreateWindowExW(
@@ -392,27 +394,37 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, nullptr, hInst, nullptr
   );
 
-  /* // Create the threads number input combobox.
-  hThreadsEdit = CreateWindowExW(
-      0, WC_BUTTON, THREADS_LABEL,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
-      kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
+  hThreadsLabel = CreateWindowExW(
+      0, WC_STATIC, THREADS_LABEL,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      kButtonCol3Left,
+      STATIC_TOP,
+      LABEL_WIDTH,
+      CW_STATICLABEL_HEIGHT,
+      hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr
   );
 
-  // Create the CPU stressor progess bar.
+  // Create the threads number input combobox.
+  hThreadsEdit = CreateWindowExW(
+      WS_EX_CLIENTEDGE, WC_EDIT, L"8",
+      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      kButtonCol3Left + LABEL_WIDTH + PADDING_X,
+      STATIC_TOP,
+      EDIT_WIDTH / 2u,
+      CW_EDITCONTROL_HEIGHT,
+      hWnd, (HMENU)IDC_THREADS, hInst, nullptr
+  );
+
+  // Create the CPU stressor progress bar.
   hProgressBar = CreateWindowExW(
-      0, WC_BUTTON, L"",
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
-      kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
-  ); */
+      0, PROGRESS_CLASS, nullptr,
+      WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
+      kButtonCol3Left,
+      STATIC_TOP + CW_STATICLABEL_HEIGHT + PADDING_Y,
+      LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X,
+      PROGRESS_HEIGHT,
+      hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr
+  );
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(
@@ -435,7 +447,6 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr
   );
 
-
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempK.c_str()); // Kelvin
@@ -448,6 +459,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"2");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"3");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"4");
+  // Set Progress bar to initially stopped
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 30);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -471,13 +484,17 @@ void HandleResize(HWND hWnd) {
   const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
   const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
   const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
-  const int kButtonCol2Left = (width / 2) - PADDING_X;
+  const int kButtonCol2Left = (width / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
+  const int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
+  const int kButtonCol4Left = kButtonCol3Left + BUTTON_WIDTH + PADDING_X;
   MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
   MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hStopStresButton, kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   if (hStatusBar) {
     SendMessageW(hStatusBar, WM_SIZE, 0, 0);
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
@@ -650,8 +667,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   switch (message) {
     case WM_INITDIALOG: {
       // Set icon in titlebar of about dialog
-      SendMessage(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
-      SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
+      SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
+      SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
       AboutHandled = true;
       SetAboutHandled(AboutHandled);
     } break;
@@ -675,4 +692,18 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
   // About dialog failed
   return (INT_PTR)AboutHandled;
+}
+
+// Get number of threads and launch them.
+void StartThreads(HWND hWnd) {
+  // Start animating the progress bar marquee
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 30);
+  std::wcout << L"Started stressor threads." << std::endl;
+}
+
+// Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
+void StopThreads(HWND hWnd) {
+  // Stop animating the progress bar
+  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 30);
+  std::wcout << L"Stopped all stressor threads." << std::endl;
 }

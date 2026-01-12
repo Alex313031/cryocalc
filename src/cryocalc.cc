@@ -147,8 +147,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
   if (!hWnd) {
     success = false;
   } else {
-    InitControls(hWnd, hInst);
-
     // Show the window
     ShowWindow(hWnd, nCmdShow);
     success = UpdateWindow(hWnd);
@@ -183,8 +181,8 @@ bool LaunchHelp(HWND hWnd) {
 }
 
 bool LaunchHelpEx(HWND hWnd) {
-  std::wcout << L"Opened online help" << std::endl;
-  return true;
+  std::wcout << L"Opening online help" << std::endl;
+  return LaunchHelp(hWnd);
 }
 
 // Window procedure for handling messages
@@ -212,6 +210,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             ClearControls(hWnd);
           }
         } break;
+        case IDC_START_BUTTON:
+          StartThreads(hWnd);
+          break;
+        case IDC_STOP_BUTTON:
+          StopThreads(hWnd);
+          break;
         case IDC_ABOUT_BUTTON:
           AboutButtonClicked(hWnd);
           break;
@@ -225,8 +229,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           HandlePaste(hWnd);
           break;
         case IDM_HELPEX:
-          //LaunchHelpEx(hWnd);
-          LaunchHelp(hWnd);
+          LaunchHelpEx(hWnd);
           break;
         case IDM_HELP:
           LaunchHelp(hWnd);
@@ -243,6 +246,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
     } break;
+    // When window is shown
+    case WM_CREATE:
+      InitControls(hWnd, hInst);
+      break;
     // Start painting
     case WM_PAINT: {
       SetClientRects(hWnd, paintHinst);
@@ -267,6 +274,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       pMinMaxInfo->ptMinTrackSize.x = 260;
       pMinMaxInfo->ptMinTrackSize.y = 320;
     } break;
+    case WM_QUERYENDSESSION:
+      std::wcout << L"Windows is shutting down now!" << std::endl;
+      StopThreads(hWnd);
+      break;
     // When close button is pressed
     case WM_CLOSE:
       PostQuitMessage(0);

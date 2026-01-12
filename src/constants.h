@@ -51,5 +51,7 @@ constexpr UINT BUTTON_HEIGHT = 30u;  // Height in pixels of buttons
 constexpr UINT COMBO_WIDTH   = 40u;  // Width in pixels of comboboxes
 constexpr UINT INTRA_PADDING = 3u;   // Value in pixels of intra-item padding
 constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3u;   // Minimum height of bottom buttom controls area
+constexpr UINT PROGRESS_WIDTH = 80u;
+constexpr UINT PROGRESS_HEIGHT = CW_STATICLABEL_HEIGHT;
 
 #endif // CRYOCALC_CONSTANTS_H_

@@ -74,4 +74,10 @@ bool ShowAboutDialog(HWND hWnd);
 // Message handler for the "About" dialog box.
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
+// Called when "Start" button pressed. Stresses CPU.
+void StartThreads(HWND hWnd);
+
+// Called when "Stop" button pressed. Stops stressing CPU.
+void StopThreads(HWND hWnd);
+
 #endif // CRYOCALC_CONTROLS_H_

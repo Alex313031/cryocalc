@@ -46,12 +46,16 @@
 #define IDC_LABEL_K                 316
 #define IDC_LABEL_F                 317
 #define IDC_LABEL_R                 318
+#define IDC_LABEL_THREADS           319
 
 // Output boxes
-#define IDC_CELSIUS                 319
-#define IDC_KELVIN                  320
-#define IDC_FAHRENHEIT              321
-#define IDC_RANKINE                 322
+#define IDC_CELSIUS                 320
+#define IDC_KELVIN                  321
+#define IDC_FAHRENHEIT              322
+#define IDC_RANKINE                 323
+
+// Progress bar
+#define IDC_PROGRESS                330
 
 // Our main Window Class unique name
 #define CRYOCALC_MAIN_WNDCLASS      L"CryoCalcClass"
