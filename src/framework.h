@@ -26,6 +26,7 @@
 #include <windows.h> // Main Windows header
 #include <commctrl.h> // Common controls header
 #include <mmsystem.h> // For playing sounds
+#include <shlwapi.h> // For DLL functions
 
 // C Runtime Headers
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
