@@ -27,6 +27,7 @@ executable("cryocalc") {
     "src/osinfo.cc",
     "src/resource.h",
     "src/resource.rc",
+    "src/strings.h",
     "src/utils.cc",
     "src/utils.h",
     "src/version.h",

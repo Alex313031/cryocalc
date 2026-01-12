@@ -32,7 +32,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   InitCommonControlsEx(&icex);
 
   // Check that we can load osinfo.dll and run init function.
-  hOsInfoDll = LoadLibraryW(L"osinfo.dll");
+  hOsInfoDll = LoadLibraryW(kOsInfoDll);
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
     MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
     FreeLibrary(hOsInfoDll);
@@ -160,10 +160,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 bool LaunchHelp(HWND hWnd) {
   bool success = false;
   std::wcout << L"Opening chm help" << std::endl;
-  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", L"cryocalc.chm", nullptr, nullptr, SW_NORMAL);
+  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kCHMHelpFile, nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if ((INT_PTR)chm_result <= 32) {
-    wostr << L"Opening cryocalc.chm failed. Error = " << GetLastError() << std::endl;
+    DWORD error = GetLastError();
+    wostr << L"Opening Help failed! \n";
+    if (error == ERROR_FILE_NOT_FOUND) {
+      wostr << L"cryocalc.chm could not be found." << std::endl;
+    } else {
+      wostr << L"Error = " << error << std::endl;
+    }
     const std::wstring warn = wostr.str();
     std::wcerr << warn;
     MessageBoxW(hWnd, warn.c_str(), L"Help Error", MB_OK | MB_ICONERROR);

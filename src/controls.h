@@ -4,6 +4,7 @@
 #include "converters.h"
 #include "framework.h"
 #include "resource.h"
+#include "strings.h"
 #include "globals.h"
 #include "utils.h"
 #include "osinfo.h"

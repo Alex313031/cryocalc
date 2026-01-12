@@ -3,11 +3,16 @@
 
 #include "globals.h"
 
-constexpr unsigned int MIN_PRECISION = 0;
+inline const wchar_t* kOsInfoDll = L"osinfo.dll";
 
-constexpr unsigned int MAX_PRECISION = 4;
+inline const wchar_t* kCHMHelpFile = L"cryocalc.chm";
 
-constexpr unsigned int CRYOCALC_PRECISION = 2;
+// Minimum decimal precision for output.
+constexpr unsigned int MIN_PRECISION = 0u;
+
+constexpr unsigned int MAX_PRECISION = 4u;
+
+constexpr unsigned int CRYOCALC_PRECISION = 2u;
 
 constexpr long double KELVIN_OFFSET = 273.150L;
 
@@ -22,29 +27,29 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int CW_MAINWIDTH  = 428; // Width of main window
-constexpr unsigned int CW_MAINHEIGHT = 320; // Height of main window
+constexpr unsigned int CW_MAINWIDTH  = 428u; // Width of main window
+constexpr unsigned int CW_MAINHEIGHT = 320u; // Height of main window
 
-constexpr unsigned int CW_STATICLABEL_HEIGHT = 24; // Height of static text label controls
+constexpr unsigned int CW_STATICLABEL_HEIGHT = 24u; // Height of static text label controls
 constexpr unsigned int CW_EDITCONTROL_HEIGHT = CW_STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
-constexpr UINT PADDING_X     = 6;  // Minimum pixels to pad all content on the left and right
-constexpr UINT PADDING_Y     = 6;  // Minimum pixels to pad all content on the top and bottom
-constexpr UINT END_PADDING   = PADDING_Y * 2; // Minimum pixels to pad all content vertically for resizing
+constexpr UINT PADDING_X     = 6u;  // Minimum pixels to pad all content on the left and right
+constexpr UINT PADDING_Y     = 6u;  // Minimum pixels to pad all content on the top and bottom
+constexpr UINT END_PADDING   = PADDING_Y * 2u; // Minimum pixels to pad all content vertically for resizing
 constexpr INT STATIC_TOP     = 12;  // Minimum pixels to pad all content from top
 constexpr INT STATIC_LEFT    = 12;  // How many pixels to pad left side before labels
 constexpr INT STATIC_RIGHT   = 12;  // How many pixels to pad right side after labels
 constexpr INT STATIC_BOTTOM  = 12;  // How many pixels to pad bottom
 
 // Control layout metrics
-constexpr UINT LABEL_WIDTH   = 80;  // Width in pixels of a static label
-constexpr UINT EDIT_WIDTH    = 80;  // Width in pixels of an edit control
-constexpr UINT BUTTON_Y      = CW_MAINHEIGHT / 2; // Y pixel units from top of frame to position buttons
-constexpr UINT BUTTON_WIDTH  = 75;  // Width in pixels buttons
-constexpr UINT BUTTON_HEIGHT = 30;  // Height in pixels of buttons
-constexpr UINT COMBO_WIDTH   = 40;  // Width in pixels of comboboxes
-constexpr UINT INTRA_PADDING = 3;   // Value in pixels of intra-item padding
-constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3;   // Minimum height of bottom buttom controls area
+constexpr UINT LABEL_WIDTH   = 80u;  // Width in pixels of a static label
+constexpr UINT EDIT_WIDTH    = 80u;  // Width in pixels of an edit control
+constexpr UINT BUTTON_Y      = CW_MAINHEIGHT / 2u; // Y pixel units from top of frame to position buttons
+constexpr UINT BUTTON_WIDTH  = 75u;  // Width in pixels buttons
+constexpr UINT BUTTON_HEIGHT = 30u;  // Height in pixels of buttons
+constexpr UINT COMBO_WIDTH   = 40u;  // Width in pixels of comboboxes
+constexpr UINT INTRA_PADDING = 3u;   // Value in pixels of intra-item padding
+constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3u;   // Minimum height of bottom buttom controls area
 
 #endif // CRYOCALC_CONSTANTS_H_

@@ -149,9 +149,10 @@ const int ShowHelpAndExit() {
   std::wostringstream wostr;
   std::wcout << L"\n " << GetExecutableName()
              << L" Usage: \n" << std::endl;
-  wostr << L"   /d | -d | --debug : Enable Debug Mode \n"
-        << L"   /v | -v | --ver   : Show Version Info \n"
-        << L"   /? | -h | --help  : Show this Help \n" << std::endl;
+  wostr << L"   /d | -d | --debug   : Enable debug mode and enable logging\n"
+        << L"   /l | -l | --logging : Enable logging in console Window \n"
+        << L"   /v | -v | --ver     : Show version info \n"
+        << L"   /? | -h | --help    : Show this Help \n" << std::endl;
   std::wcout << wostr.str();
   system("pause");
   return 0;

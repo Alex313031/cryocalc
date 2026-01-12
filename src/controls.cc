@@ -36,13 +36,6 @@ static const std::wstring kTempF = L"F";
 static const std::wstring kTempR = L"R";
 static const std::wstring kDummyScale = L"U";
 
-// Button titles
-static const std::wstring CONV_BUTTON  = L"Convert";
-static const std::wstring CLEAR_BUTTON = L"Clear";
-static const std::wstring START_BUTTON = L"Start";
-static const std::wstring STOP_BUTTON  = L"Stop";
-static const std::wstring ABOUT_BUTTON = L"About";
-
 bool _about_handled = false;
 
 Scale parseScale(const std::wstring& wscale) {
@@ -81,6 +74,7 @@ bool HandleConvert(HWND hWnd) {
   const bool is_empty = (BOOL)(dwInputSize == 0);
   bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
   const bool bad_temp_scale = (BOOL)(dwScaleSize == 0);
+  unsigned int found_prec = 255u;
   if (is_empty || bad_temp_scale) {
     if (bad_temp_scale) {
       MessageBoxW(hWnd, L"Invalid Temp scale!", L"Error!", MB_OK | MB_ICONERROR);
@@ -120,9 +114,7 @@ bool HandleConvert(HWND hWnd) {
     std::wstring preci(preci_buff);
 
     unsigned int precision_ = std::stoi(preci);
-    if (precision_ >= MIN_PRECISION && precision_ <= MAX_PRECISION) {
-      std::wcout << L"Precision = " << precision_ << std::endl;
-    } else {
+    if (precision_ < MIN_PRECISION || precision_ > MAX_PRECISION) {
       std::wcerr << L"Precision out of range " << MIN_PRECISION 
                  << L" - " << MAX_PRECISION << L" Setting precision to max: " 
                  << MAX_PRECISION << std::endl;
@@ -172,6 +164,7 @@ bool HandleConvert(HWND hWnd) {
     }
     std::wcout << L"Scale = " << kChosenScale << std::endl;
     const unsigned int precision = GetCryoCalcPrecision();
+    found_prec = precision;
     wostr << std::fixed << std::setprecision(precision) << convCelsius;
     kCelsius = wostr.str();
     wostr.str(L"");
@@ -187,6 +180,13 @@ bool HandleConvert(HWND hWnd) {
     wostr.clear();
     success = true;
   }
+  if (found_prec > MAX_PRECISION) {
+    std::wcerr << L"found_prec out of bounds! " << found_prec << std::endl;
+    success = false;
+  } else {
+    std::wcout << L"Precision = " << found_prec << std::endl;
+    success = true;
+  }
   if (success) {
     std::wcout << L"kCelsius = " << kCelsius << std::endl;
     std::wcout << L"kKelvin = " << kKelvin << std::endl;
@@ -197,8 +197,6 @@ bool HandleConvert(HWND hWnd) {
     SetWindowTextW(hFahrenheitEdit, kFahrenheit.c_str());
     SetWindowTextW(hRankineEdit, kRankine.c_str());
   }
-  const unsigned int found_prec = GetCryoCalcPrecision();
-  std::wcout << L"found_prec = " << found_prec << std::endl;
   return success;
 }
 
@@ -218,7 +216,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + PADDING_Y;
   const int kStopButtonRight = CW_MAINWIDTH - BUTTON_WIDTH - (STATIC_RIGHT + 1);
   hFrameOutline = CreateWindowExW(
-      0, WC_STATIC, L"Frame",
+      0, WC_STATIC, nullptr,
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
       PADDING_X,
       PADDING_Y,
@@ -230,7 +228,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hInputLabel = CreateWindowExW(
       0,                      // Optional window styles
       WC_STATIC,              // Predefined class: Static
-      L"Input:",              // Text
+      INPUT_LABEL,             // Text
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN, // Styles
       STATIC_LEFT,            // x position
       STATIC_TOP,             // y position
@@ -278,7 +276,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr
   );
   hPrecisionLabel = CreateWindowExW(
-      0, WC_STATIC, L"Precision:",
+      0, WC_STATIC, PREC_LABEL,
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
       kButtonColLeft,
       kButtonRow2Top,
@@ -348,7 +346,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   // Create the "Convert" Button control
   hConvButton = CreateWindowExW(
-      0, WC_BUTTON, CONV_BUTTON.c_str(),
+      0, WC_BUTTON, CONV_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonColLeft,
       kButtonRowTop,
@@ -368,7 +366,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   // Create the "Clear" Button control
   hClearButton = CreateWindowExW(
-      0, WC_BUTTON, CLEAR_BUTTON.c_str(),
+      0, WC_BUTTON, CLEAR_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol2Left, // Move about button manually to the right
       kButtonRowTop,
@@ -378,7 +376,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   // Create the "About" Button control
   hAboutButton = CreateWindowExW(
-      0, WC_BUTTON, ABOUT_BUTTON.c_str(),
+      0, WC_BUTTON, ABOUT_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol2Left,
       kButtonRow2Top,
@@ -396,7 +394,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   /* // Create the threads number input combobox.
   hThreadsEdit = CreateWindowExW(
-      0, WC_BUTTON, START_BUTTON.c_str(),
+      0, WC_BUTTON, THREADS_LABEL,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
       kButtonRowTop,
@@ -407,7 +405,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   // Create the CPU stressor progess bar.
   hProgressBar = CreateWindowExW(
-      0, WC_BUTTON, START_BUTTON.c_str(),
+      0, WC_BUTTON, L"",
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
       kButtonRowTop,
@@ -418,7 +416,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(
-      0, WC_BUTTON, START_BUTTON.c_str(),
+      0, WC_BUTTON, START_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
       kButtonRowTop,
@@ -428,7 +426,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   // Create the "Stop" CPU Stress Button control
   hStopStresButton = CreateWindowExW(
-      0, WC_BUTTON, STOP_BUTTON.c_str(),
+      0, WC_BUTTON, STOP_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kStopButtonRight, // Move about button manually to the right
       kButtonRowTop,
@@ -450,6 +448,11 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"2");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"3");
   SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"4");
+  // Make output edit controls read only.
+  SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
+  SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
+  SendMessageW(hFahrenheitEdit, EM_SETREADONLY, TRUE, 0);
+  SendMessageW(hRankineEdit, EM_SETREADONLY, TRUE, 0);
   // Set default selections
   SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0L);
   SendMessageW(hPrecisionEdit, CB_SETCURSEL, static_cast<int>(CRYOCALC_PRECISION), 0);
