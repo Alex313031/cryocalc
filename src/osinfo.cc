@@ -23,7 +23,7 @@ bool ShowOsInfo(HWND hWnd) {
   wcex.hInstance      = this_hinst;
   wcex.hIcon          = LoadIcon(this_hinst, MAKEINTRESOURCE(IDI_SMALL));
   wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-  wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW);
+  wcex.hbrBackground  = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
   wcex.lpszMenuName   = nullptr;
   wcex.lpszClassName  = szOSInfoWindowClass;
   wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -93,7 +93,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       
     } break;
     case WM_GETMINMAXINFO: {
-      LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
+      LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = 250;
       pMinMaxInfo->ptMinTrackSize.y = 150;
     } break;
@@ -132,13 +132,13 @@ void OutputOsInfo(HWND hWnd) {
   std::wcout << kNTVer.c_str();
   SendMessageW(hOsInfoTextOut, EM_SETREADONLY, TRUE, 0);
   if (hStatusBar) {
-    SendMessageW(hOsInfoStatusBar, SB_SETTEXT, 0, (LPARAM)kNTVer.c_str());
+    SendMessageW(hOsInfoStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(kNTVer.c_str()));
   }
 }
 
 void LogOsInfo() {
   GetOsInfoDllVersionW_t pGetOsInfoDllVersionW =
-      (GetOsInfoDllVersionW_t)GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW");
+      reinterpret_cast<GetOsInfoDllVersionW_t>(GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW"));
   std::wstring OsInfoDllVer;
   if (pGetOsInfoDllVersionW == nullptr) {
     DWORD error = GetLastError();
@@ -170,7 +170,7 @@ bool TestDllGetVersion() {
     std::wcerr << L"hOsInfoDll was null!" << std::endl;
     return false;
   } else {
-    fnDllGetVersion = (DLLGETVERSIONPROC)GetProcAddress(hOsInfoDll, "DllGetVersion");
+    fnDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hOsInfoDll, "DllGetVersion"));
   }
   if (fnDllGetVersion == nullptr) {
     error = GetLastError();

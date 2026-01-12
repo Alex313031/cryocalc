@@ -199,8 +199,8 @@ long double ConvertInputToLD(const wchar_t* input) {
 void AppendTextToEditControl(HWND hWnd, const std::wstring line) {
   const WCHAR* text = line.c_str();
   int length = GetWindowTextLength(hWnd); // Get current text length
-  SendMessageW(hWnd, EM_SETSEL, (WPARAM)length, (LPARAM)length); // Set cursor at the end
-  SendMessageW(hWnd, EM_REPLACESEL, FALSE, (LPARAM)text); // Append the text
+  SendMessageW(hWnd, EM_SETSEL, static_cast<WPARAM>(length), static_cast<LPARAM>(length)); // Set cursor at the end
+  SendMessageW(hWnd, EM_REPLACESEL, FALSE, reinterpret_cast<LPARAM>(text)); // Append the text
 }
 
 void SetCryoCalcPrecision(unsigned int precision) {

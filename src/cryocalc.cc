@@ -102,7 +102,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     }
   }
 
-  return (int)msg.wParam;
+  return static_cast<int>(msg.wParam);
 }
 
 ATOM RegisterWndClass(HINSTANCE hInstance) {
@@ -118,7 +118,7 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.hInstance      = hInstance; // This instance
   wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load our main app icon
   wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
-  wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW); // Choose window client area background color
+  wcex.hbrBackground  = reinterpret_cast<HBRUSH>(COLOR_WINDOW); // Choose window client area background color
   wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName  = szWindowClass; // Use our unique window class name
   wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load titlebar icon
@@ -160,7 +160,7 @@ bool LaunchHelp(HWND hWnd) {
   std::wcout << L"Opening chm help" << std::endl;
   HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kCHMHelpFile, nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
-  if ((INT_PTR)chm_result <= 32) {
+  if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening Help failed! \n";
     if (error == ERROR_FILE_NOT_FOUND) {
@@ -270,7 +270,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     // Set/get min/max window size
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
-      LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
+      LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = 260;
       pMinMaxInfo->ptMinTrackSize.y = 320;
     } break;
