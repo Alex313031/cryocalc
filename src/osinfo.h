@@ -28,4 +28,7 @@ void OutputOsInfo(HWND hWnd);
 // Logs OS info to the console
 void LogOsInfo();
 
+// Tests the DllGetVersion function in osinfo.dll
+bool TestDllGetVersion();
+
 #endif // CRYOCALC_OSINFO_H_
