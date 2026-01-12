@@ -17,6 +17,8 @@ static WCHAR szWindowClass[MAX_LOADSTRING];
 // Window procedure function
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+HMODULE hOsInfoDll = nullptr; // Module handle to osinfo.dll
+
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
                       LPWSTR    lpCmdLine,
@@ -30,10 +32,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   InitCommonControlsEx(&icex);
 
   // Check that we can load osinfo.dll and run init function.
-  HMODULE hOsInfoDll = nullptr;
   hOsInfoDll = LoadLibraryW(L"osinfo.dll");
-  if (!hOsInfoDll) {
+  if (!hOsInfoDll || hOsInfoDll == nullptr) {
     MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
+    FreeLibrary(hOsInfoDll);
     return -1;
   }
 
@@ -156,10 +158,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 }
 
 bool LaunchHelp(HWND hWnd) {
-  std::wcout << L"Opened help" << std::endl;
-  const int retval =
-      MessageBoxW(hWnd, L"No Help implemented for CryoCalc yet...", L"Help", MB_OK | MB_ICONINFORMATION);
-  return retval == 1;
+  bool success = false;
+  std::wcout << L"Opening chm help" << std::endl;
+  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", L"cryocalc.chm", nullptr, nullptr, SW_NORMAL);
+  std::wostringstream wostr;
+  if ((INT_PTR)chm_result <= 32) {
+    wostr << L"Opening cryocalc.chm failed. Error = " << GetLastError() << std::endl;
+    const std::wstring warn = wostr.str();
+    std::wcerr << warn;
+    MessageBoxW(hWnd, warn.c_str(), L"Help Error", MB_OK | MB_ICONERROR);
+    success = false;
+  } else {
+    success = true;
+  }
+  wostr.str(L"");
+  wostr.clear();
+  return success;
 }
 
 bool LaunchHelpEx(HWND hWnd) {
@@ -205,7 +219,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           HandlePaste(hWnd);
           break;
         case IDM_HELPEX:
-          LaunchHelpEx(hWnd);
+          //LaunchHelpEx(hWnd);
+          LaunchHelp(hWnd);
           break;
         case IDM_HELP:
           LaunchHelp(hWnd);
