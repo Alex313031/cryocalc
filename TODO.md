@@ -1,9 +1,15 @@
 ## TODO
 
  - Port to MSVC make sure MSVC/Ninja/Make flags are all equivalent
- - Add help .chm for IDM_HELP
+ - Add content to .chm file.
  - Make better main icon. Extract higher quality flag.ico from win 2000
- - Add translations in separate imported .RC file
- - Add proper dll get version function and onload
- - Use CreateFont and SetFont with DS_FONT for Arial
- - Use CreateThread with ThreadProc for CPU Burner.
+ - Add translations in separate imported .RC file for strings.h
+ - Check onload/offload dllmain with __cdecl instead of WINAPI.
+ - Use CreateFont and SetFont with DS_FONT for Arial instead of shell dlg font.
+ - Use CreateThread with ThreadProc for CPU Burner threads.
+ - Fix osinfo padding, background color, resizing blank.
+ - Add buttons to launch winver.exe and msinfo32.exe to osinfo window
+ - Add os info button to UI.
+ - Add enable logging menu item to attach/detach console.
+ - Write full scale Chromium style streaming logger.
+ - Convert to std::vector and C++17 types where appropriate.
