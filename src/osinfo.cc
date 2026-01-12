@@ -30,7 +30,7 @@ bool ShowOsInfo(HWND hWnd) {
 
   RegisterClassExW(&wcex);
   
-  HWND hwnd = CreateWindowExW(WS_EX_WINDOWEDGE,
+  HWND hwnd = CreateWindowExW(WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW,
                               szOSInfoWindowClass,
                               L"OS Info",
                               WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
@@ -78,9 +78,6 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
     } break;
-    case WM_CREATE: {
-      OutputOsInfo(hWnd);
-    } break;
     case WM_PAINT: {
     } break;
     case WM_SIZE: {
@@ -99,8 +96,6 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       LPMINMAXINFO pMinMaxInfo = (LPMINMAXINFO)lParam;
       pMinMaxInfo->ptMinTrackSize.x = 250;
       pMinMaxInfo->ptMinTrackSize.y = 150;
-      pMinMaxInfo->ptMaxTrackSize.x = 350;
-      pMinMaxInfo->ptMaxTrackSize.y = 250;
     } break;
     case WM_CLOSE:
     case WM_DESTROY:
@@ -132,17 +127,75 @@ void OutputOsInfo(HWND hWnd) {
         << std::fixed << std::setprecision(8) << std::showbase << std::hex
         << short_nt_ver << std::dec << std::endl;
   kNTVer = wostr.str();
+  wostr.str(L"");
+  wostr.clear();
   std::wcout << kNTVer.c_str();
+  SendMessageW(hOsInfoTextOut, EM_SETREADONLY, TRUE, 0);
   if (hStatusBar) {
     SendMessageW(hOsInfoStatusBar, SB_SETTEXT, 0, (LPARAM)kNTVer.c_str());
   }
 }
 
 void LogOsInfo() {
-  std::wcout << L"osinfo.dll ver. " << GetOsInfoDllVersionW() << std::endl;
+  GetOsInfoDllVersionW_t pGetOsInfoDllVersionW =
+      (GetOsInfoDllVersionW_t)GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW");
+  std::wstring OsInfoDllVer;
+  if (pGetOsInfoDllVersionW == nullptr) {
+    DWORD error = GetLastError();
+    std::wcerr << L"Failed to get function address. Error: " << error << std::endl;
+  } else {
+    OsInfoDllVer = pGetOsInfoDllVersionW();
+  }
+  std::wcout << L"osinfo.dll ver. " << OsInfoDllVer << std::endl;
   std::wcout << L"Windows Version: " << GetWinVersionW()
              << L" " << GetOSNameW() << std::endl;
   const unsigned long long nt_ver = GetRawNTVer();
   std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
              << nt_ver << std::dec << std::defaultfloat << std::endl;
+  if (debug_mode) {
+    TestDllGetVersion();
+  }
+}
+
+bool TestDllGetVersion() {
+  bool success = false;
+  DLLGETVERSIONPROC fnDllGetVersion;
+  DLLVERSIONINFO dvi = {sizeof(dvi)};
+  DLLVERSIONINFO2 dvi2 = {sizeof(dvi2)};
+  DWORD dwVersion = 0;
+  DWORD dwVersion2 = 0;
+  DWORD error;
+  if (!hOsInfoDll || hOsInfoDll == nullptr) {
+    fnDllGetVersion = nullptr;
+    std::wcerr << L"hOsInfoDll was null!" << std::endl;
+    return false;
+  } else {
+    fnDllGetVersion = (DLLGETVERSIONPROC)GetProcAddress(hOsInfoDll, "DllGetVersion");
+  }
+  if (fnDllGetVersion == nullptr) {
+    error = GetLastError();
+    std::wcerr << L"Failed to get DllGetVersion address. Error: " << error << std::endl; 
+  } else {
+    HRESULT hr = fnDllGetVersion(&dvi);
+    HRESULT hr2 = fnDllGetVersion(reinterpret_cast<DLLVERSIONINFO*>(&dvi2));
+    if (hr == S_OK && hr2 == S_OK) {
+      dwVersion = _PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
+      dwVersion2 = _PACKVERSION(dvi2.info1.dwMajorVersion, dvi2.info1.dwMinorVersion);
+      success = true;
+    } else {
+      error = GetLastError();
+    }
+  }
+  if (success) {
+    std::wcout << L"DLLVERSIONINFO dwVersion = " << std::showbase << std::hex
+               << dwVersion << std::dec << std::defaultfloat << std::endl;
+    std::wcout << L"DLLVERSIONINFO dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi.dwMajorVersion << L"." << dvi.dwMinorVersion << L"." << dvi.dwBuildNumber << std::endl;
+    std::wcout << L"DLLVERSIONINFO2 dwVersion = " << std::showbase << std::hex
+               << dwVersion2 << std::dec << std::defaultfloat << std::endl;
+    std::wcout << L"DLLVERSIONINFO2 dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi2.info1.dwMajorVersion << L"." << dvi2.info1.dwMinorVersion << L"." << dvi2.info1.dwBuildNumber << std::endl;
+    std::wcout << L"DLLVERSIONINFO2 ullVersion = " << dvi2.ullVersion << std::endl;
+  } else {
+    std::wcerr << __FUNC__ << L"() Failed! Error: " << error << std::endl; 
+  }
+  return success;
 }
