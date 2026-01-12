@@ -24,6 +24,7 @@ HWND hStatusBar;
 
 // For CPU Stressor
 HWND hThreadsEdit;
+HWND hProgressBar;
 HWND hStartStresButton;
 HWND hStopStresButton;
 
@@ -392,6 +393,28 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       0, 0, 0, 0,
       hWnd, nullptr, hInst, nullptr
   );
+
+  /* // Create the threads number input combobox.
+  hThreadsEdit = CreateWindowExW(
+      0, WC_BUTTON, START_BUTTON.c_str(),
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
+      kButtonRowTop,
+      BUTTON_WIDTH,
+      BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
+  );
+
+  // Create the CPU stressor progess bar.
+  hProgressBar = CreateWindowExW(
+      0, WC_BUTTON, START_BUTTON.c_str(),
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
+      kButtonRowTop,
+      BUTTON_WIDTH,
+      BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
+  ); */
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(

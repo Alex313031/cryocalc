@@ -9,6 +9,9 @@
 // current instance
 extern HINSTANCE hInst;
 
+// Module handle to osinfo.dll
+extern HMODULE hOsInfoDll;
+
 // Edit control handles
 extern HWND hInputEdit;
 extern HWND hTempSelectEdit;
@@ -26,6 +29,9 @@ extern HWND hClearButton;
 
 // Input box for CPU stressor for number of threads
 extern HWND hThreadsEdit;
+
+// Progress bar for CPU stressor
+extern HWND hProgressBar;
 
 // Start button handle for CPU stresser
 extern HWND hStartStresButton; // Intentionally called stres to make fun of
