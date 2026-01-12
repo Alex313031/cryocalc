@@ -36,3 +36,8 @@ generate `.ninja` files. These are used by Ninja (the actual build system), to r
 The compiler itself is dependant on the host platform:  
 On Linux special MinGW build I compiled on Ubuntu 24.04 to support legacy Windows and use static linkage is used.
 On Windows, it simply uses an extracted toolchain from win32-devkit mentioned above.
+
+### With Visual Studio
+Only Visual Studio 2017/2019/2022 are supported.  
+ - (Broken right now, need to add configs for osinfo.dll).  
+Open the `CryoCalc.sln` file. You will need the [v141_xp toolchain](https://learn.microsoft.com/en-us/cpp/build/configuring-programs-for-windows-xp) installed to support Windows XP.
