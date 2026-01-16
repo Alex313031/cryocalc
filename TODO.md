@@ -13,3 +13,5 @@
  - Add enable logging menu item to attach/detach console.
  - Write full scale Chromium style streaming logger.
  - Convert to std::vector and C++17 types where appropriate.
+ - Check for memory leaks/dangling pointers where FreeMemory or LocalFree or delete should be used
+ - Reduce flickering by not redrawing some background and using DeferWindowPos
