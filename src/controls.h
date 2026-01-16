@@ -22,14 +22,18 @@ enum Scale {
 
 Scale parseScale(const std::wstring& wscale);
 
+// Constantly being set by WM_SIZE
 extern unsigned int current_width;
 extern unsigned int current_height;
+
+// Global variable for storing current number of threads for CPU stressor
+extern unsigned int num_threads_;
 
 // Handles the About button
 bool AboutButtonClicked(HWND hWnd);
 
 // Handles the Convert button
-bool OnStartButtonClick(HWND hWnd);
+bool OnConvertButtonClick(HWND hWnd);
 
 // Handles conversion events
 bool HandleConvert(HWND hWnd);
@@ -74,10 +78,19 @@ bool ShowAboutDialog(HWND hWnd);
 // Message handler for the "About" dialog box.
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-// Called when "Start" button pressed. Stresses CPU.
-void StartThreads(HWND hWnd);
+// Gets number of threads to launch from hThreadsEdit
+bool GetThreadsInput(HWND hWnd);
 
-// Called when "Stop" button pressed. Stops stressing CPU.
+// Uses CreateThread to start specified number of stressor threads.
+bool StartThreads(const unsigned int num_threads);
+
+// Kills all stressor threads
+bool HaltAllThreads();
+
+// Called when "Start" button pressed. Stresses CPU via StartThreads()
+void OnStartButtonClick(HWND hWnd);
+
+// Called when "Stop" button pressed. Stops progress bar/Stops stressing CPU.
 void StopThreads(HWND hWnd);
 
 #endif // CRYOCALC_CONTROLS_H_

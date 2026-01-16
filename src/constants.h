@@ -54,4 +54,7 @@ constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3u;   // Minimum height of bottom
 constexpr UINT PROGRESS_WIDTH = 80u;
 constexpr UINT PROGRESS_HEIGHT = CW_STATICLABEL_HEIGHT;
 
+constexpr unsigned int MIN_THREADS = 1u;
+constexpr unsigned int MAX_THREADS = 64u;
+
 #endif // CRYOCALC_CONSTANTS_H_

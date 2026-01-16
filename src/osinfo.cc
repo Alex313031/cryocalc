@@ -1,7 +1,5 @@
 #include "osinfo.h"
 
-#include <os_info_dll.h>
-
 static int this_width;
 static int this_height;
 

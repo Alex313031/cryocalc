@@ -200,7 +200,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           break;
         }
         case IDC_CONVERT_BUTTON: {
-          OnStartButtonClick(hWnd);
+          OnConvertButtonClick(hWnd);
           break;
         }
         case IDC_CLEAR_BUTTON:
@@ -211,7 +211,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           }
         } break;
         case IDC_START_BUTTON:
-          StartThreads(hWnd);
+          OnStartButtonClick(hWnd);
           break;
         case IDC_STOP_BUTTON:
           StopThreads(hWnd);
@@ -271,7 +271,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
-      pMinMaxInfo->ptMinTrackSize.x = 260;
+      pMinMaxInfo->ptMinTrackSize.x = 380;
       pMinMaxInfo->ptMinTrackSize.y = 320;
     } break;
     case WM_QUERYENDSESSION:

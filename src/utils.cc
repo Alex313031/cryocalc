@@ -189,6 +189,58 @@ bool IsValidNumericInput(const wchar_t* text) {
   return true;
 }
 
+// Verifies that threads input is a whole integer
+bool IsValidThreadsInput(const wchar_t* text) {
+  assert(text);
+    // Check that all characters are digits
+  for (const wchar_t* p = text; *p != L'\0'; ++p) {
+    if (*p < L'0' || *p > L'9') {
+      return false;
+    }
+  }
+  // Convert to integer
+  wchar_t* end;
+  const long value = wcstol(text, &end, 10);
+  // Check conversion was successful (end should point to null terminator)
+  if (*end != L'\0') {
+    return false;
+  }
+  if (value == 0) {
+    std::wcerr << L"Threads input was 0!" << std::endl;
+  }
+  // Check range [1, 64]
+  return (value >= 1L && value <= 64L);
+}
+
+DWORD GetLogicalProcessorCount() {
+  SYSTEM_INFO sysInfo;
+#if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
+  GetNativeSystemInfo(&sysInfo);
+#else
+  if (GetShortNTVer() >= 0x0502L) {
+    std::wcout << L"Using GetNativeSystemInfo for " << __FUNC__ << std::endl;
+    GetNativeSystemInfo(&sysInfo);
+  } else {
+    GetSystemInfo(&sysInfo);
+  }
+#endif
+  return sysInfo.dwNumberOfProcessors;
+}
+
+unsigned int GetDefaultNumThreads() {
+  unsigned int def_threads = 0;
+  const DWORD num_cpus = GetLogicalProcessorCount();
+  std::wcout << std::fixed << std::showbase << std::hex << L"GetLogicalProcessorCount() result = "
+             << num_cpus << std::dec << std::defaultfloat << std::endl;
+  def_threads = static_cast<unsigned int>(num_cpus);
+  if (def_threads == 0) {
+    return MIN_THREADS;
+  } else if (def_threads > MAX_THREADS) {
+    return MAX_THREADS;
+  }
+  return def_threads;
+}
+
 long double ConvertInputToLD(const wchar_t* input) {
   wchar_t* endPtr;
   long double retval;
@@ -296,4 +348,38 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
   HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(hInstancePtr);
 
   return hInstance;
+}
+
+long long stress_prime_result = 0;
+
+DWORD WINAPI HogCPU() {
+  while (running) {
+    unsigned long long num = 2048LL;
+    bool is_prime = true;
+
+    // A simple prime number generator (which will use a lot of CPU cycles)
+    for (unsigned long long i = 2; i < num; ++i) {
+      if (num % i == 0) {
+        is_prime = false;
+        break;
+      }
+    }
+
+    if (is_prime) {
+      // If prime, add 1 and continue prime search
+      num = num + 1;
+    }
+
+    stress_prime_result = num;
+  }
+  return reinterpret_cast<DWORD>(stress_prime_result);
+}
+
+// Launches a vector of specified number of CreateThread
+void LaunchThreads(const unsigned int ithreads) {
+  std::vector<HANDLE> thread_handles;
+  for (unsigned int i = 0; i < ithreads; ++i) {
+    //thread_handles.push_back(CreateThread());
+  }
+  //HogCPU();
 }

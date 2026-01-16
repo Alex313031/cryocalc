@@ -7,6 +7,8 @@
 #include "converters.h"
 #include "framework.h"
 
+#include <os_info_dll.h>
+
 extern unsigned int g_precision_;
 
 // Temperature helper functions
@@ -56,6 +58,12 @@ void HandleDebugMode(const bool debug_mode);
 // a decimal point, excluding text and special symbols.
 bool IsValidNumericInput(const wchar_t* text);
 
+// Verifies that threads input is valid.
+bool IsValidThreadsInput(const wchar_t* text);
+
+// Gets the default number of threads to use for stressor: the number of logical CPUs.
+unsigned int GetDefaultNumThreads();
+
 // Converts input with decimal point to long double representation
 // for feeding into the actual conversion algorithms.
 long double ConvertInputToLD(const wchar_t* input);
@@ -81,5 +89,11 @@ bool ParseCommandLine(int argc, LPWSTR argv[]);
 
 // Returns an HINSTANCE for a given window HWND
 HINSTANCE GetInstanceFromHwnd(HWND hWnd);
+
+// Actual CPU stressor function to be dispatched with threads.
+DWORD WINAPI HogCPU();
+
+// Function that launches stressor threads.
+void LaunchThreads(const unsigned int ithreads);
 
 #endif // CRYOCALC_UTILS_H_

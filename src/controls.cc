@@ -39,6 +39,8 @@ static const std::wstring kDummyScale = L"U";
 
 bool _about_handled = false;
 
+unsigned int num_threads_ = 0;
+
 Scale parseScale(const std::wstring& wscale) {
   if (wscale == kTempC) return kScaleCelsius;
   if (wscale == kTempK) return kScaleKelvin;
@@ -59,7 +61,7 @@ bool AboutButtonClicked(HWND hWnd) {
   return true;
 }
 
-bool OnStartButtonClick(HWND hWnd) {
+bool OnConvertButtonClick(HWND hWnd) {
   return HandleConvert(hWnd);
 }
 
@@ -81,7 +83,7 @@ bool HandleConvert(HWND hWnd) {
       MessageBoxW(hWnd, L"Invalid Temp scale!", L"Error!", MB_OK | MB_ICONERROR);
     }
     if (is_empty) {
-      MessageBoxW(hWnd, L"No text entered!", L"Empty Input", MB_OK | MB_ICONWARNING);
+      MessageBoxW(hWnd, L"No text entered!", L"Empty Temp. Input", MB_OK | MB_ICONWARNING);
     }
     success = false;
   } else {
@@ -404,9 +406,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr
   );
 
+  const unsigned int default_threads = GetDefaultNumThreads();
+  std::wstring ws = std::to_wstring(default_threads);
+  const wchar_t* THREADS_DEFAULT = ws.c_str();
   // Create the threads number input combobox.
   hThreadsEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"8",
+      WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT,
       WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X,
       STATIC_TOP,
@@ -564,7 +569,6 @@ static errno_t wcsncpy_s_compat(wchar_t* dest, size_t destsz, const wchar_t* src
   }
 
   size_t i = 0;
-
   if (count == _TRUNCATE) {
     // Copy until dest is full or src ends
     for (; i < destsz - 1 && src[i]; ++i) {
@@ -710,11 +714,56 @@ DWORD WINAPI AnimateProg(LPVOID lpParam) {
   return 0;
 }
 
+bool GetThreadsInput(HWND hWnd) {
+  DWORD dwThrInputSize = GetWindowTextLength(hThreadsEdit);
+  const bool is_empty = (BOOL)(dwThrInputSize == 0);
+  bool is_invalid = is_empty;
+  if (is_empty) {
+    MessageBoxW(hWnd, L"No threads entered!", L"Empty Threads Input", MB_OK | MB_ICONWARNING);
+    return false;
+  }
+  wchar_t* in_buff = new wchar_t[dwThrInputSize + 1];
+  GetWindowTextW(hThreadsEdit, in_buff, dwThrInputSize + 1);
+  if (!IsValidThreadsInput(in_buff)) {
+    is_invalid = true;
+  }
+  unsigned int get_threads;
+  if (is_invalid) {
+    MessageBoxW(hWnd, L"Invalid Threads Input! \nValid values are 1 - 64.", L"Error.", MB_OK | MB_ICONWARNING);
+    get_threads = GetDefaultNumThreads();
+  } else {
+    std::wstring threads_input(in_buff);
+    get_threads = std::stoi(threads_input);
+  }
+  std::wcout << L"Using " << get_threads << L" number of threads." << std::endl;
+  num_threads_ = get_threads;
+  return num_threads_ >= MIN_THREADS && num_threads_ <= MAX_THREADS;
+}
+
+bool StartThreads(const unsigned int num_threads) {
+  std::wcout << L"Starting " << num_threads << L" stressor threads." << std::endl;
+  LaunchThreads(num_threads);
+  return true;
+}
+
+bool HaltAllThreads() {
+  std::wcout << L"Stopped all stressor threads." << std::endl;
+  return true;
+}
+
 // Get number of threads and launch them.
-void StartThreads(HWND hWnd) {
+void OnStartButtonClick(HWND hWnd) {
   // Start animating the progress bar marquee
   SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
-  std::wcout << L"Started stressor threads." << std::endl;
+  if (GetThreadsInput(hWnd)) {
+    std::wcout << L"Starting CPU stress test..." << std::endl;
+    StartThreads(num_threads_);
+  } else {
+    std::wcerr << __FUNC__ << L"() failed!" << std::endl;
+    // Stop animating if we failed for some reason.
+    SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
+    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  }
 }
 
 // Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
@@ -722,5 +771,6 @@ void StopThreads(HWND hWnd) {
   // Stop animating the progress bar and reset to empty state
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-  std::wcout << L"Stopped all stressor threads." << std::endl;
+  std::wcout << L"Stopping CPU stress test..." << std::endl;
+  HaltAllThreads();
 }
