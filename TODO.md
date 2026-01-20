@@ -16,3 +16,4 @@
  - Check for memory leaks/dangling pointers where FreeMemory or LocalFree or delete should be used
  - Reduce flickering by not redrawing some backgrounds and using DeferWindowPos
  - Add hover tooltips for static items
+ - Clang-format source

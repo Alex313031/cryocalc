@@ -9,7 +9,18 @@
 
 #include <os_info_dll.h>
 
+// Global precision to use
 extern unsigned int g_precision_;
+
+// Bools set by parsing commandline to control further program behavior
+extern bool debug_mode;
+extern bool enable_logging;
+extern bool show_version;
+extern bool show_help;
+
+// Volatile variables to be used by stress threads
+extern volatile unsigned long long stress_prime_result; // Ultimate returned result from thread joining
+extern volatile bool running; // For controlling thread activation state
 
 // Temperature helper functions
 std::wstring& GetTempString(long double in_temperature);
@@ -21,14 +32,6 @@ std::wstring fromKelvin(long double in_kelvin);
 std::wstring fromFahrenheit(long double in_fahrenheit);
 
 std::wstring fromRankine(long double in_rankine);
-
-// Bools set by parsing commandline to control further program behavior
-extern bool debug_mode;
-extern bool enable_logging;
-extern bool show_version;
-extern bool show_help;
-
-extern volatile unsigned long long stress_prime_result;
 
 // Runs test routines
 bool runTests();

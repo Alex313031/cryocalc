@@ -4,6 +4,10 @@
 
 unsigned int g_precision_;
 
+// Maybe use std::atomic instead?
+volatile unsigned long long stress_prime_result = 0;
+volatile bool running = false;
+
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
   std::wostringstream wostr;
@@ -355,10 +359,6 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
 
   return hInstance;
 }
-
-volatile unsigned long long stress_prime_result = 0;
-
-volatile bool running = false;
 
 DWORD WINAPI HogCPU() {
   while (running) {
