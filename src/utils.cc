@@ -172,6 +172,7 @@ void HandleDebugMode(const bool debug_mode) {
 bool IsValidNumericInput(const wchar_t* text) {
   assert(text);
   bool decimalFound = false;
+  bool minusFound = false;
   for (const wchar_t* p = text; *p != L'\0'; ++p) {
     if (*p >= L'0' && *p <= L'9') {
       continue; // Safe numerals
@@ -181,6 +182,14 @@ bool IsValidNumericInput(const wchar_t* text) {
         return false;
       }
       decimalFound = true; // Found a decimal
+      continue;
+    }
+    // Same checking, but for minus symbol, for negative temp values.
+    if (*p == L'-') {
+      if (minusFound) {
+        return false;
+      }
+      minusFound = true;
       continue;
     }
     // Any other character as invalid
@@ -208,8 +217,8 @@ bool IsValidThreadsInput(const wchar_t* text) {
   if (value == 0) {
     std::wcerr << L"Threads input was 0!" << std::endl;
   }
-  // Check range [1, 64]
-  return (value >= 1L && value <= 64L);
+  // Check range [1, 128]
+  return (value >= static_cast<long>(MIN_THREADS) && value <= static_cast<long>(MAX_THREADS));
 }
 
 DWORD GetLogicalProcessorCount() {
@@ -229,10 +238,7 @@ DWORD GetLogicalProcessorCount() {
 
 unsigned int GetDefaultNumThreads() {
   unsigned int def_threads = 0;
-  const DWORD num_cpus = GetLogicalProcessorCount();
-  std::wcout << std::fixed << std::showbase << std::hex << L"GetLogicalProcessorCount() result = "
-             << num_cpus << std::dec << std::defaultfloat << std::endl;
-  def_threads = static_cast<unsigned int>(num_cpus);
+  def_threads = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (def_threads == 0) {
     return MIN_THREADS;
   } else if (def_threads > MAX_THREADS) {
@@ -350,7 +356,9 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
   return hInstance;
 }
 
-long long stress_prime_result = 0;
+volatile unsigned long long stress_prime_result = 0;
+
+volatile bool running = false;
 
 DWORD WINAPI HogCPU() {
   while (running) {
@@ -372,14 +380,42 @@ DWORD WINAPI HogCPU() {
 
     stress_prime_result = num;
   }
-  return reinterpret_cast<DWORD>(stress_prime_result);
+  return static_cast<DWORD>(stress_prime_result);
+}
+
+void set_run_state(bool on) {
+  if (on) {
+    running = true;
+  } else {
+    running = false;
+  }
 }
 
 // Launches a vector of specified number of CreateThread
-void LaunchThreads(const unsigned int ithreads) {
-  std::vector<HANDLE> thread_handles;
-  for (unsigned int i = 0; i < ithreads; ++i) {
-    //thread_handles.push_back(CreateThread());
+void LaunchThreads(const unsigned int num_threads) {
+  std::vector<std::thread> threads;
+  if (num_threads == 0) {
+    set_run_state(false);
+    return;
+  } else {
+    if (!running) {
+      std::wcerr << L"Must run set_run_state(true) before calling " << __FUNC__ << std::endl;
+    } else {
+      std::vector<HANDLE> thread_handles;
+      // Create threads
+      for (unsigned int i = 0; i < num_threads; ++i) {
+        //thread_handles.push_back(CreateThread());
+        threads.push_back(std::thread(HogCPU));
+      }
+      // Wait for threads to finish (this will never happen unless `running` is set to false)
+      for (auto& thread : threads) {
+        thread.join();
+      }
+    }
   }
-  //HogCPU();
+}
+
+void HaltAllThreads() {
+  set_run_state(false);
+  std::wcout << L"Stopped all stressor threads." << std::endl;
 }

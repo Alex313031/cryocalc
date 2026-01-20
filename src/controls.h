@@ -81,12 +81,6 @@ INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 // Gets number of threads to launch from hThreadsEdit
 bool GetThreadsInput(HWND hWnd);
 
-// Uses CreateThread to start specified number of stressor threads.
-bool StartThreads(const unsigned int num_threads);
-
-// Kills all stressor threads
-bool HaltAllThreads();
-
 // Called when "Start" button pressed. Stresses CPU via StartThreads()
 void OnStartButtonClick(HWND hWnd);
 

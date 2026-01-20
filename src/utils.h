@@ -28,6 +28,8 @@ extern bool enable_logging;
 extern bool show_version;
 extern bool show_help;
 
+extern volatile unsigned long long stress_prime_result;
+
 // Runs test routines
 bool runTests();
 
@@ -61,7 +63,11 @@ bool IsValidNumericInput(const wchar_t* text);
 // Verifies that threads input is valid.
 bool IsValidThreadsInput(const wchar_t* text);
 
-// Gets the default number of threads to use for stressor: the number of logical CPUs.
+// Gets the number of logical CPU threads of the host system.
+DWORD GetLogicalProcessorCount();
+
+// Gets the default number of threads to use for stressor: the number of logical CPUs within bounds of
+// MIN_THREADS and MAX_THREADS.
 unsigned int GetDefaultNumThreads();
 
 // Converts input with decimal point to long double representation
@@ -77,7 +83,7 @@ void SetCryoCalcPrecision(unsigned int precision);
 // Gets the precision to use for calculations
 const unsigned int GetCryoCalcPrecision();
 
-// Simple percent calculator
+// Simple percent calculator functions
 const int GetPercentInt(const int in, const float percent);
 
 const int GetXOffset(const int in, const int offset, const float percent);
@@ -93,7 +99,13 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 // Actual CPU stressor function to be dispatched with threads.
 DWORD WINAPI HogCPU();
 
-// Function that launches stressor threads.
-void LaunchThreads(const unsigned int ithreads);
+// Call this before launching threads. Set to false to stop threads
+void set_run_state(bool on);
+
+// Uses CreateThread to start specified number of stressor threads.
+void LaunchThreads(const unsigned int num_threads);
+
+// Stops all stressor threads
+void HaltAllThreads();
 
 #endif // CRYOCALC_UTILS_H_

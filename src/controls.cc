@@ -426,8 +426,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
       kButtonCol3Left,
       STATIC_TOP + CW_STATICLABEL_HEIGHT + PADDING_Y,
-      LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X,
-      PROGRESS_HEIGHT,
+      PROGBAR_WIDTH,
+      PROGBAR_HEIGHT,
       hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr
   );
 
@@ -473,7 +473,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hRankineEdit, EM_SETREADONLY, TRUE, 0);
   // Set default selections
   SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0L);
-  SendMessageW(hPrecisionEdit, CB_SETCURSEL, static_cast<int>(CRYOCALC_PRECISION), 0);
+  SendMessageW(hPrecisionEdit, CB_SETCURSEL, static_cast<int>(DEFAULT_PRECISION), 0);
   InitStatusBar(hWnd, hInst);
 }
 
@@ -728,27 +728,40 @@ bool GetThreadsInput(HWND hWnd) {
     is_invalid = true;
   }
   unsigned int get_threads;
+  const unsigned int num_logical_cpus = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (is_invalid) {
-    MessageBoxW(hWnd, L"Invalid Threads Input! \nValid values are 1 - 64.", L"Error.", MB_OK | MB_ICONWARNING);
-    get_threads = GetDefaultNumThreads();
+    const std::wstring valid_msg = L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
+    MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
+    return false;
   } else {
     std::wstring threads_input(in_buff);
     get_threads = std::stoi(threads_input);
+    std::wcout << L"Number of system CPU threads: " << num_logical_cpus << std::endl;
+    if (get_threads > num_logical_cpus) {
+      std::wcerr << L"Threads input is larger than the number of system CPU threads! " << num_logical_cpus << std::endl;
+      std::wostringstream wostr;
+      wostr << L"You have entered more threads (" << get_threads << ") than the machine's CPU has (" << num_logical_cpus << ") "
+            << L"\nWould you still like to continue?";
+      std::wstring wout = wostr.str();
+      int allow_threads =
+          MessageBoxW(nullptr, wout.c_str(), L"Threads Confirmation",
+                      MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
+      switch (allow_threads) {
+        case IDNO:
+        case IDCANCEL:
+          return false;
+        case IDOK:
+          break;
+        default:
+          return false;
+      }
+    }
   }
-  std::wcout << L"Using " << get_threads << L" number of threads." << std::endl;
+  if (debug_mode) {
+    std::wcout << L"Got " << get_threads << L" number of threads to start from input box." << std::endl;
+  }
   num_threads_ = get_threads;
   return num_threads_ >= MIN_THREADS && num_threads_ <= MAX_THREADS;
-}
-
-bool StartThreads(const unsigned int num_threads) {
-  std::wcout << L"Starting " << num_threads << L" stressor threads." << std::endl;
-  LaunchThreads(num_threads);
-  return true;
-}
-
-bool HaltAllThreads() {
-  std::wcout << L"Stopped all stressor threads." << std::endl;
-  return true;
 }
 
 // Get number of threads and launch them.
@@ -756,8 +769,10 @@ void OnStartButtonClick(HWND hWnd) {
   // Start animating the progress bar marquee
   SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
   if (GetThreadsInput(hWnd)) {
-    std::wcout << L"Starting CPU stress test..." << std::endl;
-    StartThreads(num_threads_);
+    std::wcout << L"Starting " << num_threads_ << L" CPU stressor threads." << std::endl;
+    set_run_state(true);
+    std::thread StressorLaunchThread(LaunchThreads, num_threads_);
+    StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
   } else {
     std::wcerr << __FUNC__ << L"() failed!" << std::endl;
     // Stop animating if we failed for some reason.
@@ -771,6 +786,5 @@ void StopThreads(HWND hWnd) {
   // Stop animating the progress bar and reset to empty state
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-  std::wcout << L"Stopping CPU stress test..." << std::endl;
   HaltAllThreads();
 }
