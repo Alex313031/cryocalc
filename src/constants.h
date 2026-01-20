@@ -7,29 +7,26 @@ inline const wchar_t* kOsInfoDll = L"osinfo.dll";
 
 inline const wchar_t* kCHMHelpFile = L"cryocalc.chm";
 
-// Minimum decimal precision for output.
+// Min/Max decimal precision for output.
 constexpr unsigned int MIN_PRECISION = 0u;
-
 constexpr unsigned int MAX_PRECISION = 4u;
 
-constexpr unsigned int CRYOCALC_PRECISION = 2u;
+// Default precision to set to on startup
+constexpr unsigned int DEFAULT_PRECISION = 3u;
 
+// Natural Constants needed for temp conversion functions.
 constexpr long double KELVIN_OFFSET = 273.150L;
-
 constexpr long double RANKINE_OFFSET = 459.670L;
 
+// Dummy values for feeding unit test functions
 constexpr long double kDummyCelsius = 0.000L; // Freezing point of water
-
 constexpr long double kDummyKelvin = 77.000L; // Boiling point of Liquid Nitrogen
-
 constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
-
 constexpr long double kDummyRankine = 671.641L; // Boiling point of water
 
 // Static values
 constexpr unsigned int CW_MAINWIDTH  = 428u; // Width of main window
 constexpr unsigned int CW_MAINHEIGHT = 320u; // Height of main window
-
 constexpr unsigned int CW_STATICLABEL_HEIGHT = 24u; // Height of static text label controls
 constexpr unsigned int CW_EDITCONTROL_HEIGHT = CW_STATICLABEL_HEIGHT; // Height of edit controls
 
@@ -51,10 +48,11 @@ constexpr UINT BUTTON_HEIGHT = 30u;  // Height in pixels of buttons
 constexpr UINT COMBO_WIDTH   = 40u;  // Width in pixels of comboboxes
 constexpr UINT INTRA_PADDING = 3u;   // Value in pixels of intra-item padding
 constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3u;   // Minimum height of bottom buttom controls area
-constexpr UINT PROGRESS_WIDTH = 80u;
-constexpr UINT PROGRESS_HEIGHT = CW_STATICLABEL_HEIGHT;
+constexpr UINT PROGBAR_WIDTH = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
+constexpr UINT PROGBAR_HEIGHT = CW_STATICLABEL_HEIGHT;
 
-constexpr unsigned int MIN_THREADS = 1u;
-constexpr unsigned int MAX_THREADS = 64u;
+// Minimum/Maximum number of threads for the CPU stressor.
+constexpr unsigned int MIN_THREADS = 1u; // Less than one thread doesn't make sense
+constexpr unsigned int MAX_THREADS = 128u; // Threadrippers top out at 128
 
 #endif // CRYOCALC_CONSTANTS_H_
