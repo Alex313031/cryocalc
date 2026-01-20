@@ -148,9 +148,9 @@ void LogOsInfo() {
   std::wcout << L"Windows Version: " << GetWinVersionW()
              << L" " << GetOSNameW() << std::endl;
   const unsigned long long nt_ver = GetRawNTVer();
-  std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
-             << nt_ver << std::dec << std::defaultfloat << std::endl;
   if (debug_mode) {
+    std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
+               << nt_ver << std::dec << std::defaultfloat << std::endl;
     TestDllGetVersion();
   }
 }
