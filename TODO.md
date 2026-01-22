@@ -6,10 +6,8 @@
  - Add translations in separate imported .RC file for strings.h
  - Check onload/offload dllmain with __cdecl instead of WINAPI.
  - Use CreateFont and SetFont with DS_FONT for Arial instead of shell dlg font.
- - Use CreateThread with ThreadProc for CPU Burner threads.
- - Fix osinfo window padding, background color, resizing blank.
- - Add buttons to launch winver.exe and msinfo32.exe to osinfo window
- - Add os info button to UI.
+ - Maybe use CreateThread with ThreadProc for CPU Burner threads.
+ - Fix osinfo background color.
  - Add enable logging menu item to attach/detach console.
  - Write full scale Chromium style streaming logger.
  - Convert to std::vector and C++17 types where appropriate.
