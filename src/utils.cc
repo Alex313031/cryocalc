@@ -1,12 +1,17 @@
 #include "utils.h"
 
 #include "converters.h"
+#include "resource.h"
+#include "strings.h"
 
 unsigned int g_precision_;
 
 // Maybe use std::atomic instead?
 volatile unsigned long long stress_prime_result = 0;
 volatile bool running = false;
+
+static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
+static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
@@ -112,14 +117,22 @@ const std::wstring GetVersionWstring() {
 
 const int ShowVersionAndExit() {
   static const std::wstring ver = GetVersionWstring();
-  std::wcout << L"\n CryoCalc ver. " << ver << std::endl;
+  std::wcout << L"\n " << kAppName << " ver. " << ver << std::endl;
   system("pause");
   return 0;
 }
 
+void CloseAllWindows(HWND hWnd) {
+  // Tell OsInfo Window to close, if it's open.
+  if (hOsInfoWin != nullptr) {
+    PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
+  }
+  FreeConsole();
+  DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
+}
+
 int ConfirmExit(HWND hWnd) {
-  int user_response_code;
-  user_response_code =
+  int user_response_code =
       MessageBoxW(nullptr, L"Are you sure you want to exit?", L"Confirm Exit",
                   MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
   switch (user_response_code) {
@@ -127,7 +140,8 @@ int ConfirmExit(HWND hWnd) {
     case IDCANCEL:
       break;
     case IDYES:
-      DestroyWindow(hWnd);
+      CloseAllWindows(hWnd);
+      break;
     default:
       break;
   }
@@ -155,7 +169,7 @@ const int ShowHelpAndExit() {
              << L" Usage: \n" << std::endl;
   wostr << L"   /d | -d | --debug   : Enable debug mode and enable logging\n"
         << L"   /l | -l | --logging : Enable logging in console Window \n"
-        << L"   /v | -v | --ver     : Show version info \n"
+        << L"   /v | -v | --version : Show version info \n"
         << L"   /? | -h | --help    : Show this Help \n" << std::endl;
   std::wcout << wostr.str();
   system("pause");
@@ -164,7 +178,7 @@ const int ShowHelpAndExit() {
 
 void HandleDebugMode(const bool debug_mode) {
   std::wostringstream wostr;
-  wostr << L"Welcome to CryoCalc ver. " << GetVersionWstring();
+  wostr << L"Welcome to " << kAppName << " ver. " << GetVersionWstring();
   if (debug_mode) {
     wostr << L" (Debug Mode)" << std::endl;
   } else {
@@ -227,16 +241,27 @@ bool IsValidThreadsInput(const wchar_t* text) {
 
 DWORD GetLogicalProcessorCount() {
   SYSTEM_INFO sysInfo;
+  std::wstring whichfunc;
 #if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
-  GetNativeSystemInfo(&sysInfo);
+  whichfunc =  L"GetNativeSystemInfo";
+  GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
 #else
-  if (GetShortNTVer() >= 0x0502L) {
-    std::wcout << L"Using GetNativeSystemInfo for " << __FUNC__ << std::endl;
-    GetNativeSystemInfo(&sysInfo);
+  HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
+  // Dynamically get GetNativeSystemInfo
+  pfnGetNativeSystemInfo = reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
+  // Windows 2000 won't have this function, use GetSystemInfo instead
+  if (pfnGetNativeSystemInfo) {
+    whichfunc =  L"pfnGetNativeSystemInfo";
+    pfnGetNativeSystemInfo(&sysInfo);
   } else {
+    whichfunc = L"GetSystemInfo";
     GetSystemInfo(&sysInfo);
   }
+  if (debug_mode) {
+    std::wcout << L"Using " << whichfunc << " for " << __FUNC__ << std::endl;
+  }
 #endif
+  FreeLibrary(hKernel32);
   return sysInfo.dwNumberOfProcessors;
 }
 
@@ -418,4 +443,50 @@ void LaunchThreads(const unsigned int num_threads) {
 void HaltAllThreads() {
   set_run_state(false);
   std::wcout << L"Stopped all stressor threads." << std::endl;
+}
+
+// Opens the "Run" shell dialog from shell32.dll
+void OpenRunDialog(HWND hWnd) {
+  static HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hWnd), MAKEINTRESOURCE(IDI_WINFLAG));
+  if (kSmallIcon) {
+    wchar_t szCurDir[MAX_PATH];
+    GetCurrentDirectoryW(MAX_PATH, szCurDir);
+    // Open "Run"
+    HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
+    pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)61));
+    if (pfnRunFileDlg) {
+      pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
+    } else {
+      std::wcerr << L"Failed to open run dialog." << std::endl;
+    }
+    DestroyIcon(kSmallIcon); // Cleanup icon
+    FreeLibrary(hShell32Dll);
+  }
+}
+
+// Run any shell app
+bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
+  bool success = false;
+  std::wcout << L"Running " << executable << std::endl;
+  HINSTANCE result = ShellExecuteW(hWnd, L"open", executable, nullptr, nullptr, SW_NORMAL);
+  std::wostringstream wostr;
+  if (reinterpret_cast<INT_PTR>(result) <= 32) {
+    DWORD error = GetLastError();
+    wostr << L"Opening " << executable << " failed! \n";
+    if (error == ERROR_FILE_NOT_FOUND) {
+      wostr << executable << L" could not be found." << std::endl;
+    } else {
+      wostr << L"Error = " << std::showbase << std::hex << error
+            << std::dec << std::defaultfloat << std::endl;
+    }
+    const std::wstring warn = wostr.str();
+    std::wcerr << warn;
+    MessageBoxW(hWnd, warn.c_str(), L"Error", MB_OK | MB_ICONERROR);
+    success = false;
+  } else {
+    success = true;
+  }
+  wostr.str(L"");
+  wostr.clear();
+  return success;
 }

@@ -19,8 +19,9 @@ HWND hKelvinEdit;
 HWND hFahrenheitEdit;
 HWND hRankineEdit;
 HWND hConvButton;
-HWND hAboutButton;
 HWND hClearButton;
+HWND hAboutButton;
+HWND hOsInfoButton;
 HWND hStatusBar;
 
 // For CPU Stressor
@@ -204,7 +205,6 @@ bool HandleConvert(HWND hWnd) {
 }
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
-  SetClientRects(hWnd, hInst);
   const int kTempEditLeft = GetXOffset(STATIC_LEFT, LABEL_WIDTH + INTRA_PADDING, 1.0f);
   // Create staic box outline frame for all controls
   int padding = PADDING_X * 2; // Padding on left and right
@@ -217,8 +217,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kButtonCol2Left = (CW_MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
   const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
   const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2u);
-  const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + PADDING_Y;
-  const int kStopButtonRight = CW_MAINWIDTH - BUTTON_WIDTH - (STATIC_RIGHT + 1);
+  const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
   hFrameOutline = CreateWindowExW(
       0, WC_STATIC, nullptr,
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
@@ -293,7 +292,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Temperature input
   hInputEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, L"77",
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP,
       EDIT_WIDTH,
@@ -313,7 +312,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   hCelsiusEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad),
       EDIT_WIDTH,
@@ -322,7 +321,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hKelvinEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 2),
       EDIT_WIDTH,
@@ -331,7 +330,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hFahrenheitEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE |  ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * INTRA_PADDING),
       EDIT_WIDTH,
@@ -340,7 +339,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hRankineEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 4),
       EDIT_WIDTH,
@@ -372,7 +371,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hClearButton = CreateWindowExW(
       0, WC_BUTTON, CLEAR_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kButtonCol2Left, // Move about button manually to the right
+      kButtonCol2Left,
       kButtonRowTop,
       BUTTON_WIDTH,
       BUTTON_HEIGHT,
@@ -412,7 +411,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the threads number input combobox.
   hThreadsEdit = CreateWindowExW(
       WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT,
-      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X,
       STATIC_TOP,
       EDIT_WIDTH / 2u,
@@ -435,7 +434,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hStartStresButton = CreateWindowExW(
       0, WC_BUTTON, START_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kButtonCol2Left + BUTTON_WIDTH + PADDING_X, // Move about button manually to the right
+      kButtonCol3Left,
       kButtonRowTop,
       BUTTON_WIDTH,
       BUTTON_HEIGHT,
@@ -445,11 +444,21 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hStopStresButton = CreateWindowExW(
       0, WC_BUTTON, STOP_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kStopButtonRight, // Move about button manually to the right
+      kButtonCol3Left + BUTTON_WIDTH + PADDING_X,
       kButtonRowTop,
       BUTTON_WIDTH,
       BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr
+  );
+  // Create the "Show OS Info" Button control
+  hOsInfoButton = CreateWindowExW(
+      0, WC_BUTTON, OSINFO_BUTTON,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      kButtonCol3Left,
+      kButtonRow2Top,
+      BUTTON_WIDTH * 2u,
+      BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr
   );
 
   // Set temperature selection options in combobox
@@ -482,17 +491,21 @@ void HandleResize(HWND hWnd) {
     return;
   }
 
+  // TODO, move copy of this to InitControls with CW_MAINWIDTH/CW_MAINHEIGHT
   const unsigned int width = current_width;
   const unsigned int height = current_height;
   const int kStatusSplit = width - LABEL_WIDTH;
   const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
-  const int frame_bottom = GetXOffset(height, 0, 0.6f) - STATIC_BOTTOM;
-  const int button_top = frame_bottom + INTRA_PADDING + STATIC_BOTTOM;
+  const int frame_bottom = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+  const int button_top = frame_bottom + (INTRA_PADDING * 3u);
   const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
   const int kButtonCol2Left = (width / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
   const int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
   const int kButtonCol4Left = kButtonCol3Left + BUTTON_WIDTH + PADDING_X;
-  MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, width - STATIC_RIGHT, frame_bottom, TRUE);
+  const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u) + PADDING_X;
+  const unsigned int kFrameWidth = width - END_PADDING;
+
+  MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
   MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
@@ -500,6 +513,8 @@ void HandleResize(HWND hWnd) {
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hStopStresButton, kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hOsInfoButton, kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT, TRUE);
+
   if (hStatusBar) {
     SendMessageW(hStatusBar, WM_SIZE, 0, 0);
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
@@ -507,47 +522,31 @@ void HandleResize(HWND hWnd) {
 }
 
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
-  std::wstring status_text = L"CryoCalc ver. " + GetVersionWstring();
-  std::wstring status_bubble = L"Status";
+  std::wstring status_text = kAppName + L" ver. " + GetVersionWstring();
+  static std::wstring status_bubble = L"Status";
   const int kStatusSplit = CW_MAINWIDTH - LABEL_WIDTH;
-  const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
-  if (hStatusBar) {
+  const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 means extend to right edge
+  if (!hStatusBar) {
+    std::wcerr << __FUNC__ << L"() failed: Status bar not initialized" << std::endl;
+  } else {
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
     SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)status_text.c_str());
     SendMessageW(hStatusBar, SB_SETTEXT, 1, (LPARAM)status_bubble.c_str());
-  } else {
-    std::wcerr << __FUNC__ << L"() failed: hStatusBar not initialized" << std::endl;
   }
 }
 
 void SetClientRects(HWND hWnd, HINSTANCE hInst) {
-  // Structure to store painting info for hbrush handle
-  PAINTSTRUCT paintStruct;
   // Declare rect to use for all future window layout
   RECT kWinRect;
 
-  // Begin painting the contents of the window
-  // HDC is a device context handle for GDI
-  HDC hdc = BeginPaint(hWnd, &paintStruct);
-  // Start logging as we are painting
-  if (hdc) {
-    // Get context of entire window
-    const HDC winDC = GetWindowDC(hWnd);
-    // Get rect size of window including titlebar
-    GetClientRect(hWnd, &kWinRect);
-    // Set color of text
-    SetTextColor(winDC, COLOR_WINDOWTEXT);
-    // Set window backgroun painting behavior
-    SetBkMode(winDC, TRANSPARENT);
-  } else {
-    std::wcout << __FUNC__ << L"() Failed!" << std::endl;
-    return;
-  }
+  // Get rect size of window including titlebar
+  GetClientRect(hWnd, &kWinRect);
+  /* TODO: Add stuff to actually set stuff from above RECT */
 }
 
 void ClearInput(HWND hWnd) {
   SetWindowTextW(hInputEdit, kBlank);
-  std::wcout << L"Cleared input" << std::endl;
+  std::wcerr << L"Cleared input" << std::endl;
 }
 
 void ClearControls(HWND hWnd) {
@@ -667,7 +666,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   UNREFERENCED_PARAMETER(lParam);
 
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
-  const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
+  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
   switch (message) {
     case WM_INITDIALOG: {
       // Set icon in titlebar of about dialog

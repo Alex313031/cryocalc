@@ -32,6 +32,7 @@ APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
 
 IDI_CRYOCALC   ICON  "res/cryocalc.ico"
 IDI_SMALL      ICON  "res/small.ico"
+IDI_WINFLAG    ICON  "res/winflag.ico"
 
 #ifdef APSTUDIO_INVOKED
 // TEXTINCLUDE
@@ -71,7 +72,7 @@ IDC_CRYOCALC MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Clear",   IDM_CLEAR
+        MENUITEM "&Run",     IDM_RUN
         MENUITEM "E&xit",    IDM_CEXIT
     END
     POPUP "&Edit"
@@ -107,6 +108,7 @@ BEGIN
     0x57,      IDM_CLEAR, VIRTKEY, CONTROL         // Ctrl+W
     0x51,      IDM_EXIT,  VIRTKEY, CONTROL         // Ctrl+Q
     VK_ESCAPE, IDM_EXIT,  VIRTKEY, NOINVERT        // Esc key
+    0x52,      IDM_RUN,   VIRTKEY, CONTROL         // Win+R
 END
 
 // About Dialog Box

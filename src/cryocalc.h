@@ -11,14 +11,8 @@
 #include "framework.h"
 #include "resource.h"
 
-// Maximum size of string that can be loaded from resource table with LoadString().
-#define MAX_LOADSTRING 255
-
-// The title bar text, non-translatable
-constexpr const WCHAR* CAPTION_TITLE = L"CryoCalc";
-
 // Creates the main window with CreateWindowW()
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
+bool InitInstance(HINSTANCE hInstance, int nCmdShow);
 
 // Handles about button being clicked
 bool AboutButtonClicked(HWND hWnd);

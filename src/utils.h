@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "converters.h"
 #include "framework.h"
+#include "globals.h"
 
 #include <os_info_dll.h>
 
@@ -21,6 +22,17 @@ extern bool show_help;
 // Volatile variables to be used by stress threads
 extern volatile unsigned long long stress_prime_result; // Ultimate returned result from thread joining
 extern volatile bool running; // For controlling thread activation state
+
+// Typedefs for accessing system .dll functions through GetProcAddress()
+#define RFD_NOBROWSE            0x00000001
+#define RFD_NODEFFILE           0x00000002
+#define RFD_USEFULLPATHDIR      0x00000004
+#define RFD_NOSHOWOPEN          0x00000008
+#define RFD_WOW_APP             0x00000010
+#define RFD_NOSEPMEMORY_BOX     0x00000020
+typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
+typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
+typedef int (* RUN_FILE_DLG_)(HWND hwndParent, HICON hIcon, LPCTSTR lpszWorkingDir, LPCTSTR lpszTitle, LPCTSTR lpszPrompt, DWORD dwFlags);
 
 // Temperature helper functions
 std::wstring& GetTempString(long double in_temperature);
@@ -46,6 +58,9 @@ const std::wstring GetVersionWstring();
 
 // Shows the version info and quits
 const int ShowVersionAndExit();
+
+// Closes all sub-windows, then exits app.
+void CloseAllWindows(HWND hWnd);
 
 // Confirms whether the user wants to exit.
 int ConfirmExit(HWND hWnd);
@@ -110,5 +125,11 @@ void LaunchThreads(const unsigned int num_threads);
 
 // Stops all stressor threads
 void HaltAllThreads();
+
+// Opens the "Run" applet
+void OpenRunDialog(HWND hWnd);
+
+// Launcher function to open shell applets
+bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 
 #endif // CRYOCALC_UTILS_H_

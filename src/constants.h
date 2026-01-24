@@ -2,10 +2,20 @@
 #define CRYOCALC_CONSTANTS_H_
 
 #include "globals.h"
+#include "resource.h"
 
-inline const wchar_t* kOsInfoDll = L"osinfo.dll";
+// Name of the app
+inline const std::wstring kAppName = APP_NAME;
 
-inline const wchar_t* kCHMHelpFile = L"cryocalc.chm";
+// The title bar text, non-translatable
+constexpr const WCHAR* CAPTION_TITLE = APP_NAME;
+
+// File name constants
+inline const wchar_t* kOsInfoDll    = L"osinfo.dll";
+inline const wchar_t* kShell32Dll   = L"shell32.dll";
+inline const wchar_t* kChmHelpFile  = L"cryocalc.chm";
+inline const wchar_t* kWinVerExe    = L"winver.exe";
+inline const wchar_t* kMsInfo32Exe  = L"msinfo32.exe";
 
 // Min/Max decimal precision for output.
 constexpr unsigned int MIN_PRECISION = 0u;
@@ -31,12 +41,12 @@ constexpr unsigned int CW_STATICLABEL_HEIGHT = 24u; // Height of static text lab
 constexpr unsigned int CW_EDITCONTROL_HEIGHT = CW_STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
-constexpr UINT PADDING_X     = 6u;  // Minimum pixels to pad all content on the left and right
-constexpr UINT PADDING_Y     = 6u;  // Minimum pixels to pad all content on the top and bottom
+constexpr UINT PADDING_X     = 4u;  // Minimum pixels to pad all content on the left and right
+constexpr UINT PADDING_Y     = 4u;  // Minimum pixels to pad all content on the top and bottom
 constexpr UINT END_PADDING   = PADDING_Y * 2u; // Minimum pixels to pad all content vertically for resizing
 constexpr INT STATIC_TOP     = 12;  // Minimum pixels to pad all content from top
-constexpr INT STATIC_LEFT    = 12;  // How many pixels to pad left side before labels
-constexpr INT STATIC_RIGHT   = 12;  // How many pixels to pad right side after labels
+constexpr INT STATIC_LEFT    = 8;  // How many pixels to pad left side before labels
+constexpr INT STATIC_RIGHT   = 8;  // How many pixels to pad right side after labels
 constexpr INT STATIC_BOTTOM  = 12;  // How many pixels to pad bottom
 
 // Control layout metrics
@@ -54,5 +64,13 @@ constexpr UINT PROGBAR_HEIGHT = CW_STATICLABEL_HEIGHT;
 // Minimum/Maximum number of threads for the CPU stressor.
 constexpr unsigned int MIN_THREADS = 1u; // Less than one thread doesn't make sense
 constexpr unsigned int MAX_THREADS = 128u; // Threadrippers top out at 128
+
+// Color constants
+#define RGB_RED RGB(255, 0, 0)
+#define RGB_GREEN RGB(0, 255, 0)
+#define RGB_BLUE RGB(0, 0, 255)
+#define RGB_YELLOW RGB(255, 255, 0)
+#define RGB_BLACK RGB(0, 0, 0)
+#define RGB_WHITE RGB(255, 255, 255)
 
 #endif // CRYOCALC_CONSTANTS_H_

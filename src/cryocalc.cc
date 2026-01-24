@@ -3,6 +3,8 @@
 
 // Global instance
 HINSTANCE hInst;
+// Main Window handle
+HWND hMainWindow;
 
 // Set during WM_SIZE main window message, used to calculate rects of all other controls.
 unsigned int current_width;
@@ -12,7 +14,7 @@ unsigned int current_height;
 static FILE* fDummyFile;
 
 // The main window class name
-static WCHAR szWindowClass[MAX_LOADSTRING];
+WCHAR szWindowClass[MAX_LOADSTRING];
 
 // Window procedure function
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -127,29 +129,29 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   return RegisterClassExW(&wcex);
 }
 
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
+bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   bool success = false;
   hInst = hInstance;
   // Create the main window
-  HWND hWnd = CreateWindowExW(WS_EX_WINDOWEDGE,
-                              szWindowClass,
-                              CAPTION_TITLE,
-                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
-                              512,
-                              512,
-                              CW_MAINWIDTH,
-                              CW_MAINHEIGHT,
-                              nullptr,
-                              nullptr,
-                              hInstance,
-                              nullptr);
+  hMainWindow = CreateWindowExW(WS_EX_WINDOWEDGE,
+                                szWindowClass,
+                                CAPTION_TITLE,
+                                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
+                                512,
+                                512,
+                                CW_MAINWIDTH,
+                                CW_MAINHEIGHT,
+                                nullptr,
+                                nullptr,
+                                hInstance,
+                                nullptr);
 
-  if (!hWnd) {
+  if (!hMainWindow) {
     success = false;
   } else {
     // Show the window
-    ShowWindow(hWnd, nCmdShow);
-    success = UpdateWindow(hWnd);
+    ShowWindow(hMainWindow, nCmdShow);
+    success = UpdateWindow(hMainWindow);
   }
 
   return success;
@@ -158,15 +160,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 bool LaunchHelp(HWND hWnd) {
   bool success = false;
   std::wcout << L"Opening chm help" << std::endl;
-  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kCHMHelpFile, nullptr, nullptr, SW_NORMAL);
+  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kChmHelpFile, nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening Help failed! \n";
     if (error == ERROR_FILE_NOT_FOUND) {
-      wostr << L"cryocalc.chm could not be found." << std::endl;
+      wostr << kChmHelpFile << L" could not be found." << std::endl;
     } else {
-      wostr << L"Error = " << error << std::endl;
+      wostr << L"Error = " << std::showbase << std::hex << error
+            << std::dec << std::defaultfloat << std::endl;
     }
     const std::wstring warn = wostr.str();
     std::wcerr << warn;
@@ -223,6 +226,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           ShowAboutDialog(hWnd);
           break;
         case IDM_OSINFO:
+        case IDC_OSINFO_BUTTON:
           ShowOsInfo(hWnd);
           break;
         case IDM_PASTE:
@@ -235,12 +239,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           LaunchHelp(hWnd);
           break;
         case IDM_EXIT:
-          // Send WM_DESTROY message to close window
-          DestroyWindow(hWnd);
+          CloseAllWindows(hWnd);
           break;
         case IDM_CEXIT:
           // Confirm before exiting
           ConfirmExit(hWnd);
+          break;
+        case IDM_RUN:
+          // Open run dialog
+          OpenRunDialog(hWnd);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -257,8 +264,31 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       HDC hdc = BeginPaint(hWnd, &ps);
       // TODO: Add any drawing code that uses hdc here...
       if (hdc) {
+        const HDC winDC = GetWindowDC(hWnd);
+        // Set color of text
+        SetTextColor(winDC, COLOR_WINDOWTEXT);
+        // Set window background painting behavior
+        SetBkMode(winDC, TRANSPARENT);
       }
       EndPaint(hWnd, &ps);
+    } break;
+    case WM_CTLCOLOREDIT:
+    case WM_CTLCOLORSTATIC: {
+      HDC hdc = reinterpret_cast<HDC>(wParam);
+      HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
+      const bool custom = true;
+      const COLORREF kWindowBackground = custom ? RGB(0, 128, 0)
+                                                : GetSysColor(COLOR_WINDOW);
+
+      switch (GetDlgCtrlID(hThisEditControl)) {
+        case IDC_LABEL_THREADS: {
+          static HBRUSH hBrush = CreateSolidBrush(kWindowBackground);
+          SetBkColor(hdc, kWindowBackground);
+          return reinterpret_cast<LRESULT>(hBrush);
+        } break;
+        default:
+          break;
+      }
     } break;
     // Handle resize events
     case WM_SIZE: {
@@ -274,13 +304,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       pMinMaxInfo->ptMinTrackSize.x = 380;
       pMinMaxInfo->ptMinTrackSize.y = 320;
     } break;
-    case WM_QUERYENDSESSION:
+    case WM_QUERYENDSESSION: {
       std::wcout << L"Windows is shutting down now!" << std::endl;
       StopThreads(hWnd);
-      break;
+      const uint64_t reason = static_cast<uint64_t>(lParam);
+      std::wcout << L"Reason = " << reason << std::endl;
+      CloseAllWindows(hWnd);
+    } break;
+    case WM_LBUTTONDOWN: {
+    } break;
     // When close button is pressed
     case WM_CLOSE:
-      PostQuitMessage(0);
+      CloseAllWindows(hWnd);
       break;
     // Handle destroy message
     case WM_DESTROY:
@@ -289,7 +324,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     default:
       return DefWindowProc(hWnd, uMsg, wParam, lParam);
   }
-  return 0;
+  return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 HINSTANCE GetGlobalHinst() {
