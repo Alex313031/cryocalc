@@ -55,19 +55,23 @@
 #define IDC_LABEL_F                 317
 #define IDC_LABEL_R                 318
 #define IDC_LABEL_THREADS           319
+#define IDC_LABEL_CACHE             320
 
 // Output boxes
-#define IDC_CELSIUS                 320
-#define IDC_KELVIN                  321
-#define IDC_FAHRENHEIT              322
-#define IDC_RANKINE                 323
+#define IDC_CELSIUS                 321
+#define IDC_KELVIN                  322
+#define IDC_FAHRENHEIT              323
+#define IDC_RANKINE                 324
 
 // Progress bar
 #define IDC_PROGRESS                330
-// Command to close Os Info Window
+// Command to close Os Info Window gracefully when parent window is closing
 #define IDC_CLOSE_OSINFO            331
+// Os Info Logging Output Window
 #define IDC_OSINFO_OUT              332
-#define IDC_CPUINFO                 333
+// Stress SSE2 checkbox
+#define IDC_SSE2_CHECKBOX           333
+#define IDC_CACHE_SIZE              334
 
 // Name of the App
 #define APP_NAME L"CryoCalc"

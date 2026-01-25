@@ -16,6 +16,8 @@ constexpr wchar_t winver_button[]   = L"Run Winver.exe";
 constexpr wchar_t msinfo_button[]   = L"Run MSInfo32.exe";
 constexpr wchar_t run_title[]       = L"Create New Task";
 constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or file, and CryoCalc will open it for you.";
+constexpr wchar_t use_sse2q[]       = L"Use SSE2?";
+constexpr wchar_t cache_multi[]     = L"Cache ";
 
 #if defined(AFX_TARG_ENU)
  inline const wchar_t* CONV_BUTTON   = convert_button;
@@ -32,6 +34,8 @@ constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or f
  inline const wchar_t* MSINFO_BUTTON = msinfo_button;
  inline const wchar_t* RUN_TITLE     = run_title;
  inline const wchar_t* RUN_PROMPT    = run_prompt;
+ inline const wchar_t* USE_SSE2Q     = use_sse2q;
+ inline const wchar_t* CACHE_SIZEQ   = cache_multi;
 #elif defined(AFX_TARG_PH)
  inline const wchar_t* CONV_BUTTON   = L"Magbalik-loob";
  inline const wchar_t* INPUT_LABEL   = L"Temperatura:";
@@ -47,6 +51,8 @@ constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or f
  inline const wchar_t* MSINFO_BUTTON = msinfo_button;
  inline const wchar_t* RUN_TITLE     = run_title;
  inline const wchar_t* RUN_PROMPT    = run_prompt;
+ inline const wchar_t* USE_SSE2Q     = use_sse2q;
+ inline const wchar_t* CACHE_SIZEQ   = cache_multi;
 #elif defined(AFX_TARG_RU)
  inline const wchar_t* CONV_BUTTON   = L"Конвертировать";
  inline const wchar_t* INPUT_LABEL   = L"Вход:";
@@ -62,6 +68,8 @@ constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or f
  inline const wchar_t* MSINFO_BUTTON = msinfo_button;
  inline const wchar_t* RUN_TITLE     = run_title;
  inline const wchar_t* RUN_PROMPT    = run_prompt;
+ inline const wchar_t* USE_SSE2Q     = use_sse2q;
+ inline const wchar_t* CACHE_SIZEQ   = cache_multi;
 #elif defined(AFX_TARG_ES)
  inline const wchar_t* CONV_BUTTON   = L"Convertir";
  inline const wchar_t* INPUT_LABEL   = L"Aporte:";
@@ -77,6 +85,8 @@ constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or f
  inline const wchar_t* MSINFO_BUTTON = msinfo_button;
  inline const wchar_t* RUN_TITLE     = run_title;
  inline const wchar_t* RUN_PROMPT    = run_prompt;
+ inline const wchar_t* USE_SSE2Q     = use_sse2q;
+ inline const wchar_t* CACHE_SIZEQ   = cache_multi;
 #else
  inline const wchar_t* CONV_BUTTON   = convert_button;
  inline const wchar_t* INPUT_LABEL   = input_label;
@@ -92,6 +102,8 @@ constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or f
  inline const wchar_t* MSINFO_BUTTON = msinfo_button;
  inline const wchar_t* RUN_TITLE     = run_title;
  inline const wchar_t* RUN_PROMPT    = run_prompt;
+ inline const wchar_t* USE_SSE2Q     = use_sse2q;
+ inline const wchar_t* CACHE_SIZEQ   = cache_multi;
 #endif
 
 #endif // CRYOCALC_STRINGS_H_

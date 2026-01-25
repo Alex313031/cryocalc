@@ -341,8 +341,8 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
     for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
       wchar_t* arg = argv[i];
       is_debug_mode =
-          ((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
-           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0));
+          (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
+           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0)) && !(wcscmp(arg, L"--no-debug") == 0));
       is_log_mode =
           ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) || (wcscmp(arg, L"-log") == 0)
            || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
@@ -379,35 +379,6 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
   HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(hInstancePtr);
 
   return hInstance;
-}
-
-// Launches a vector of specified number of CreateThread
-void LaunchThreads(const unsigned int num_threads) {
-  std::vector<std::thread> threads;
-  if (num_threads == 0) {
-    set_run_state(false);
-    return;
-  } else {
-    if (!running) {
-      std::wcerr << L"Must run set_run_state(true) before calling " << __FUNC__ << std::endl;
-    } else {
-      std::vector<HANDLE> thread_handles;
-      // Create threads
-      for (unsigned int i = 0; i < num_threads; ++i) {
-        //thread_handles.push_back(CreateThread());
-        threads.push_back(std::thread(HogCPU));
-      }
-      // Wait for threads to finish (this will never happen unless `running` is set to false)
-      for (auto& thread : threads) {
-        thread.join();
-      }
-    }
-  }
-}
-
-void HaltAllThreads() {
-  set_run_state(false);
-  std::wcout << L"Stopped all stressor threads." << std::endl;
 }
 
 // Opens the "Run" shell dialog from shell32.dll
@@ -454,4 +425,24 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
   wostr.str(L"");
   wostr.clear();
   return success;
+}
+
+const size_t GetCacheSize() {
+  size_t cache_size = 1024u;
+  DWORD dwCacheComboSize = GetWindowTextLength(hCacheSizeCombo);
+  wchar_t* cachesz_buff = new wchar_t[dwCacheComboSize + 1];
+  GetWindowTextW(hCacheSizeCombo, cachesz_buff, dwCacheComboSize + 1);
+  if ((wcscmp(cachesz_buff, L"1MB") == 0)) {
+    cache_size = 1024u;
+  } else if ((wcscmp(cachesz_buff, L"2MB") == 0)) {
+    cache_size = 2048u;
+  } else if ((wcscmp(cachesz_buff, L"3MB") == 0)) {
+    cache_size = 3072u;
+  } else if ((wcscmp(cachesz_buff, L"4MB") == 0)) {
+    cache_size = 4096u;
+  } else {
+    std::wcerr << L"Default cache size was used!" << std::endl;
+    cache_size = 1024u;
+  }
+  return cache_size;
 }

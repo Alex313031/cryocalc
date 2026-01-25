@@ -169,6 +169,8 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = 250;
       pMinMaxInfo->ptMinTrackSize.y = 150;
+      pMinMaxInfo->ptMaxTrackSize.x = 640;
+      pMinMaxInfo->ptMaxTrackSize.y = 480;
     } break;
     case WM_CLOSE:
     case WM_DESTROY:

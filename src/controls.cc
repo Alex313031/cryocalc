@@ -9,11 +9,12 @@ static HWND hRankineLabel;
 static HWND hFrameOutline;
 static HWND hPrecisionLabel;
 static HWND hThreadsLabel;
+static HWND hCacheSizeLabel;
 
 // Controls/buttons forward decl
 HWND hInputEdit;
 HWND hTempSelectEdit;
-HWND hPrecisionEdit;
+HWND hPrecisionCombo;
 HWND hCelsiusEdit;
 HWND hKelvinEdit;
 HWND hFahrenheitEdit;
@@ -27,6 +28,8 @@ HWND hStatusBar;
 // For CPU Stressor
 HWND hThreadsEdit;
 HWND hProgressBar;
+HWND hSSE2Checkbox;
+HWND hCacheSizeCombo;
 HWND hStartStresButton;
 HWND hStopStresButton;
 
@@ -74,7 +77,7 @@ bool HandleConvert(HWND hWnd) {
   // Get the length of the text in the edit control
   DWORD dwInputSize = GetWindowTextLength(hInputEdit);
   DWORD dwScaleSize = GetWindowTextLength(hTempSelectEdit);
-  DWORD dwPrecisionSize = GetWindowTextLength(hPrecisionEdit);
+  DWORD dwPrecisionSize = GetWindowTextLength(hPrecisionCombo);
   const bool is_empty = (BOOL)(dwInputSize == 0);
   bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
   const bool bad_temp_scale = (BOOL)(dwScaleSize == 0);
@@ -112,7 +115,7 @@ bool HandleConvert(HWND hWnd) {
     }
 
     GetWindowTextW(hTempSelectEdit, scale_buff, dwScaleSize + 1);
-    GetWindowTextW(hPrecisionEdit, preci_buff, dwPrecisionSize + 1);
+    GetWindowTextW(hPrecisionCombo, preci_buff, dwPrecisionSize + 1);
 
     std::wstring scale(scale_buff);
     std::wstring preci(preci_buff);
@@ -218,6 +221,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
   const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
+  const unsigned int kProgressBarTop = STATIC_TOP + CW_STATICLABEL_HEIGHT + PADDING_Y;
   hFrameOutline = CreateWindowExW(
       0, WC_STATIC, nullptr,
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
@@ -358,7 +362,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr
   );
   // Create the "Precision" combobox
-  hPrecisionEdit = CreateWindowExW(
+  hPrecisionCombo = CreateWindowExW(
       0, WC_COMBOBOX, L"",
       CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonColLeft + LABEL_WIDTH + INTRA_PADDING,
@@ -414,8 +418,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X,
       STATIC_TOP,
-      EDIT_WIDTH / 2u,
-      CW_EDITCONTROL_HEIGHT,
+      EDIT_WIDTH / 2u, CW_EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_THREADS, hInst, nullptr
   );
 
@@ -424,10 +427,35 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       0, PROGRESS_CLASS, nullptr,
       WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
       kButtonCol3Left,
-      STATIC_TOP + CW_STATICLABEL_HEIGHT + PADDING_Y,
-      PROGBAR_WIDTH,
-      PROGBAR_HEIGHT,
+      kProgressBarTop,
+      PROGBAR_WIDTH, PROGBAR_HEIGHT,
       hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr
+  );
+
+  hCacheSizeLabel = CreateWindowEx(
+      0, WC_STATIC, CACHE_SIZEQ,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      kButtonCol3Left,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
+      LABEL_WIDTH - 16u, CW_STATICLABEL_HEIGHT,
+      hWnd, (HMENU)IDC_LABEL_CACHE, hInst, nullptr
+  );
+  hCacheSizeCombo = CreateWindowEx(
+      0, WC_COMBOBOX, L"",
+      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
+      COMBO_WIDTH + 16u, BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr
+  );
+
+  hSSE2Checkbox = CreateWindowEx(
+      0, WC_BUTTON, USE_SSE2Q,
+      WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX,
+      kButtonCol3Left,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + CW_EDITCONTROL_HEIGHT + PADDING_Y,
+      100u, CW_EDITCONTROL_HEIGHT,
+      hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr
   );
 
   // Create the "Start" CPU Stress Button control
@@ -436,8 +464,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol3Left,
       kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
+      BUTTON_WIDTH, BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
   );
   // Create the "Stop" CPU Stress Button control
@@ -446,8 +473,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol3Left + BUTTON_WIDTH + PADDING_X,
       kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
+      BUTTON_WIDTH, BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr
   );
   // Create the "Show OS Info" Button control
@@ -456,8 +482,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kButtonCol3Left,
       kButtonRow2Top,
-      BUTTON_WIDTH * 2u,
-      BUTTON_HEIGHT,
+      BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr
   );
 
@@ -468,12 +493,17 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempR.c_str()); // Rankine
   //SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Unknown
   // Precision combobox options
-  SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"0");
-  SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"1");
-  SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"2");
-  SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"3");
-  SendMessageW(hPrecisionEdit, CB_ADDSTRING, 0, (LPARAM)L"4");
-  // Set Progress bar to initially stopped
+  SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"0");
+  SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"1");
+  SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"2");
+  SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"3");
+  SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"4");
+  SendMessageW(hCacheSizeCombo, CB_ADDSTRING, 0, (LPARAM)L"1MB");
+  SendMessageW(hCacheSizeCombo, CB_ADDSTRING, 0, (LPARAM)L"2MB");
+  SendMessageW(hCacheSizeCombo, CB_ADDSTRING, 0, (LPARAM)L"3MB");
+  SendMessageW(hCacheSizeCombo, CB_ADDSTRING, 0, (LPARAM)L"4MB");
+  // Set Progress bar to initially stopped and in 0 position
+  SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
@@ -482,7 +512,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hRankineEdit, EM_SETREADONLY, TRUE, 0);
   // Set default selections
   SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0L);
-  SendMessageW(hPrecisionEdit, CB_SETCURSEL, static_cast<int>(DEFAULT_PRECISION), 0);
+  SendMessageW(hPrecisionCombo, CB_SETCURSEL, static_cast<int>(DEFAULT_PRECISION), 0);
+  SendMessageW(hCacheSizeCombo, CB_SETCURSEL, 1, 0);
+  SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
   InitStatusBar(hWnd, hInst);
 }
 
@@ -508,7 +540,7 @@ void HandleResize(HWND hWnd) {
   MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
-  MoveWindow(hPrecisionEdit, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
@@ -729,6 +761,7 @@ bool GetThreadsInput(HWND hWnd) {
   unsigned int get_threads;
   const unsigned int num_logical_cpus = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (is_invalid) {
+    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
     const std::wstring valid_msg = L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
     MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
     return false;
@@ -775,16 +808,14 @@ void OnStartButtonClick(HWND hWnd) {
   } else {
     std::wcerr << __FUNC__ << L"() failed!" << std::endl;
     // Stop animating if we failed for some reason.
-    SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   }
 }
 
 // Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
-void StopThreads(HWND hWnd) {
+void OnStopButtonClick(HWND hWnd) {
   // Stop animating the progress bar and reset to empty state
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-  HaltAllThreads();
-  std::wcout << "Threads result > " << stress_prime_result << std::endl;
+  StopAllThreads();
 }

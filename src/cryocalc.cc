@@ -213,12 +213,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             ClearControls(hWnd);
           }
         } break;
-        case IDC_START_BUTTON:
+        case IDC_START_BUTTON: {
+          BOOL isChecked = (BOOL)SendMessageW(hSSE2Checkbox, BM_GETCHECK, 0, 0);
+          set_use_sse2(isChecked);
           OnStartButtonClick(hWnd);
-          break;
+        } break;
         case IDC_STOP_BUTTON:
-          StopThreads(hWnd);
+          OnStopButtonClick(hWnd);
           break;
+        case IDC_SSE2_CHECKBOX: {
+          BOOL isChecked = (BOOL)SendMessageW(hSSE2Checkbox, BM_GETCHECK, 0, 0);
+          if (HIWORD(wParam) == BN_CLICKED) {
+            std::wstring msg = isChecked ? L"SSE2 checkbox was checked." : L"SSE2 checkbox was empty.";
+            std::wcout << msg.c_str() << std::endl;
+          }
+          set_use_sse2(isChecked);
+        } break;
         case IDC_ABOUT_BUTTON:
           AboutButtonClicked(hWnd);
           break;
@@ -265,7 +275,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       // TODO: Add any drawing code that uses hdc here...
       if (hdc) {
         const HDC winDC = GetWindowDC(hWnd);
-        // Set color of text
+        // Set color of window and text
+        SetBkColor(winDC, COLOR_WINDOW);
         SetTextColor(winDC, COLOR_WINDOWTEXT);
         // Set window background painting behavior
         SetBkMode(winDC, TRANSPARENT);
@@ -276,18 +287,37 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CTLCOLORSTATIC: {
       HDC hdc = reinterpret_cast<HDC>(wParam);
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
-      const bool custom = true;
-      const COLORREF kWindowBackground = custom ? RGB(0, 128, 0)
-                                                : GetSysColor(COLOR_WINDOW);
+      COLORREF kWindowBackground = GetSysColor(COLOR_WINDOW);
+      static HBRUSH hBrush = CreateSolidBrush(kWindowBackground);
+      bool set_color = true;
 
       switch (GetDlgCtrlID(hThisEditControl)) {
-        case IDC_LABEL_THREADS: {
-          static HBRUSH hBrush = CreateSolidBrush(kWindowBackground);
-          SetBkColor(hdc, kWindowBackground);
-          return reinterpret_cast<LRESULT>(hBrush);
+        case IDC_LABEL_C:
+        case IDC_LABEL_K:
+        case IDC_LABEL_F:
+        case IDC_LABEL_R: {
+          kWindowBackground = RGB_RED;
+          hBrush = CreateSolidBrush(kWindowBackground);
+        } break;
+        case IDC_LABEL_INPUT:
+        case IDC_LABEL_PREC:
+        case IDC_LABEL_THREADS:
+        case IDC_LABEL_CACHE: {
+          kWindowBackground = RGB_GREEN;
+          hBrush = CreateSolidBrush(kWindowBackground);
+        } break;
+        case IDC_INPUT:
+        case IDC_THREADS: {
+          kWindowBackground = RGB_CYAN;
+          hBrush = CreateSolidBrush(kWindowBackground);
         } break;
         default:
+          set_color = false;
           break;
+      }
+      if (set_color) {
+        SetBkColor(hdc, kWindowBackground);
+        return reinterpret_cast<LRESULT>(hBrush);
       }
     } break;
     // Handle resize events
@@ -303,10 +333,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = 380;
       pMinMaxInfo->ptMinTrackSize.y = 320;
+      pMinMaxInfo->ptMaxTrackSize.x = 800;
+      pMinMaxInfo->ptMaxTrackSize.y = 600;
     } break;
     case WM_QUERYENDSESSION: {
       std::wcout << L"Windows is shutting down now!" << std::endl;
-      StopThreads(hWnd);
+      StopAllThreads();
       const uint64_t reason = static_cast<uint64_t>(lParam);
       std::wcout << L"Reason = " << reason << std::endl;
       CloseAllWindows(hWnd);

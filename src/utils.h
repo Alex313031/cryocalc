@@ -92,7 +92,7 @@ long double ConvertInputToLD(const wchar_t* input);
 // Appends lines of text to an edit control
 void AppendTextToEditControl(HWND hWnd, const std::wstring line);
 
-// Sets the precision to use for calculations (usually from hPrecisionEdit).
+// Sets the precision to use for calculations (usually from hPrecisionCombo).
 void SetCryoCalcPrecision(unsigned int precision);
 
 // Gets the precision to use for calculations
@@ -111,16 +111,13 @@ bool ParseCommandLine(int argc, LPWSTR argv[]);
 // Returns an HINSTANCE for a given window HWND
 HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 
-// Uses CreateThread to start specified number of stressor threads.
-void LaunchThreads(const unsigned int num_threads);
-
-// Stops all stressor threads
-void HaltAllThreads();
-
 // Opens the "Run" applet
 void OpenRunDialog(HWND hWnd);
 
 // Launcher function to open shell applets
 bool RunShellApplet(HWND hWnd, const wchar_t* executable);
+
+// Get default cache multiplier to use, from hCacheSizeCombo
+const size_t GetCacheSize();
 
 #endif // CRYOCALC_UTILS_H_

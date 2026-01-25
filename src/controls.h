@@ -85,6 +85,6 @@ bool GetThreadsInput(HWND hWnd);
 void OnStartButtonClick(HWND hWnd);
 
 // Called when "Stop" button pressed. Stops progress bar/Stops stressing CPU.
-void StopThreads(HWND hWnd);
+void OnStopButtonClick(HWND hWnd);
 
 #endif // CRYOCALC_CONTROLS_H_

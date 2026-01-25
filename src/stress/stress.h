@@ -5,13 +5,27 @@
 #include "../globals.h"
 
 // Volatile variables to be used by stress threads
-extern volatile unsigned long long stress_prime_result; // Ultimate returned result from thread joining
 extern volatile bool running; // For controlling thread activation state
 
-// Actual CPU stressor function to be dispatched with threads.
-DWORD WINAPI HogCPU();
+extern bool use_sse2_simd; // For controlling which stress function to use.
 
 // Call this before launching threads. Set to false to stop threads
 void set_run_state(bool on);
+
+void set_use_sse2(bool on);
+
+// Actual CPU stressor functions to be dispatched with threads.
+
+// Matrix vector math to stress L2/L3 Caches.
+__attribute__((optimize("Og"))) void StressCPUVec(const size_t cache_size);
+
+// Inline SSE2 assembly to stress SIMD registers.
+void StressCPUSSE2(const size_t cache_size);
+
+// Uses CreateThread to start specified number of stressor threads.
+bool LaunchThreads(const unsigned int num_threads);
+
+// Stops all stressor threads
+void StopAllThreads();
 
 #endif // CRYOCALC_STRESS_H_

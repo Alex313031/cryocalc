@@ -24,7 +24,7 @@ extern HMODULE hOsInfoDll;
 // Edit control handles
 extern HWND hInputEdit;
 extern HWND hTempSelectEdit;
-extern HWND hPrecisionEdit;
+extern HWND hPrecisionCombo;
 extern HWND hCelsiusEdit;
 extern HWND hKelvinEdit;
 extern HWND hFahrenheitEdit;
@@ -41,6 +41,12 @@ extern HWND hClearButton;
 
 // Input box for CPU stressor for number of threads
 extern HWND hThreadsEdit;
+
+// Checkbox on whether to use the SSE2 version of the stressor.
+extern HWND hSSE2Checkbox;
+
+// Combobox to select L2/L3 Cache multiplier
+extern HWND hCacheSizeCombo;
 
 // Progress bar for CPU stressor
 extern HWND hProgressBar;
