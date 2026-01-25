@@ -21,9 +21,9 @@ SRC_DIR  := ./src
 DLL_DIR  := ./osinfo
 
 # Automatically discover source files
-HEADERS     := $(wildcard $(SRC_DIR)/*.h)
-SRC_C       := $(wildcard $(SRC_DIR)/*.c)
-SRC_CPP     := $(wildcard $(SRC_DIR)/*.cc)
+HEADERS     := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/stress/*.h)
+SRC_C       := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/stress/*.c)
+SRC_CPP     := $(wildcard $(SRC_DIR)/*.cc $(SRC_DIR)/stress/*.cc)
 SRC_RC      := $(wildcard $(SRC_DIR)/*.rc)
 # Dll source files
 DLL_HEADERS := $(wildcard $(DLL_DIR)/*.h)

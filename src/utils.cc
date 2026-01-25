@@ -6,10 +6,6 @@
 
 unsigned int g_precision_;
 
-// Maybe use std::atomic instead?
-volatile unsigned long long stress_prime_result = 0;
-volatile bool running = false;
-
 static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
@@ -383,37 +379,6 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
   HINSTANCE hInstance = reinterpret_cast<HINSTANCE>(hInstancePtr);
 
   return hInstance;
-}
-
-DWORD WINAPI HogCPU() {
-  while (running) {
-    unsigned long long num = 2048LL;
-    bool is_prime = true;
-
-    // A simple prime number generator (which will use a lot of CPU cycles)
-    for (unsigned long long i = 2; i < num; ++i) {
-      if (num % i == 0) {
-        is_prime = false;
-        break;
-      }
-    }
-
-    if (is_prime) {
-      // If prime, add 1 and continue prime search
-      num = num + 1;
-    }
-
-    stress_prime_result = num;
-  }
-  return static_cast<DWORD>(stress_prime_result);
-}
-
-void set_run_state(bool on) {
-  if (on) {
-    running = true;
-  } else {
-    running = false;
-  }
 }
 
 // Launches a vector of specified number of CreateThread

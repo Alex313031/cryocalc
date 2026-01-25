@@ -7,6 +7,7 @@
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
+#include "stress/stress.h"
 
 #include <os_info_dll.h>
 
@@ -18,10 +19,6 @@ extern bool debug_mode;
 extern bool enable_logging;
 extern bool show_version;
 extern bool show_help;
-
-// Volatile variables to be used by stress threads
-extern volatile unsigned long long stress_prime_result; // Ultimate returned result from thread joining
-extern volatile bool running; // For controlling thread activation state
 
 // Typedefs for accessing system .dll functions through GetProcAddress()
 #define RFD_NOBROWSE            0x00000001
@@ -113,12 +110,6 @@ bool ParseCommandLine(int argc, LPWSTR argv[]);
 
 // Returns an HINSTANCE for a given window HWND
 HINSTANCE GetInstanceFromHwnd(HWND hWnd);
-
-// Actual CPU stressor function to be dispatched with threads.
-DWORD WINAPI HogCPU();
-
-// Call this before launching threads. Set to false to stop threads
-void set_run_state(bool on);
 
 // Uses CreateThread to start specified number of stressor threads.
 void LaunchThreads(const unsigned int num_threads);

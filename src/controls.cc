@@ -786,4 +786,5 @@ void StopThreads(HWND hWnd) {
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   HaltAllThreads();
+  std::wcout << "Threads result > " << stress_prime_result << std::endl;
 }
