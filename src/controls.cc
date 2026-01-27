@@ -236,7 +236,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       0,                      // Optional window styles
       WC_STATIC,              // Predefined class: Static
       INPUT_LABEL,             // Text
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN, // Styles
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY, // Styles
       STATIC_LEFT,            // x position
       STATIC_TOP,             // y position
       LABEL_WIDTH,            // Width
@@ -248,7 +248,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hCelsiusLabel = CreateWindowExW(
       0, WC_STATIC, L"Celsius:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       STATIC_LEFT,
       STATIC_TOP + kLabelYPad,
       LABEL_WIDTH,
@@ -257,7 +257,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hKelvinLabel = CreateWindowExW(
       0, WC_STATIC, L"Kelvin:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * 2),
       LABEL_WIDTH,
@@ -266,7 +266,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hFahrenheitLabel = CreateWindowExW(
       0, WC_STATIC, L"Fahrenheit:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * INTRA_PADDING),
       LABEL_WIDTH,
@@ -275,7 +275,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hRankineLabel = CreateWindowExW(
       0, WC_STATIC, L"Rankine:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * 4),
       LABEL_WIDTH,
@@ -284,7 +284,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hPrecisionLabel = CreateWindowExW(
       0, WC_STATIC, PREC_LABEL,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       kButtonColLeft,
       kButtonRow2Top,
       LABEL_WIDTH,
@@ -401,7 +401,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   hThreadsLabel = CreateWindowExW(
       0, WC_STATIC, THREADS_LABEL,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       kButtonCol3Left,
       STATIC_TOP,
       LABEL_WIDTH,
@@ -434,7 +434,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   hCacheSizeLabel = CreateWindowEx(
       0, WC_STATIC, CACHE_SIZEQ,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN,
+      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
       LABEL_WIDTH - 16u, CW_STATICLABEL_HEIGHT,
@@ -516,6 +516,35 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hCacheSizeCombo, CB_SETCURSEL, 1, 0);
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
   InitStatusBar(hWnd, hInst);
+  AppendTooltips(hWnd, hInst);
+}
+
+void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
+  AddTooltip(hWnd, hInputLabel, hInst, L"Temperature input.");
+  AddTooltip(hWnd, hInputEdit, hInst, L"Input your temp to calculate here!");
+  AddTooltip(hWnd, hTempSelectEdit, hInst, L"Choose temperature scale for Input");
+  AddTooltip(hWnd, hConvButton, hInst, L"Convert input to all units");
+  AddTooltip(hWnd, hStartStresButton, hInst, L"Start running specified number of CPU threads");
+  AddTooltip(hWnd, hStopStresButton, hInst, L"Stop running all CPU threads");
+  AddTooltip(hWnd, hPrecisionLabel, hInst, L"Decimal precision for temp calculation");
+  AddTooltip(hWnd, hPrecisionCombo, hInst, L"Select decimal precision for temp calculation");
+  AddTooltip(hWnd, hThreadsLabel, hInst, L"Input number of threads to stress CPU");
+  AddTooltip(hWnd, hThreadsEdit, hInst, L"(default = number of logical CPU cores)");
+  AddTooltip(hWnd, hCelsiusLabel, hInst, L"Converted Celsius output");
+  AddTooltip(hWnd, hCelsiusEdit, hInst, L"° Celsius");
+  AddTooltip(hWnd, hKelvinLabel, hInst, L"Converted Kelvin output");
+  AddTooltip(hWnd, hKelvinEdit, hInst, L"° Kelvin");
+  AddTooltip(hWnd, hFahrenheitLabel, hInst, L"Converted Fahrenheit output");
+  AddTooltip(hWnd, hFahrenheitEdit, hInst, L"° Fahrenheit");
+  AddTooltip(hWnd, hRankineLabel, hInst, L"Converted Rankine output");
+  AddTooltip(hWnd, hRankineEdit, hInst, L"° Rankine");
+  AddTooltip(hWnd, hCacheSizeLabel, hInst, L"The L2 Cache size, in MB, to be used for stressor functions");
+  AddTooltip(hWnd, hCacheSizeCombo, hInst, L"Choose the L2 Cache size, in MB, for stressor functions");
+  AddTooltip(hWnd, hSSE2Checkbox, hInst, L"Whether to use the SSE2 SIMD stressor function instead of regular one.");
+  AddTooltip(hWnd, hClearButton, hInst, L"Clear all temperature output");
+  AddTooltip(hWnd, hOsInfoButton, hInst, L"Open OS Information window + utilities");
+  AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
+  AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
 }
 
 void HandleResize(HWND hWnd) {

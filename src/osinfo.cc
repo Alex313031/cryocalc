@@ -7,10 +7,11 @@ const WCHAR* szOSInfoWindowClass = CRYOCALC_OSINFO_WNDCLASS;
 
 HWND hOsInfoWin;
 
-HWND hOsInfoStatusBar;
 HWND hOsInfoTextOut;
+HWND hOsInfoStatusBar;
 HWND hWinVerButton;
 HWND hMsInfoButton;
+HWND hRunAppButton;
 
 static const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u);
 
@@ -81,7 +82,7 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
       0, WC_BUTTON, WINVER_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       PADDING_X,
-      GetYOffset(OSINFO_HEIGHT, 0, 0.75f) - END_PADDING,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING,
       kOsInfoButtonWidth,
       BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_WINVER_BUTTON, hInst, nullptr
@@ -90,11 +91,24 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
       0, WC_BUTTON, MSINFO_BUTTON,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
-      GetYOffset(OSINFO_HEIGHT, 0, 0.75f) - END_PADDING,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING,
       kOsInfoButtonWidth,
       BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_MSINFO_BUTTON, hInst, nullptr
   );
+  hRunAppButton = CreateWindowExW(
+      0, WC_BUTTON, RUN_BUTTON,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT - END_PADDING,
+      kOsInfoButtonWidth,
+      BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_RUNAPP_BUTTON, hInst, nullptr
+  );
+  AddTooltip(hWnd, hOsInfoTextOut, hInst, L"Windows System Info Log");
+  AddTooltip(hWnd, hWinVerButton, hInst, L"Open Windows Version shell dialog");
+  AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");
+  AddTooltip(hWnd, hRunAppButton, hInst, L"Open \"Run\" Dialog");
   OutputOsInfo(hWnd);
 }
 
@@ -109,6 +123,7 @@ void HandleOsInfoResize(HWND hWnd) {
   const unsigned int kOsOutputWidth = this_width - END_PADDING;
   const unsigned int kOsOutputHeight = GetYOffset(this_height, 0, 0.75f) - status_height - END_PADDING;
   const unsigned int kButtonTop = kOsOutputHeight + (PADDING_Y * 2u);
+  const unsigned int kButton2Top = kButtonTop + BUTTON_HEIGHT + INTRA_PADDING;
   MoveWindow(hOsInfoTextOut, PADDING_X, PADDING_Y, kOsOutputWidth, kOsOutputHeight, TRUE);
   const int total_buttons_width = static_cast<int>((kOsInfoButtonWidth * 2u) + (INTRA_PADDING * 2u) + PADDING_X);
   const bool is_compact = this_width <= total_buttons_width;
@@ -116,6 +131,7 @@ void HandleOsInfoResize(HWND hWnd) {
   const unsigned int kButtonLeft = is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
   MoveWindow(hWinVerButton, kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
   MoveWindow(hMsInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hRunAppButton, kButtonLeft + ((INTRA_PADDING + kButtonWidth) / 2u), kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
 }
 
 LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -129,6 +145,9 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           break;
         case IDC_MSINFO_BUTTON:
           RunShellApplet(hWnd, kMsInfo32Exe);
+          break;
+        case IDC_RUNAPP_BUTTON:
+          OpenRunDialog(hWnd);
           break;
         case IDC_CLOSE_OSINFO:
           CloseWindow(hWnd);
@@ -167,8 +186,8 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     } break;
     case WM_GETMINMAXINFO: {
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
-      pMinMaxInfo->ptMinTrackSize.x = 250;
-      pMinMaxInfo->ptMinTrackSize.y = 150;
+      pMinMaxInfo->ptMinTrackSize.x = 320;
+      pMinMaxInfo->ptMinTrackSize.y = 280;
       pMinMaxInfo->ptMaxTrackSize.x = 640;
       pMinMaxInfo->ptMaxTrackSize.y = 480;
     } break;

@@ -120,4 +120,10 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 // Get default cache multiplier to use, from hCacheSizeCombo
 const size_t GetCacheSize();
 
+// Adds a tooltip to a control.
+HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText);
+
+// Detaches console to allow attaching a new one. See AttachConsole() in cryocalc.cc
+void DetachConsole();
+
 #endif // CRYOCALC_UTILS_H_

@@ -29,6 +29,8 @@
 #define IDM_OSINFO                  208
 #define IDM_HELPEX                  209
 #define IDM_RUN                     210
+#define IDM_ATTACH_CON              211
+#define IDM_DETACH_CON              212
 
 // Buttons
 #define IDC_CONVERT                 300
@@ -40,38 +42,40 @@
 #define IDC_OSINFO_BUTTON           306
 #define IDC_WINVER_BUTTON           307
 #define IDC_MSINFO_BUTTON           308
+#define IDC_RUNAPP_BUTTON           309
 
 // User input controls
-#define IDC_INPUT                   309
-#define IDC_SCALE                   310
-#define IDC_PRECISION               311
-#define IDC_THREADS                 312
+#define IDC_INPUT                   320
+#define IDC_SCALE                   321
+#define IDC_PRECISION               322
+#define IDC_THREADS                 323
+// Stress SSE2 checkbox
+#define IDC_SSE2_CHECKBOX           324
+// Cache size input combobox
+#define IDC_CACHE_SIZE              325
 
 // Labels
-#define IDC_LABEL_INPUT             313
-#define IDC_LABEL_PREC              314
-#define IDC_LABEL_C                 315
-#define IDC_LABEL_K                 316
-#define IDC_LABEL_F                 317
-#define IDC_LABEL_R                 318
-#define IDC_LABEL_THREADS           319
-#define IDC_LABEL_CACHE             320
+#define IDC_LABEL_INPUT             330
+#define IDC_LABEL_PREC              331
+#define IDC_LABEL_C                 332
+#define IDC_LABEL_K                 333
+#define IDC_LABEL_F                 334
+#define IDC_LABEL_R                 335
+#define IDC_LABEL_THREADS           336
+#define IDC_LABEL_CACHE             337
 
 // Output boxes
-#define IDC_CELSIUS                 321
-#define IDC_KELVIN                  322
-#define IDC_FAHRENHEIT              323
-#define IDC_RANKINE                 324
+#define IDC_CELSIUS                 340
+#define IDC_KELVIN                  341
+#define IDC_FAHRENHEIT              342
+#define IDC_RANKINE                 343
 
 // Progress bar
-#define IDC_PROGRESS                330
+#define IDC_PROGRESS                350
 // Command to close Os Info Window gracefully when parent window is closing
-#define IDC_CLOSE_OSINFO            331
+#define IDC_CLOSE_OSINFO            351
 // Os Info Logging Output Window
-#define IDC_OSINFO_OUT              332
-// Stress SSE2 checkbox
-#define IDC_SSE2_CHECKBOX           333
-#define IDC_CACHE_SIZE              334
+#define IDC_OSINFO_OUT              352
 
 // Name of the App
 #define APP_NAME L"CryoCalc"

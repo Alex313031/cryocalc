@@ -123,7 +123,7 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
-  FreeConsole();
+  DetachConsole();
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
 }
 
@@ -146,7 +146,7 @@ int ConfirmExit(HWND hWnd) {
 
 bool ConfirmClearControls(HWND hWnd) {
   int user_response_code =
-      MessageBoxW(nullptr, L"Clear All Controls?", L"Confirm Clear",
+      MessageBoxW(nullptr, L"Clear All Temperature Output?", L"Confirm Clear",
                   MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
   switch (user_response_code) {
     case IDNO:
@@ -445,4 +445,44 @@ const size_t GetCacheSize() {
     cache_size = 1024u;
   }
   return cache_size;
+}
+
+HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText) {
+  if (!hWndParent || !hWndControl || !tooltipText) {
+    return nullptr;
+  }
+
+  // Create the tooltip window
+  HWND hTooltip = CreateWindowExW(
+      0, TOOLTIPS_CLASS, nullptr,
+      WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
+      CW_USEDEFAULT, CW_USEDEFAULT,
+      CW_USEDEFAULT, CW_USEDEFAULT,
+      hWndParent, nullptr, hInst, nullptr);
+
+  if (!hTooltip) {
+    return nullptr;
+  }
+
+  // Set up the TOOLINFO structure
+  TOOLINFOW ti = {0};
+  ti.cbSize = sizeof(ti);
+  ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
+  ti.hwnd = hWndParent;
+  ti.uId = reinterpret_cast<UINT_PTR>(hWndControl);
+  ti.lpszText = const_cast<wchar_t*>(tooltipText);
+
+  // Associate the tooltip with the control
+  SendMessageW(hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
+  // Tooltip must be topmost to appear above other windows
+  SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+  // Finally, activate it to show it.
+  SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
+
+  return hTooltip;
+}
+
+void DetachConsole() {
+  FreeConsole();
 }

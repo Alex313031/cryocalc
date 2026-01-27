@@ -44,6 +44,9 @@ void InitStatusBar(HWND hWnd, HINSTANCE hInst);
 // Creates main controls
 void InitControls(HWND hWnd, HINSTANCE hInst);
 
+// Creates help tooltips on hover of certain control elements
+void AppendTooltips(HWND hWnd, HINSTANCE hInst);
+
 // Handles resize events and repaints controls as necessary
 void HandleResize(HWND hWnd);
 

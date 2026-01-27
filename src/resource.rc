@@ -84,6 +84,8 @@ BEGIN
     END
     POPUP "&Dev"
     BEGIN
+        MENUITEM "&Attach Console", IDM_ATTACH_CON
+        MENUITEM "&Detach Console", IDM_DETACH_CON
         MENUITEM "&OS Info", IDM_OSINFO
     END
     POPUP "&Help"
@@ -102,7 +104,7 @@ END
 
 IDC_CRYOCALC ACCELERATORS
 BEGIN
-    VK_F1,     IDM_HELP,  VIRTKEY, NOINVERT        // "F1" key
+    //VK_F1,     IDM_HELPEX,  VIRTKEY, NOINVERT        // "F1" key
     "?",       IDM_ABOUT, ASCII,   ALT             // "?" key
     VK_OEM_2,  IDM_ABOUT, VIRTKEY, ALT             // "/" key
     0x57,      IDM_CLEAR, VIRTKEY, CONTROL         // Ctrl+W

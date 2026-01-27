@@ -51,21 +51,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     LocalFree(argv);
 
     if (enable_logging) {
-      // Allow and allocate conhost for cmd.exe logging window
-      if (!AllocConsole()) {
-        return 1;
-      }
-     // File handler pointer to a dummy file, possibly an actual logfile
-      FILE* fNonExistFile = fDummyFile;
-#ifndef __MINGW32__
-      freopen_s(&fNonExistFile, "CONOUT$", "w", stdout); // Standard error
-      freopen_s(&fNonExistFile, "CONOUT$", "w", stderr); // Standard out
-#else
-      // freopen_s doesn't exist in MinGW...
-      fNonExistFile = freopen("CONOUT$", "w", stdout); // Standard error
-      fNonExistFile = freopen("CONOUT$", "w", stderr); // Standard out
-#endif // __MINGW32__
-      if (!fNonExistFile) {
+      if (!AttachConsole()) {
         return 1;
       }
     }
@@ -259,6 +245,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           // Open run dialog
           OpenRunDialog(hWnd);
           break;
+        case IDM_ATTACH_CON: {
+          // Atach new console
+          if (!AttachConsole()) {
+            return 1;
+          }
+        } break;
+        case IDM_DETACH_CON:
+          // Detach console
+          DetachConsole();
+          break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
@@ -283,6 +279,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       }
       EndPaint(hWnd, &ps);
     } break;
+    // Handle F1 key
+    case WM_HELP:
+      LaunchHelp(hWnd);
+      break;
+    // Set Paint colors of child windows
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORSTATIC: {
       HDC hdc = reinterpret_cast<HDC>(wParam);
@@ -331,7 +332,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
-      pMinMaxInfo->ptMinTrackSize.x = 380;
+      pMinMaxInfo->ptMinTrackSize.x = 390;
       pMinMaxInfo->ptMinTrackSize.y = 320;
       pMinMaxInfo->ptMaxTrackSize.x = 800;
       pMinMaxInfo->ptMaxTrackSize.y = 600;
@@ -365,5 +366,27 @@ HINSTANCE GetGlobalHinst() {
   } else {
     __debugbreak();
     return nullptr;
+  }
+}
+
+bool AttachConsole() {
+  // Allow and allocate conhost for cmd.exe logging window
+  if (!AllocConsole()) {
+    return false;
+  }
+  // File handler pointer to a dummy file, possibly an actual logfile
+  FILE* fNonExistFile = fDummyFile;
+#ifndef __MINGW32__
+  freopen_s(&fNonExistFile, "CONOUT$", "w", stdout); // Standard error
+  freopen_s(&fNonExistFile, "CONOUT$", "w", stderr); // Standard out
+#else
+  // freopen_s doesn't exist in MinGW...
+  fNonExistFile = freopen("CONOUT$", "w", stdout); // Standard error
+  fNonExistFile = freopen("CONOUT$", "w", stderr); // Standard out
+#endif // __MINGW32__
+  if (!fNonExistFile) {
+    return false;
+  } else {
+    return true;
   }
 }
