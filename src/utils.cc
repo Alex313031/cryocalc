@@ -257,7 +257,6 @@ DWORD GetLogicalProcessorCount() {
     std::wcout << L"Using " << whichfunc << " for " << __FUNC__ << std::endl;
   }
 #endif
-  FreeLibrary(hKernel32);
   return sysInfo.dwNumberOfProcessors;
 }
 
@@ -430,15 +429,15 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
 const size_t GetCacheSize() {
   size_t cache_size = 1024u;
   DWORD dwCacheComboSize = GetWindowTextLength(hCacheSizeCombo);
-  wchar_t* cachesz_buff = new wchar_t[dwCacheComboSize + 1];
-  GetWindowTextW(hCacheSizeCombo, cachesz_buff, dwCacheComboSize + 1);
-  if ((wcscmp(cachesz_buff, L"1MB") == 0)) {
+  std::wstring cachesz_buff(dwCacheComboSize + 1, L'\0');
+  GetWindowTextW(hCacheSizeCombo, &cachesz_buff[0], dwCacheComboSize + 1);
+  if ((wcscmp(cachesz_buff.c_str(), L"1MB") == 0)) {
     cache_size = 1024u;
-  } else if ((wcscmp(cachesz_buff, L"2MB") == 0)) {
+  } else if ((wcscmp(cachesz_buff.c_str(), L"2MB") == 0)) {
     cache_size = 2048u;
-  } else if ((wcscmp(cachesz_buff, L"3MB") == 0)) {
+  } else if ((wcscmp(cachesz_buff.c_str(), L"3MB") == 0)) {
     cache_size = 3072u;
-  } else if ((wcscmp(cachesz_buff, L"4MB") == 0)) {
+  } else if ((wcscmp(cachesz_buff.c_str(), L"4MB") == 0)) {
     cache_size = 4096u;
   } else {
     std::wcerr << L"Default cache size was used!" << std::endl;

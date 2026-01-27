@@ -92,15 +92,15 @@ bool HandleConvert(HWND hWnd) {
     success = false;
   } else {
     std::wostringstream wostr;
-    // Create a buffer to store the text
-    wchar_t* input_buff = new wchar_t[dwInputSize + 1]; // Allocate memory for the text
-    wchar_t* scale_buff = new wchar_t[dwScaleSize + 1];
-    wchar_t* preci_buff = new wchar_t[dwPrecisionSize + 1];
+    // Create buffers to store the text (using wstring for automatic memory management)
+    std::wstring input_buff(dwInputSize + 1, L'\0');
+    std::wstring scale_buff(dwScaleSize + 1, L'\0');
+    std::wstring preci_buff(dwPrecisionSize + 1, L'\0');
 
     // Get the text from the edit control
-    GetWindowTextW(hInputEdit, input_buff, dwInputSize + 1);
+    GetWindowTextW(hInputEdit, &input_buff[0], dwInputSize + 1);
     // Check that it isn't invalid input, like text characters
-    if (!IsValidNumericInput(input_buff)) {
+    if (!IsValidNumericInput(input_buff.c_str())) {
       is_invalid = true; // Bad
     }
 
@@ -110,15 +110,15 @@ bool HandleConvert(HWND hWnd) {
        ClearInput(hWnd);
        return success; // Fail on invalid input.
     } else {
-      input = ConvertInputToLD(input_buff);
+      input = ConvertInputToLD(input_buff.c_str());
       std::wcout << L"Input = " << std::setprecision(MAX_PRECISION) << input << std::endl;
     }
 
-    GetWindowTextW(hTempSelectEdit, scale_buff, dwScaleSize + 1);
-    GetWindowTextW(hPrecisionCombo, preci_buff, dwPrecisionSize + 1);
+    GetWindowTextW(hTempSelectEdit, &scale_buff[0], dwScaleSize + 1);
+    GetWindowTextW(hPrecisionCombo, &preci_buff[0], dwPrecisionSize + 1);
 
-    std::wstring scale(scale_buff);
-    std::wstring preci(preci_buff);
+    std::wstring scale(scale_buff.c_str());
+    std::wstring preci(preci_buff.c_str());
 
     unsigned int precision_ = std::stoi(preci);
     if (precision_ < MIN_PRECISION || precision_ > MAX_PRECISION) {
@@ -681,19 +681,19 @@ bool GetClipboardTextW(wchar_t* buffer, size_t bufferSize) {
 }
 
 bool HandlePaste(HWND hWnd) {
-  wchar_t* clpbrd_buff = new wchar_t[255];
+  std::wstring clpbrd_buff(255, L'\0');
 
   // Get text from clipboard
-  if (!GetClipboardTextW(clpbrd_buff, 255)) {
+  if (!GetClipboardTextW(&clpbrd_buff[0], 255)) {
     return false;
   }
 
-  if (!IsValidNumericInput(clpbrd_buff)) {
+  if (!IsValidNumericInput(clpbrd_buff.c_str())) {
     MessageBoxW(hWnd, L"Invalid Paste Input!", L"Error!", MB_OK | MB_ICONWARNING);
     return false;
   }
 
-  SetWindowTextW(hInputEdit, clpbrd_buff);
+  SetWindowTextW(hInputEdit, clpbrd_buff.c_str());
   return true;
 }
 
@@ -782,9 +782,9 @@ bool GetThreadsInput(HWND hWnd) {
     MessageBoxW(hWnd, L"No threads entered!", L"Empty Threads Input", MB_OK | MB_ICONWARNING);
     return false;
   }
-  wchar_t* in_buff = new wchar_t[dwThrInputSize + 1];
-  GetWindowTextW(hThreadsEdit, in_buff, dwThrInputSize + 1);
-  if (!IsValidThreadsInput(in_buff)) {
+  std::wstring in_buff(dwThrInputSize + 1, L'\0');
+  GetWindowTextW(hThreadsEdit, &in_buff[0], dwThrInputSize + 1);
+  if (!IsValidThreadsInput(in_buff.c_str())) {
     is_invalid = true;
   }
   unsigned int get_threads;
@@ -795,7 +795,7 @@ bool GetThreadsInput(HWND hWnd) {
     MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
     return false;
   } else {
-    std::wstring threads_input(in_buff);
+    std::wstring threads_input(in_buff.c_str());
     get_threads = std::stoi(threads_input);
     std::wcout << L"Number of system CPU threads: " << num_logical_cpus << std::endl;
     if (get_threads > num_logical_cpus) {

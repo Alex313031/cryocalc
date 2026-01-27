@@ -276,6 +276,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         SetTextColor(winDC, COLOR_WINDOWTEXT);
         // Set window background painting behavior
         SetBkMode(winDC, TRANSPARENT);
+        ReleaseDC(hWnd, winDC);
       }
       EndPaint(hWnd, &ps);
     } break;
@@ -288,37 +289,44 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CTLCOLORSTATIC: {
       HDC hdc = reinterpret_cast<HDC>(wParam);
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
-      COLORREF kWindowBackground = GetSysColor(COLOR_WINDOW);
-      static HBRUSH hBrush = CreateSolidBrush(kWindowBackground);
+
+      // Create brushes once and reuse them (static prevents GDI handle leaks)
+      static HBRUSH hBrushDefault = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
+      static HBRUSH hBrushRed = CreateSolidBrush(RGB_RED);
+      static HBRUSH hBrushGreen = CreateSolidBrush(RGB_GREEN);
+      static HBRUSH hBrushCyan = CreateSolidBrush(RGB_CYAN);
+
+      HBRUSH hBrushToUse = hBrushDefault;
+      COLORREF bgColor = GetSysColor(COLOR_WINDOW);
       bool set_color = true;
 
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_LABEL_C:
         case IDC_LABEL_K:
         case IDC_LABEL_F:
-        case IDC_LABEL_R: {
-          kWindowBackground = RGB_RED;
-          hBrush = CreateSolidBrush(kWindowBackground);
-        } break;
+        case IDC_LABEL_R:
+          bgColor = RGB_RED;
+          hBrushToUse = hBrushRed;
+          break;
         case IDC_LABEL_INPUT:
         case IDC_LABEL_PREC:
         case IDC_LABEL_THREADS:
-        case IDC_LABEL_CACHE: {
-          kWindowBackground = RGB_GREEN;
-          hBrush = CreateSolidBrush(kWindowBackground);
-        } break;
+        case IDC_LABEL_CACHE:
+          bgColor = RGB_GREEN;
+          hBrushToUse = hBrushGreen;
+          break;
         case IDC_INPUT:
-        case IDC_THREADS: {
-          kWindowBackground = RGB_CYAN;
-          hBrush = CreateSolidBrush(kWindowBackground);
-        } break;
+        case IDC_THREADS:
+          bgColor = RGB_CYAN;
+          hBrushToUse = hBrushCyan;
+          break;
         default:
           set_color = false;
           break;
       }
       if (set_color) {
-        SetBkColor(hdc, kWindowBackground);
-        return reinterpret_cast<LRESULT>(hBrush);
+        SetBkColor(hdc, bgColor);
+        return reinterpret_cast<LRESULT>(hBrushToUse);
       }
     } break;
     // Handle resize events
