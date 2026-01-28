@@ -13,6 +13,11 @@ enum LogLevel {
   MAX_LOGLEVEL = 5
 };
 
+// Toggle to test LOG(FATAL) which will crash the app
+static constexpr bool test_fatal = false; 
+
+namespace logging {
+
 class LogMessage {
  public:
   explicit LogMessage(LogLevel level);
@@ -52,18 +57,30 @@ class LogMessage {
     return *this;
   }
 
+ protected:
+   bool IsDCheck(); // Whether to use DLOG
+
  private:
   LogLevel level_;
   std::wostringstream stream_;
 };
 
-#define LOG(level) LogMessage(LOG_##level)
-#define DLOG(level) LogMessage(LOG_##level)
+extern volatile bool dcheck_log_;
 
 // Initialize logging for this program
 bool InitLogging(HINSTANCE hInstance);
 
+// Set whether to use DLOG
+void SetIsDCheck(bool set_is_dcheck);
+
 // Test that logging works as expected.
 void TestLogging();
+
+void NotReachedImpl();
+}
+
+#define LOG(level) logging::LogMessage(LOG_##level)
+#define DLOG() logging::LogMessage(LOG_DEBUG)
+#define NOTREACHED() logging::NotReachedImpl()
 
 #endif // CRYOCALC_LOGGING_H_
