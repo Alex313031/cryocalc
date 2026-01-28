@@ -500,6 +500,12 @@ void DetachConsole(HWND hWnd) {
   FreeConsole();
 }
 
+void ClearConsole(HWND hWnd) {
+  if (hWnd) {
+    system("cls");
+  }
+}
+
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   // Default position if we can't get the main window rect
   const int kDefaultX = 512;

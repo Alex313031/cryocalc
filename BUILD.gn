@@ -30,6 +30,8 @@ executable("cryocalc") {
     "src/strings.h",
     "src/stress/stress.h",
     "src/stress/stress.cc",
+    "src/logging/logging.h",
+    "src/logging/logging.cc",
     "src/utils.cc",
     "src/utils.h",
     "src/version.h",

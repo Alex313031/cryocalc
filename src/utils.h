@@ -7,6 +7,7 @@
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
+#include "logging/logging.h"
 #include "stress/stress.h"
 
 #include <os_info_dll.h>
@@ -125,6 +126,9 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
 
 // Detaches console to allow attaching a new one. See AttachConsole() in cryocalc.cc
 void DetachConsole(HWND hWnd);
+
+// Clears console output without detaching it.
+void ClearConsole(HWND hWnd);
 
 // Gets the position to place a window to the right of another window
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
