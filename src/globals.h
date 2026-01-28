@@ -33,6 +33,9 @@ extern HWND hRankineEdit;
 // Window handle to Os Info Window
 extern HWND hOsInfoWin;
 
+extern RECT kMainWinRect;
+extern RECT kMainClientRect;
+
 // Convert button handle
 extern HWND hConvButton;
 

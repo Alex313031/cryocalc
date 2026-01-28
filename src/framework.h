@@ -5,6 +5,12 @@
 #ifndef CRYOCALC_FRAMEWORK_H_
 #define CRYOCALC_FRAMEWORK_H_
 
+#ifdef __cplusplus
+ #if __cplusplus < 201103L
+  #error CryoCalc only supports C++11 and above
+ #endif
+#endif
+
 #include "version.h"
 
 //#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers

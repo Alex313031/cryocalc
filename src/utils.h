@@ -124,6 +124,9 @@ const size_t GetCacheSize();
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText);
 
 // Detaches console to allow attaching a new one. See AttachConsole() in cryocalc.cc
-void DetachConsole();
+void DetachConsole(HWND hWnd);
+
+// Gets the position to place a window to the right of another window
+void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
 
 #endif // CRYOCALC_UTILS_H_

@@ -51,7 +51,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst);
 void HandleResize(HWND hWnd);
 
 // Set client rects for future resizing
-void SetClientRects(HWND hWnd, HINSTANCE hInst);
+bool SetClientRects(HWND hWnd, HINSTANCE hInst);
 
 // Clears the input box
 void ClearInput(HWND hWnd);

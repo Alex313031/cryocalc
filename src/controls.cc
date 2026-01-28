@@ -45,6 +45,10 @@ bool _about_handled = false;
 
 unsigned int num_threads_ = 0;
 
+// Declare rects to use for all future window layout
+RECT kMainClientRect;
+RECT kMainWinRect;
+
 Scale parseScale(const std::wstring& wscale) {
   if (wscale == kTempC) return kScaleCelsius;
   if (wscale == kTempK) return kScaleKelvin;
@@ -596,13 +600,16 @@ void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
   }
 }
 
-void SetClientRects(HWND hWnd, HINSTANCE hInst) {
-  // Declare rect to use for all future window layout
-  RECT kWinRect;
-
-  // Get rect size of window including titlebar
-  GetClientRect(hWnd, &kWinRect);
-  /* TODO: Add stuff to actually set stuff from above RECT */
+bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
+  // Get rect size of window including titlebar, for setting other Window's positions relative to this window
+  if (!GetWindowRect(hMainWindow, &kMainWinRect)) {
+    return false;
+  }
+  // Get internal rects inside Window, excluding titlebar, for setting control positions inside Window
+  if (!GetClientRect(hWnd, &kMainClientRect)) {
+    return false;
+  }
+  return true;
 }
 
 void ClearInput(HWND hWnd) {

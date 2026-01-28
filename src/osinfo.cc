@@ -40,12 +40,18 @@ bool ShowOsInfo(HWND hWnd) {
 
   RegisterClassExW(&wcex);
 
+  // Position OS Info window to the right of the main window
+  int osInfoX, osInfoY;
+  GetRightOfWindow(hMainWindow, &osInfoX, &osInfoY);
+  osInfoX = osInfoX + 2; // 2 pixels padding between windows
+  osInfoY = osInfoY + 2;
+
   hOsInfoWin = CreateWindowExW(WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW,
                               szOSInfoWindowClass,
                               OSINFO_TITLE,
                               WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
-                              512, // TODO: Position OS Info window to right of main window
-                              512,
+                              osInfoX,
+                              osInfoY,
                               OSINFO_WIDTH,
                               OSINFO_HEIGHT,
                               nullptr,

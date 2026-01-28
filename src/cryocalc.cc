@@ -252,7 +252,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         } break;
         case IDM_DETACH_CON:
           // Detach console
-          DetachConsole();
+          DetachConsole(hWnd);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -264,7 +264,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       break;
     // Start painting
     case WM_PAINT: {
-      SetClientRects(hWnd, paintHinst);
       PAINTSTRUCT ps;
       HDC hdc = BeginPaint(hWnd, &ps);
       // TODO: Add any drawing code that uses hdc here...

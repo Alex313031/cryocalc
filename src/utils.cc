@@ -123,7 +123,7 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
-  DetachConsole();
+  DetachConsole(hWnd);
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
 }
 
@@ -492,6 +492,36 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
   return hTooltip;
 }
 
-void DetachConsole() {
+void DetachConsole(HWND hWnd) {
+  if (!hWnd) {
+    __debugbreak();
+    return;
+  }
   FreeConsole();
+}
+
+void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
+  // Default position if we can't get the main window rect
+  const int kDefaultX = 512;
+  const int kDefaultY = 512;
+
+  if (!outX || !outY) {
+    return;
+  }
+
+  if (!hWnd) {
+    *outX = kDefaultX;
+    *outY = kDefaultY;
+    return;
+  }
+
+  RECT thisRect;
+  if (GetWindowRect(hWnd, &thisRect)) {
+    // Position at the right edge of the main window, aligned with its top
+    *outX = thisRect.right;
+    *outY = thisRect.top;
+  } else {
+    *outX = kDefaultX;
+    *outY = kDefaultY;
+  }
 }
