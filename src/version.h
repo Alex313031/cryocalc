@@ -56,8 +56,8 @@
 #define ABOUT_TITLE L"About CryoCalc"
 #define ABOUT_CONTENT L"CryoCalc ver. " VERSION_STRING
 // TODO: Rebuilt win32devkit with UTF8 rc support and convert to ©
-#define ABOUT_COPYRIGHT L"\251 2025 Alex313031" // \251 is the © symbol
-#define LEGAL_COPYRIGHT L"\251 2025 Alex313031"
+#define ABOUT_COPYRIGHT L"\251 2025-2026 Alex313031" // \251 is the © symbol
+#define LEGAL_COPYRIGHT L"\251 2025-2026 Alex313031"
 
 #ifndef _PACKVERSION
  #define _PACKVERSION(major,minor) MAKELONG((minor), ((major) << 8))
