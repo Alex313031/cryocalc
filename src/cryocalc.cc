@@ -37,7 +37,6 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   hOsInfoDll = LoadLibraryW(kOsInfoDll);
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
     MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
-    FreeLibrary(hOsInfoDll);
     return -1;
   }
 
@@ -357,9 +356,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     // When close button is pressed
     case WM_CLOSE:
       CloseAllWindows(hWnd);
+      FreeLibrary(hOsInfoDll);
       break;
     // Handle destroy message
     case WM_DESTROY:
+      FreeLibrary(hOsInfoDll);
       PostQuitMessage(0);
       break;
     default:

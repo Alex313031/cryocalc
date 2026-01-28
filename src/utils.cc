@@ -242,16 +242,23 @@ DWORD GetLogicalProcessorCount() {
   whichfunc =  L"GetNativeSystemInfo";
   GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
 #else
+  // Note: Do not call FreeLibrary() on GetModuleHandle() results
   HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
-  // Dynamically get GetNativeSystemInfo
-  pfnGetNativeSystemInfo = reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
-  // Windows 2000 won't have this function, use GetSystemInfo instead
-  if (pfnGetNativeSystemInfo) {
-    whichfunc =  L"pfnGetNativeSystemInfo";
-    pfnGetNativeSystemInfo(&sysInfo);
-  } else {
+  if (!hKernel32) {
+    // Fallback if kernel32.dll handle couldn't be obtained
     whichfunc = L"GetSystemInfo";
     GetSystemInfo(&sysInfo);
+  } else {
+    // Dynamically get GetNativeSystemInfo
+    pfnGetNativeSystemInfo = reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
+    // Windows 2000 won't have this function, use GetSystemInfo instead
+    if (pfnGetNativeSystemInfo) {
+      whichfunc = L"pfnGetNativeSystemInfo";
+      pfnGetNativeSystemInfo(&sysInfo);
+    } else {
+      whichfunc = L"GetSystemInfo";
+      GetSystemInfo(&sysInfo);
+    }
   }
   if (debug_mode) {
     std::wcout << L"Using " << whichfunc << " for " << __FUNC__ << std::endl;
@@ -388,14 +395,17 @@ void OpenRunDialog(HWND hWnd) {
     GetCurrentDirectoryW(MAX_PATH, szCurDir);
     // Open "Run"
     HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
-    pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)61));
-    if (pfnRunFileDlg) {
-      pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
+    if (hShell32Dll) {
+      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)61));
+      if (pfnRunFileDlg) {
+        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
+      } else {
+        std::wcerr << L"Failed to open run dialog." << std::endl;
+      }
     } else {
-      std::wcerr << L"Failed to open run dialog." << std::endl;
+      std::wcerr << L"Failed to get shell32.dll handle." << std::endl;
     }
     DestroyIcon(kSmallIcon); // Cleanup icon
-    FreeLibrary(hShell32Dll);
   }
 }
 
