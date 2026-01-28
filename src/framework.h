@@ -45,4 +45,11 @@
 #include <vector> // std::vector
 #include <thread> // For threading support
 
+inline constexpr bool is_dcheck =
+#ifdef DCHECK
+ true;
+#else
+ false;
+#endif // DCHECK
+
 #endif // CRYOCALC_FRAMEWORK_H_
