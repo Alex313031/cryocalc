@@ -7,9 +7,9 @@
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
-#include "logging/logging.h"
 #include "stress/stress.h"
 
+#include <logging.h>
 #include <os_info_dll.h>
 
 // Global precision to use

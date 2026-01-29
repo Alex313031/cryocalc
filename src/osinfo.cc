@@ -21,7 +21,10 @@ bool ShowOsInfo(HWND hWnd) {
 
   // Check if Window already exists: Don't open two OS Info Windows
   if (hOsInfoWin != nullptr) {
+    LOG(INFO) << L"Restoring OS Info Window to foreground";
     return SetForegroundWindow(hOsInfoWin);
+  } else {
+    LOG(INFO) << L"Showed OS Info Window";
   }
 
   WNDCLASSEXW wcex;
@@ -47,17 +50,17 @@ bool ShowOsInfo(HWND hWnd) {
   osInfoY = osInfoY + 2;
 
   hOsInfoWin = CreateWindowExW(WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW,
-                              szOSInfoWindowClass,
-                              OSINFO_TITLE,
-                              WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
-                              osInfoX,
-                              osInfoY,
-                              OSINFO_WIDTH,
-                              OSINFO_HEIGHT,
-                              nullptr,
-                              nullptr,
-                              this_hinst,
-                              nullptr);
+                               szOSInfoWindowClass,
+                               OSINFO_TITLE,
+                               WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
+                               osInfoX,
+                               osInfoY,
+                               OSINFO_WIDTH,
+                               OSINFO_HEIGHT,
+                               nullptr,
+                               nullptr,
+                               this_hinst,
+                               nullptr);
 
   if (!hOsInfoWin) {
     success = false;

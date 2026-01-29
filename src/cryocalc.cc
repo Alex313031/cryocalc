@@ -153,11 +153,11 @@ bool LaunchHelp(HWND hWnd) {
   if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening Help failed! \n";
-    bool treat_as_error = false;
+    bool treat_as_error = true;
     if (error == ERROR_FILE_NOT_FOUND) {
+      treat_as_error = false;
       wostr << kChmHelpFile << L" could not be found." << std::endl;
     } else {
-      treat_as_error = true;
       wostr << L"Error = " << std::showbase << std::hex << error
             << std::dec << std::defaultfloat << std::endl;
     }
@@ -231,7 +231,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           break;
         case IDM_OSINFO:
         case IDC_OSINFO_BUTTON:
-          LOG(INFO) << L"Showed OS Info Window";
           ShowOsInfo(hWnd);
           break;
         case IDM_PASTE:

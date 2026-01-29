@@ -395,8 +395,9 @@ void OpenRunDialog(HWND hWnd) {
     // Open "Run"
     HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
     if (hShell32Dll) {
-      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)61));
+      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
       if (pfnRunFileDlg) {
+        LOG(INFO) << L"Opening RunFileDlg";
         pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
       } else {
         LOG(ERROR) << L"Failed to open run dialog.";
@@ -417,11 +418,11 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
   if (reinterpret_cast<INT_PTR>(result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening " << executable << " failed! \n";
-    bool treat_as_error = false;
+    bool treat_as_error = true;
     if (error == ERROR_FILE_NOT_FOUND) {
       wostr << executable << L" could not be found.";
+      treat_as_error = false;
     } else {
-      treat_as_error = true;
       wostr << L"Error = " << std::showbase << std::hex << error
             << std::dec << std::defaultfloat;
     }

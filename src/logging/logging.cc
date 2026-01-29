@@ -41,16 +41,17 @@ logging::LogMessage::~LogMessage() {
   if (level_ == LOG_FATAL) {
     std::wcerr << prefix << stream_.str() << std::endl;
 #ifdef _DEBUG
+    // Catch for debugger on FATAL
     __debugbreak();
 #else
+    // Crash more gracefully
     ExitProcess(LOG_FATAL);
 #endif
     return;
-  }
-
-  if (level_ == LOG_INFO) {
+  } else if (level_ == LOG_INFO) {
     std::wcout << prefix << stream_.str() << std::endl;
   } else {
+    // Levels higher than INFO level go to stderr
     std::wcerr << prefix << stream_.str() << std::endl;
   }
 }
@@ -187,7 +188,7 @@ void logging::TestLogging() {
   LOG(DEBUG) << "Test long double: " <<  testDb;
   LOG(ERROR) << "Test Error";
   LOG(ERROR) << L"Test Error " << GetLastError();
-  DLOG() << L"Test Error " << GetLastError();
+  DLOG() << L"DLOG Test";
   if (test_fatal) {
     LOG(FATAL) << L"Testing wide character FATAL logging";
   }

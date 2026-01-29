@@ -1,0 +1,21 @@
+group("hawk_logger_all") {
+  public_deps = [
+    ":hawk_logger",
+  ]
+}
+
+static_library("hawk_logger") {
+  configs += [ ":hawk_logger_config" ]
+  sources = [
+    "logging.h",
+    "logging.cc",
+  ]
+}
+
+config("hawk_logger_config") {
+  include_dirs = [
+    "./",
+  ]
+}
+
+

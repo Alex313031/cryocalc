@@ -4,6 +4,7 @@ group("cryocalc_all") {
   public_deps = [
     ":cryocalc",
     "osinfo:osinfo_dll",
+    "src/logging:hawk_logger_all",
   ]
 }
 
@@ -12,6 +13,7 @@ executable("cryocalc") {
   configs += [
     "//build/config/win:windowed_subsystem",
     ":cryocalc_config",
+    "src/logging:hawk_logger_config",
   ]
   sources = [
     "src/constants.h",
@@ -30,14 +32,13 @@ executable("cryocalc") {
     "src/strings.h",
     "src/stress/stress.h",
     "src/stress/stress.cc",
-    "src/logging/logging.h",
-    "src/logging/logging.cc",
     "src/utils.cc",
     "src/utils.h",
     "src/version.h",
   ]
   deps = [
     "osinfo:osinfo",
+    "src/logging:hawk_logger",
   ]
   public_deps = [
     "osinfo:osinfo_dll",
