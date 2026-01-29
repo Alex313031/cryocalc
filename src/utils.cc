@@ -73,16 +73,16 @@ std::wstring fromRankine(long double in_rankine) {
 
 bool runTests() {
   std::wstring testCelsius = fromCelsius(kDummyCelsius);
-  std::wcout << "testCelsius: \n" << testCelsius << std::endl;
+  LOG(DEBUG) << "testCelsius: \n" << testCelsius;
 
   std::wstring testFahrenheit = fromFahrenheit(kDummyFahrenheit);
-  std::wcout << "testFahrenheit: \n" << testFahrenheit << std::endl;
+  LOG(DEBUG) << "testFahrenheit: \n" << testFahrenheit;
 
   std::wstring testKelvin = fromKelvin(kDummyKelvin);
-  std::wcout << "testKelvin: \n" << testKelvin << std::endl;
+  LOG(DEBUG) << "testKelvin: \n" << testKelvin;
 
   std::wstring testRankine = fromRankine(kDummyRankine);
-  std::wcout << "testRankine: \n" << testRankine << std::endl;
+  LOG(DEBUG) << "testRankine: \n" << testRankine;
 
   return true;
 }
@@ -174,12 +174,11 @@ const int ShowHelpAndExit() {
 
 void HandleDebugMode(const bool debug_mode) {
   std::wostringstream wostr;
-  wostr << L"Welcome to " << kAppName << " ver. " << GetVersionWstring();
+  wostr << L" ------ " << "Welcome to " << kAppName << " ver. " << GetVersionWstring();
   if (debug_mode) {
-    wostr << L" (Debug Mode)" << std::endl;
-  } else {
-    wostr << std::endl;
+    wostr << L" (Debug Mode)";
   }
+  wostr << L" ------ " << std::endl;
   std::wcout << wostr.str();
 }
 
@@ -229,7 +228,7 @@ bool IsValidThreadsInput(const wchar_t* text) {
     return false;
   }
   if (value == 0) {
-    std::wcerr << L"Threads input was 0!" << std::endl;
+    LOG(WARN) << L"Threads input was 0!";
   }
   // Check range [1, 128]
   return (value >= static_cast<long>(MIN_THREADS) && value <= static_cast<long>(MAX_THREADS));
@@ -261,7 +260,7 @@ DWORD GetLogicalProcessorCount() {
     }
   }
   if (debug_mode) {
-    std::wcout << L"Using " << whichfunc << " for " << __FUNC__ << std::endl;
+    LOG(DEBUG) << L"Using " << whichfunc << " for " << __FUNC__;
   }
 #endif
   return sysInfo.dwNumberOfProcessors;
@@ -303,8 +302,8 @@ const unsigned int GetCryoCalcPrecision() {
 
 const int GetPercentInt(const int in, const float percent) {
   if (percent > 1.0f || percent <= 0.0f) {
-    std::wcerr << L"Percentage " << percent 
-               << L" is too large or zero!" << std::endl;
+    LOG(ERROR) << L"Percentage " << percent
+               << L" is too large or zero!";
     return in;    
   } else {
     const int retval = static_cast<int>(in * percent);
@@ -400,10 +399,10 @@ void OpenRunDialog(HWND hWnd) {
       if (pfnRunFileDlg) {
         pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
       } else {
-        std::wcerr << L"Failed to open run dialog." << std::endl;
+        LOG(ERROR) << L"Failed to open run dialog.";
       }
     } else {
-      std::wcerr << L"Failed to get shell32.dll handle." << std::endl;
+      LOG(ERROR) << L"Failed to get shell32.dll handle.";
     }
     DestroyIcon(kSmallIcon); // Cleanup icon
   }
@@ -412,21 +411,27 @@ void OpenRunDialog(HWND hWnd) {
 // Run any shell app
 bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
   bool success = false;
-  std::wcout << L"Running " << executable << std::endl;
+  LOG(INFO) << L"Running " << executable;
   HINSTANCE result = ShellExecuteW(hWnd, L"open", executable, nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if (reinterpret_cast<INT_PTR>(result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening " << executable << " failed! \n";
+    bool treat_as_error = false;
     if (error == ERROR_FILE_NOT_FOUND) {
-      wostr << executable << L" could not be found." << std::endl;
+      wostr << executable << L" could not be found.";
     } else {
+      treat_as_error = true;
       wostr << L"Error = " << std::showbase << std::hex << error
-            << std::dec << std::defaultfloat << std::endl;
+            << std::dec << std::defaultfloat;
     }
-    const std::wstring warn = wostr.str();
-    std::wcerr << warn;
-    MessageBoxW(hWnd, warn.c_str(), L"Error", MB_OK | MB_ICONERROR);
+    const std::wstring message = wostr.str();
+    if (!treat_as_error) {
+      LOG(WARN) << message;
+    } else {
+      LOG(ERROR) << message;
+    }
+    MessageBoxW(hWnd, message.c_str(), treat_as_error ? L"Error" : L"Warning", MB_OK | MB_ICONERROR);
     success = false;
   } else {
     success = true;
@@ -450,7 +455,7 @@ const size_t GetCacheSize() {
   } else if ((wcscmp(cachesz_buff.c_str(), L"4MB") == 0)) {
     cache_size = 4096u;
   } else {
-    std::wcerr << L"Default cache size was used!" << std::endl;
+    LOG(ERROR) << L"Default cache size was used!";
     cache_size = 1024u;
   }
   return cache_size;

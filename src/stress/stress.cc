@@ -155,7 +155,7 @@ bool LaunchThreads(const unsigned int num_threads) {
   } else {
     threads.reserve(num_threads);
     if (!running) {
-      std::wcerr << L"Must run set_run_state(true) before calling " << __FUNC__ << std::endl;
+      LOG(ERROR) << L"Must run set_run_state(true) before calling " << __FUNC__;
       return false;
     } else if (is_running) {
       MessageBoxW(nullptr, L"Threads are already running! \nYou must press Stop before changing thread paramaters.", L"Threads > 0",
@@ -168,17 +168,17 @@ bool LaunchThreads(const unsigned int num_threads) {
       // Create threads
       const size_t cache_bytes = GetCacheSize();
       if (use_sse2_simd) {
-        std::wcout << L"Using SSE2 assembly stressor function" << std::endl;
+        LOG(DEBUG) << L"Using SSE2 assembly stressor function";
         for (unsigned int i = 0; i < num_threads; ++i) {
           threads.emplace_back(StressCPUSSE2, cache_bytes);
         }
       } else {
-        std::wcout << L"Using vector math stressor function" << std::endl;
+        LOG(DEBUG) << L"Using vector math stressor function";
         for (unsigned int i = 0; i < num_threads; ++i) {
           threads.emplace_back(StressCPUVec, cache_bytes);
         }
       }
-      std::wcout << L"Using " << std::to_wstring(cache_bytes).c_str() << L"KB for cache size." << std::endl;
+      LOG(INFO) << L"Using " << std::to_wstring(cache_bytes).c_str() << L"KB for cache size.";
       // Wait for threads to finish (this will never happen unless `running` is set to false)
       for (auto& thread : threads) {
         thread.join();
@@ -191,13 +191,13 @@ bool LaunchThreads(const unsigned int num_threads) {
 void StopAllThreads() {
   bool post_msg = false;
   if (!is_running) {
-    std::wcerr << L"No threads to stop: Queue empty." << std::endl;
+    LOG(WARN) << L"No threads to stop: Queue empty.";
   } else {
     post_msg = true;
   }
   is_running = false;
   set_run_state(false);
   if (post_msg) {
-    std::wcout << L"Stopped all stressor threads." << std::endl;
+    LOG(INFO) << L"Stopped all stressor threads.";
   }
 }

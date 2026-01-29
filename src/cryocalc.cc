@@ -64,6 +64,9 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     }
     HandleDebugMode(debug_mode);
   }
+  //logging::SetLogSink();
+  logging::SetIsDCheck(is_dcheck);
+  logging::InitLogging(hInstance);
   LogOsInfo();
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
@@ -144,21 +147,27 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
 
 bool LaunchHelp(HWND hWnd) {
   bool success = false;
-  std::wcout << L"Opening chm help" << std::endl;
+  LOG(INFO) << L"Opening chm help";
   HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kChmHelpFile, nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
     wostr << L"Opening Help failed! \n";
+    bool treat_as_error = false;
     if (error == ERROR_FILE_NOT_FOUND) {
       wostr << kChmHelpFile << L" could not be found." << std::endl;
     } else {
+      treat_as_error = true;
       wostr << L"Error = " << std::showbase << std::hex << error
             << std::dec << std::defaultfloat << std::endl;
     }
-    const std::wstring warn = wostr.str();
-    std::wcerr << warn;
-    MessageBoxW(hWnd, warn.c_str(), L"Help Error", MB_OK | MB_ICONERROR);
+    const std::wstring message = wostr.str();
+    if (!treat_as_error) {
+      LOG(WARN) << message;
+    } else {
+      LOG(ERROR) << message;
+    }
+    MessageBoxW(hWnd, message.c_str(), L"Help Error", MB_OK | MB_ICONERROR);
     success = false;
   } else {
     success = true;
@@ -169,7 +178,7 @@ bool LaunchHelp(HWND hWnd) {
 }
 
 bool LaunchHelpEx(HWND hWnd) {
-  std::wcout << L"Opening online help" << std::endl;
+  LOG(INFO) << L"Opening online help";
   return LaunchHelp(hWnd);
 }
 
@@ -210,7 +219,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           BOOL isChecked = (BOOL)SendMessageW(hSSE2Checkbox, BM_GETCHECK, 0, 0);
           if (HIWORD(wParam) == BN_CLICKED) {
             std::wstring msg = isChecked ? L"SSE2 checkbox was checked." : L"SSE2 checkbox was empty.";
-            std::wcout << msg.c_str() << std::endl;
+            LOG(INFO) << msg.c_str();
           }
           set_use_sse2(isChecked);
         } break;
@@ -222,6 +231,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           break;
         case IDM_OSINFO:
         case IDC_OSINFO_BUTTON:
+          LOG(INFO) << L"Showed OS Info Window";
           ShowOsInfo(hWnd);
           break;
         case IDM_PASTE:
@@ -254,6 +264,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           // Detach console
           DetachConsole(hWnd);
           break;
+        case IDM_CLEAR_CON:
+          ClearConsole(hWnd);
+          break;
+        case IDM_TEST_LOG: {
+          DetachConsole(hWnd);
+          if (AttachConsole()) {
+            logging::TestLogging();
+          }
+        } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
@@ -344,10 +363,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       pMinMaxInfo->ptMaxTrackSize.y = 600;
     } break;
     case WM_QUERYENDSESSION: {
-      std::wcout << L"Windows is shutting down now!" << std::endl;
+      LOG(WARN) << L"Windows is shutting down now!";
       StopAllThreads();
       const uint64_t reason = static_cast<uint64_t>(lParam);
-      std::wcout << L"Reason = " << reason << std::endl;
+      LOG(WARN) << L"Reason = " << reason;
       CloseAllWindows(hWnd);
     } break;
     case WM_LBUTTONDOWN: {

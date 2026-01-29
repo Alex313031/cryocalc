@@ -55,7 +55,7 @@ Scale parseScale(const std::wstring& wscale) {
   if (wscale == kTempF) return kScaleFahrenheit;
   if (wscale == kTempR) return kScaleRankine;
   if (wscale == kDummyScale) {
-    std::wcout << L"Using dummy unknown scale \"" << kDummyScale << L"\" for testing" << std::endl;
+    LOG(DEBUG) << L"Using dummy unknown scale \"" << kDummyScale << L"\" for testing";
     return kScaleUnknown;
   }
   throw std::invalid_argument("Unknown scale!");
@@ -63,7 +63,7 @@ Scale parseScale(const std::wstring& wscale) {
 
 bool AboutButtonClicked(HWND hWnd) {
   if (!ShowAboutDialog(hWnd)) {
-    std::wcerr << L"About Button failed" << std::endl;
+    LOG(ERROR) << L"About Button failed";
     return false;
   }
   return true;
@@ -115,7 +115,7 @@ bool HandleConvert(HWND hWnd) {
        return success; // Fail on invalid input.
     } else {
       input = ConvertInputToLD(input_buff.c_str());
-      std::wcout << L"Input = " << std::setprecision(MAX_PRECISION) << input << std::endl;
+      LOG(INFO) << L"Input = " << std::setprecision(MAX_PRECISION) << input;
     }
 
     GetWindowTextW(hTempSelectEdit, &scale_buff[0], dwScaleSize + 1);
@@ -126,9 +126,9 @@ bool HandleConvert(HWND hWnd) {
 
     unsigned int precision_ = std::stoi(preci);
     if (precision_ < MIN_PRECISION || precision_ > MAX_PRECISION) {
-      std::wcerr << L"Precision out of range " << MIN_PRECISION 
+      LOG(ERROR) << L"Precision out of range " << MIN_PRECISION
                  << L" - " << MAX_PRECISION << L" Setting precision to max: " 
-                 << MAX_PRECISION << std::endl;
+                 << MAX_PRECISION;
       precision_ = MAX_PRECISION;
     }
     SetCryoCalcPrecision(precision_);
@@ -173,7 +173,7 @@ bool HandleConvert(HWND hWnd) {
         kChosenScale = L"Unknown";
         MessageBoxW(hWnd, L"Temp scale not handled", L"Error", MB_OK | MB_ICONERROR);
     }
-    std::wcout << L"Scale = " << kChosenScale << std::endl;
+    LOG(INFO) << L"Scale = " << kChosenScale;
     const unsigned int precision = GetCryoCalcPrecision();
     found_prec = precision;
     wostr << std::fixed << std::setprecision(precision) << convCelsius;
@@ -192,17 +192,17 @@ bool HandleConvert(HWND hWnd) {
     success = true;
   }
   if (found_prec > MAX_PRECISION) {
-    std::wcerr << L"found_prec out of bounds! " << found_prec << std::endl;
+    LOG(ERROR) << L"found_prec out of bounds! " << found_prec;
     success = false;
   } else {
-    std::wcout << L"Precision = " << found_prec << std::endl;
+    LOG(INFO) << L"Precision = " << found_prec;
     success = true;
   }
   if (success) {
-    std::wcout << L"kCelsius = " << kCelsius << std::endl;
-    std::wcout << L"kKelvin = " << kKelvin << std::endl;
-    std::wcout << L"kFahrenheit = " << kFahrenheit << std::endl;
-    std::wcout << L"kRankine = " << kRankine << std::endl;
+    LOG(INFO) << L"kCelsius = " << kCelsius;
+    LOG(INFO) << L"kKelvin = " << kKelvin;
+    LOG(INFO) << L"kFahrenheit = " << kFahrenheit;
+    LOG(INFO) << L"kRankine = " << kRankine;
     SetWindowTextW(hCelsiusEdit, kCelsius.c_str());
     SetWindowTextW(hKelvinEdit, kKelvin.c_str());
     SetWindowTextW(hFahrenheitEdit, kFahrenheit.c_str());
@@ -592,7 +592,7 @@ void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
   const int kStatusSplit = CW_MAINWIDTH - LABEL_WIDTH;
   const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 means extend to right edge
   if (!hStatusBar) {
-    std::wcerr << __FUNC__ << L"() failed: Status bar not initialized" << std::endl;
+    LOG(ERROR) << __FUNC__ << L"() failed: Status bar not initialized";
   } else {
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
     SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)status_text.c_str());
@@ -614,7 +614,7 @@ bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
 
 void ClearInput(HWND hWnd) {
   SetWindowTextW(hInputEdit, kBlank);
-  std::wcerr << L"Cleared input" << std::endl;
+  LOG(WARN) << L"Cleared input";
 }
 
 void ClearControls(HWND hWnd) {
@@ -622,7 +622,7 @@ void ClearControls(HWND hWnd) {
   SetWindowTextW(hKelvinEdit, kBlank);
   SetWindowTextW(hFahrenheitEdit, kBlank);
   SetWindowTextW(hRankineEdit, kBlank);
-  std::wcout << L"Cleared controls" << std::endl;
+  LOG(WARN) << L"Cleared controls";
 }
 
 static errno_t wcsncpy_s_compat(wchar_t* dest, size_t destsz, const wchar_t* src, size_t count) {
@@ -675,7 +675,7 @@ bool GetClipboardTextW(wchar_t* buffer, size_t bufferSize) {
         static_cast<const wchar_t*>(GlobalLock(hData));
     if (pText) {
       if (debug_mode) {
-        std::wcout << __FUNC__ << L"() got: " << pText << std::endl;
+        LOG(DEBUG) << __FUNC__ << L"() got: " << pText;
       }
       wcsncpy_s_compat(buffer, bufferSize, pText, _TRUNCATE);
       GlobalUnlock(hData);
@@ -723,9 +723,9 @@ bool ShowAboutDialog(HWND hWnd) {
   DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
   bool handled_dialog = GetAboutHandledState();
   if (handled_dialog) {
-    std::wcout << L"Showed about dialog." << std::endl;
+    LOG(INFO) << L"Showed about dialog.";
   } else {
-    std::wcerr << L"About dialog failed!" << std::endl;
+    LOG(ERROR) << L"About dialog failed!";
   }
   return handled_dialog;
 }
@@ -804,9 +804,9 @@ bool GetThreadsInput(HWND hWnd) {
   } else {
     std::wstring threads_input(in_buff.c_str());
     get_threads = std::stoi(threads_input);
-    std::wcout << L"Number of system CPU threads: " << num_logical_cpus << std::endl;
+    LOG(DEBUG) << L"Number of system CPU threads: " << num_logical_cpus;
     if (get_threads > num_logical_cpus) {
-      std::wcerr << L"Threads input is larger than the number of system CPU threads! " << num_logical_cpus << std::endl;
+      LOG(ERROR) << L"Threads input is larger than the number of system CPU threads! " << num_logical_cpus;
       std::wostringstream wostr;
       wostr << L"You have entered more threads (" << get_threads << ") than the machine's CPU has (" << num_logical_cpus << ") "
             << L"\nWould you still like to continue?";
@@ -826,7 +826,7 @@ bool GetThreadsInput(HWND hWnd) {
     }
   }
   if (debug_mode) {
-    std::wcout << L"Got " << get_threads << L" number of threads to start from input box." << std::endl;
+    LOG(DEBUG) << L"Got " << get_threads << L" number of threads to start from input box.";
   }
   num_threads_ = get_threads;
   return num_threads_ >= MIN_THREADS && num_threads_ <= MAX_THREADS;
@@ -837,12 +837,12 @@ void OnStartButtonClick(HWND hWnd) {
   // Start animating the progress bar marquee
   SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
   if (GetThreadsInput(hWnd)) {
-    std::wcout << L"Starting " << num_threads_ << L" CPU stressor threads." << std::endl;
+    LOG(INFO) << L"Starting " << num_threads_ << L" CPU stressor threads.";
     set_run_state(true);
     std::thread StressorLaunchThread(LaunchThreads, num_threads_);
     StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
   } else {
-    std::wcerr << __FUNC__ << L"() failed!" << std::endl;
+    LOG(ERROR) << __FUNC__ << L"() failed!";
     // Stop animating if we failed for some reason.
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   }

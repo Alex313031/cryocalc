@@ -225,11 +225,11 @@ void OutputOsInfo(HWND hWnd) {
   std::wostringstream wostr;
   wostr << L"Raw NTVER: "
         << std::fixed << std::setprecision(8) << std::showbase << std::hex
-        << short_nt_ver << std::dec << std::endl;
+        << short_nt_ver << std::dec;
   kNTVer = wostr.str();
   wostr.str(L"");
   wostr.clear();
-  std::wcout << kNTVer.c_str();
+  LOG(DEBUG) << kNTVer.c_str();
   SendMessageW(hOsInfoTextOut, EM_SETREADONLY, TRUE, 0);
   if (hStatusBar) {
     SendMessageW(hOsInfoStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(kNTVer.c_str()));
@@ -242,17 +242,17 @@ void LogOsInfo() {
   std::wstring OsInfoDllVer;
   if (pGetOsInfoDllVersionW == nullptr) {
     DWORD error = GetLastError();
-    std::wcerr << L"Failed to get function address. Error: " << error << std::endl;
+    LOG(ERROR) << L"Failed to get function address. Error: " << error;
   } else {
     OsInfoDllVer = pGetOsInfoDllVersionW();
   }
-  std::wcout << L"osinfo.dll ver. " << OsInfoDllVer << std::endl;
-  std::wcout << L"Windows Version: " << GetWinVersionW()
-             << L" " << GetOSNameW() << std::endl;
+  LOG(INFO) << kOsInfoDll << L" ver. " << OsInfoDllVer;
+  LOG(INFO) << L"Windows Version: " << GetWinVersionW()
+            << L" " << GetOSNameW();
   const unsigned long long nt_ver = GetRawNTVer();
   if (debug_mode) {
-    std::wcout << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
-               << nt_ver << std::dec << std::defaultfloat << std::endl;
+    LOG(DEBUG) << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
+               << nt_ver << std::dec << std::defaultfloat;
     TestDllGetVersion();
   }
 }
@@ -267,14 +267,14 @@ bool TestDllGetVersion() {
   DWORD error;
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
     fnDllGetVersion = nullptr;
-    std::wcerr << L"hOsInfoDll was null!" << std::endl;
+    LOG(ERROR) << L"hOsInfoDll was null!";
     return false;
   } else {
     fnDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hOsInfoDll, "DllGetVersion"));
   }
   if (fnDllGetVersion == nullptr) {
     error = GetLastError();
-    std::wcerr << L"Failed to get DllGetVersion address. Error: " << error << std::endl; 
+    LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << error; 
   } else {
     HRESULT hr = fnDllGetVersion(&dvi);
     HRESULT hr2 = fnDllGetVersion(reinterpret_cast<DLLVERSIONINFO*>(&dvi2));
@@ -287,15 +287,15 @@ bool TestDllGetVersion() {
     }
   }
   if (success) {
-    std::wcout << L"DLLVERSIONINFO dwVersion = " << std::showbase << std::hex
-               << dwVersion << std::dec << std::defaultfloat << std::endl;
-    std::wcout << L"DLLVERSIONINFO dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi.dwMajorVersion << L"." << dvi.dwMinorVersion << L"." << dvi.dwBuildNumber << std::endl;
-    std::wcout << L"DLLVERSIONINFO2 dwVersion = " << std::showbase << std::hex
-               << dwVersion2 << std::dec << std::defaultfloat << std::endl;
-    std::wcout << L"DLLVERSIONINFO2 dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi2.info1.dwMajorVersion << L"." << dvi2.info1.dwMinorVersion << L"." << dvi2.info1.dwBuildNumber << std::endl;
-    std::wcout << L"DLLVERSIONINFO2 ullVersion = " << dvi2.ullVersion << std::endl;
+    LOG(DEBUG) << L"DLLVERSIONINFO dwVersion = " << std::showbase << std::hex
+               << dwVersion << std::dec << std::defaultfloat;
+    LOG(DEBUG) << L"DLLVERSIONINFO dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi.dwMajorVersion << L"." << dvi.dwMinorVersion << L"." << dvi.dwBuildNumber;
+    LOG(DEBUG) << L"DLLVERSIONINFO2 dwVersion = " << std::showbase << std::hex
+               << dwVersion2 << std::dec << std::defaultfloat;
+    LOG(DEBUG) << L"DLLVERSIONINFO2 dwMajorVersion.dwMinorVersion.dwBuildNumber = " << dvi2.info1.dwMajorVersion << L"." << dvi2.info1.dwMinorVersion << L"." << dvi2.info1.dwBuildNumber;
+    LOG(DEBUG) << L"DLLVERSIONINFO2 ullVersion = " << dvi2.ullVersion;
   } else {
-    std::wcerr << __FUNC__ << L"() Failed! Error: " << error << std::endl; 
+    LOG(ERROR) << __FUNC__ << L"() Failed! Error: " << error; 
   }
   return success;
 }
