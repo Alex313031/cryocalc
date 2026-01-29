@@ -1,7 +1,5 @@
 #include "logging.h"
 
-#include <limits>
-
 namespace logging {
 
  volatile bool dcheck_log_ = false;
@@ -33,7 +31,7 @@ logging::LogMessage::~LogMessage() {
       break;
     case MAX_LOGLEVEL:
     default:
-      std::wcerr << __FUNC__ << L"INVALID LOG LEVEL" << std::endl;
+      std::wcerr << __func__ << L"INVALID LOG LEVEL" << std::endl;
       NOTREACHED();
       return;
   }
@@ -196,7 +194,7 @@ void logging::TestLogging() {
 
 void logging::NotReachedImpl() {
   // TODO, add way to get function name from caller from PiCalc
-  std::string func_name = __FUNC__;
+  std::string func_name = __func__;
   std::wcerr << L"NOTREACHED(): " << func_name.c_str() << std::endl;
   __debugbreak();
 }

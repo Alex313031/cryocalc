@@ -7,8 +7,13 @@ group("hawk_logger_all") {
 static_library("hawk_logger") {
   configs += [ ":hawk_logger_config" ]
   sources = [
+    "check.h",
+    "check.cc",
+    "file_util.h",
+    "file_util.cc",
     "logging.h",
     "logging.cc",
+    "logging_base.h",
   ]
 }
 

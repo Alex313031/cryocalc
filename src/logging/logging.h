@@ -1,8 +1,9 @@
-#ifndef CRYOCALC_LOGGING_H_
-#define CRYOCALC_LOGGING_H_
+#ifndef MINI_LOGGER_LOGGING_H_
+#define MINI_LOGGER_LOGGING_H_
 
-#include "../framework.h"
-#include "../globals.h"
+#include "logging_base.h"
+#include "check.h"
+#include "file_util.h"
 
 enum LogLevel {
   LOG_INFO = 0,
@@ -83,4 +84,4 @@ void NotReachedImpl();
 #define DLOG() logging::LogMessage(LOG_DEBUG)
 #define NOTREACHED() logging::NotReachedImpl()
 
-#endif // CRYOCALC_LOGGING_H_
+#endif // MINI_LOGGER_LOGGING_H_
