@@ -14,6 +14,8 @@ constexpr const WCHAR* CAPTION_TITLE = APP_NAME;
 inline const wchar_t* kOsInfoDll    = L"osinfo.dll";
 inline const wchar_t* kShell32Dll   = L"shell32.dll";
 inline const wchar_t* kChmHelpFile  = L"cryocalc.chm";
+inline const wchar_t* kLogFileName  = L"cryocalc.log";
+inline const wchar_t* kIniFileName  = L"cryocalc.ini";
 inline const wchar_t* kWinVerExe    = L"winver.exe";
 inline const wchar_t* kMsInfo32Exe  = L"msinfo32.exe";
 
