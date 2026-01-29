@@ -32,6 +32,19 @@ typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
 typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
 typedef int (* RUN_FILE_DLG_)(HWND hwndParent, HICON hIcon, LPCTSTR lpszWorkingDir, LPCTSTR lpszTitle, LPCTSTR lpszPrompt, DWORD dwFlags);
 
+struct CustomSettings {
+  bool set_debug_mode;
+  unsigned int default_precision;
+};
+
+extern CustomSettings custom_settings;
+
+extern bool got_settings;
+extern bool set_settings;
+
+extern unsigned int custom_precision;
+extern bool custom_debug_mode;
+
 // Temperature helper functions
 std::wstring& GetTempString(long double in_temperature);
 
@@ -115,6 +128,9 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 // Opens the "Run" applet
 void OpenRunDialog(HWND hWnd);
 
+// Returns path to the main .exe, for finding files side by side with it.
+const std::wstring GetExeDir();
+
 // Launcher function to open shell applets
 bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 
@@ -130,7 +146,25 @@ void DetachConsole(HWND hWnd);
 // Clears console output without detaching it.
 void ClearConsole(HWND hWnd);
 
+// Clears log file, if any.
+uint32_t* ClearLogFile(HWND hWnd);
+
 // Gets the position to place a window to the right of another window
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
+
+// Gets, and verifies custom settings from a user created .ini file
+bool GetCustomSettings();
+
+// Sets our custom settings from .ini if we got them
+bool SetCustomSettings();
+
+// Opens an .ini file in read only mode to get settings
+bool OpenIniFileForReading(const std::wstring ini_file);
+
+// Gets the default precision to use to set the intial state of the Precision combobox
+const unsigned int GetDefaultPrecision();
+
+// Gets if the user set debug mode in .ini file, takes precedence over command line flag.
+const bool GetDefaultWantDebug();
 
 #endif // CRYOCALC_UTILS_H_

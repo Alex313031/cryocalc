@@ -9,6 +9,15 @@ unsigned int g_precision_;
 static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
+CustomSettings custom_settings;
+unsigned int custom_precision;
+bool custom_debug_mode;
+
+bool got_ini = false;
+bool got_settings = false;
+bool set_settings = false;
+HANDLE g_ini_file;
+
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
   std::wostringstream wostr;
@@ -123,6 +132,7 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
+  logging::DeInitLogging(GetGlobalHinst());
   DetachConsole(hWnd);
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
 }
@@ -329,10 +339,10 @@ bool show_help = false;
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
   bool parsed = false;
   bool is_debug_mode =
-#if defined(_DEBUG) || defined(DEBUG)
+#if defined(_DEBUG) || defined(DEBUG) || defined(DCHECK)
     true;
 #else
-    false;
+    GetDefaultWantDebug();
 #endif
   bool is_version_mode = false;
   bool is_help_mode = false;
@@ -407,6 +417,32 @@ void OpenRunDialog(HWND hWnd) {
     }
     DestroyIcon(kSmallIcon); // Cleanup icon
   }
+}
+
+const std::wstring GetExeDir() {
+  wchar_t exe_path[MAX_PATH];
+  HMODULE this_app = GetModuleHandleW(nullptr);
+  if (!this_app) {
+    return std::wstring();
+  }
+  DWORD got_path = GetModuleFileNameW(nullptr, exe_path, MAX_PATH);
+  if (got_path == 0 || got_path >= MAX_PATH) {
+    return std::wstring();
+  }
+
+  // Find the last backslash to get the directory
+  std::wstring fullPath(exe_path);
+  size_t lastSlash = fullPath.find_last_of(L"\\/");
+  std::wstring retval;
+  if (lastSlash != std::wstring::npos) {
+    retval = fullPath.substr(0, lastSlash + 1);  // Include trailing slash
+  } else {
+    retval = fullPath;
+  }
+  if (debug_mode) {
+    LOG(DEBUG) << __func__ << L" = " << retval;
+  }
+  return retval;
 }
 
 // Run any shell app
@@ -512,6 +548,16 @@ void ClearConsole(HWND hWnd) {
   }
 }
 
+uint32_t* ClearLogFile(HWND hWnd) {
+  if (!hWnd) {
+    return nullptr;
+  }
+  if (!logging::ClearFileContents()) {
+    return nullptr;
+  }
+  return 0x0000;
+}
+
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   // Default position if we can't get the main window rect
   const int kDefaultX = 512;
@@ -535,5 +581,151 @@ void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   } else {
     *outX = kDefaultX;
     *outY = kDefaultY;
+  }
+}
+
+bool GetCustomSettings() {
+  // Open cryocalc.ini
+  const std::wstring cryocalc_ini = GetExeDir() + kIniFileName;
+  if (!OpenIniFileForReading(cryocalc_ini)) {
+    return false;
+  }
+
+  if (!got_ini) {
+    return false;
+  }
+
+  // Read file contents
+  DWORD file_size = GetFileSize(g_ini_file, nullptr);
+  if (file_size == INVALID_FILE_SIZE || file_size == 0) {
+    CloseHandle(g_ini_file);
+    g_ini_file = INVALID_HANDLE_VALUE;
+    return false;
+  }
+
+  // Read the file into a buffer
+  std::string buffer(file_size, '\0');
+  DWORD bytes_read = 0;
+  if (!ReadFile(g_ini_file, &buffer[0], file_size, &bytes_read, nullptr)) {
+    std::wcerr << L"Failed to read " << kIniFileName << std::endl;
+    CloseHandle(g_ini_file);
+    g_ini_file = INVALID_HANDLE_VALUE;
+    return false;
+  }
+
+  // Close file handle now that we're through with it
+  CloseHandle(g_ini_file);
+  g_ini_file = INVALID_HANDLE_VALUE;
+
+  // Parse the file line by line
+  // Format: key=value (e.g., default_precision=4, debug_mode=1)
+  std::istringstream stream(buffer);
+  std::string line;
+  while (std::getline(stream, line)) {
+    // Skip empty lines and comments
+    if (line.empty() || line[0] == '#' || line[0] == ';') {
+      continue;
+    }
+
+    // Find the '=' delimiter
+    size_t eq_pos = line.find('=');
+    if (eq_pos == std::string::npos) {
+      continue;
+    }
+
+    std::string key = line.substr(0, eq_pos);
+    std::string value = line.substr(eq_pos + 1);
+
+    // Trim whitespace from key and value
+    while (!key.empty() && (key.back() == ' ' || key.back() == '\r')) {
+      key.pop_back();
+    }
+    while (!value.empty() && (value.back() == ' ' || value.back() == '\r')) {
+      value.pop_back();
+    }
+
+    // Parse known settings
+    if (key == "default_precision") {
+      const int precision = std::atoi(value.c_str());
+      if (precision >= static_cast<int>(MIN_PRECISION) &&
+          precision <= static_cast<int>(MAX_PRECISION)) {
+        custom_settings.default_precision = static_cast<unsigned int>(precision);
+        std::wcout << L"INI: default_precision=" << precision << std::endl;
+      } else {
+        std::wcerr << L"INI: default_precision=" << precision
+                   << L" out of range (" << MIN_PRECISION << L"-" << MAX_PRECISION << L")" << std::endl;
+        custom_settings.default_precision = DEFAULT_PRECISION;
+      }
+    } else if (key == "debug_mode") {
+      const int debug_val = std::atoi(value.c_str());
+      custom_settings.set_debug_mode = (debug_val == 1);
+      std::wcout << L"INI: debug_mode=" << debug_val << std::endl;
+    }
+  }
+
+  got_settings = true;
+  return SetCustomSettings();
+}
+
+bool SetCustomSettings() {
+  if (!got_settings) {
+    return false;
+  }
+  unsigned int want_prec = custom_settings.default_precision;
+  bool want_debug = custom_settings.set_debug_mode;
+  LOG(INFO) << L"Got custom settings: " << L"Prec=" << want_prec
+            << L" Debug=" << static_cast<int>(want_debug);
+  custom_precision = want_prec;
+  custom_debug_mode = want_debug;
+  set_settings = true;
+  return true;
+}
+
+bool OpenIniFileForReading(const std::wstring ini_file) {
+  if (ini_file.length() >= MAX_PATH) {
+    return false;
+  }
+
+  // Try to open the .ini file in read only mode.
+  g_ini_file = CreateFileW(
+      ini_file.c_str(),
+      GENERIC_READ, // Only allow reading
+      FILE_SHARE_READ | FILE_SHARE_WRITE,
+      nullptr,        // Default security
+      OPEN_EXISTING, // Only open if .ini file exists
+      FILE_ATTRIBUTE_NORMAL,
+      nullptr);
+
+  if (g_ini_file == INVALID_HANDLE_VALUE) {
+    got_ini = false;
+    DWORD err = GetLastError();
+    if (err == ERROR_FILE_NOT_FOUND) {
+      LOG(WARN) << kIniFileName << " not found!";
+    } else {
+      LOG(ERROR) << __FUNC__ << L" Failed. Error = " << err;
+    }
+    return false;
+  }
+
+  got_ini = true;
+  LOG(DEBUG) << L"Successfully opened " << ini_file;
+  return true;
+}
+
+// Uses custom precision from .ini file, otherwise DEFAULT_PRECISION
+const unsigned int GetDefaultPrecision() {
+  if (!set_settings) {
+    return DEFAULT_PRECISION;
+  } else {
+    return custom_precision;
+  }
+}
+
+// Returns true if debug_mode=1 in .ini file
+const bool GetDefaultWantDebug() {
+  if (!set_settings) {
+    return false;
+  } else {
+    return custom_debug_mode;
   }
 }

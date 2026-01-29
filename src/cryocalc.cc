@@ -43,6 +43,9 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   int argc = 0;
   LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
+  // Get our custom settings from .ini file (if any)
+  GetCustomSettings();
+
   if (!ParseCommandLine(argc, argv)) {
     LocalFree(argv);
     return 1;
@@ -62,12 +65,16 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     if (show_version) {
       return ShowVersionAndExit();
     }
-    HandleDebugMode(debug_mode);
+    HandleDebugMode(debug_mode); // Handle setting debug mode and welcome message
   }
-  //logging::SetLogSink();
+
+  // Set up our logging using mini_logger library.
+  logging::LogDest kLogSink = logging::LOG_TO_ALL;
+  const std::wstring kLogFile(kLogFileName);
+  logging::InitLogging(hInstance, kLogSink, kLogFile);
   logging::SetIsDCheck(is_dcheck);
-  logging::InitLogging(hInstance);
-  LogOsInfo();
+
+  LogOsInfo(); // Log Windows version info
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 
@@ -148,7 +155,8 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
 bool LaunchHelp(HWND hWnd) {
   bool success = false;
   LOG(INFO) << L"Opening chm help";
-  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", kChmHelpFile, nullptr, nullptr, SW_NORMAL);
+  std::wstring help_file = GetExeDir() + kChmHelpFile;
+  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", help_file.c_str(), nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
@@ -267,10 +275,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           ClearConsole(hWnd);
           break;
         case IDM_TEST_LOG: {
-          DetachConsole(hWnd);
-          if (AttachConsole()) {
-            logging::TestLogging();
-          }
+          logging::TestLogging();
         } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);

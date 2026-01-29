@@ -74,4 +74,6 @@ extern HWND hStatusBar;
 // Gets our global hInst for the main Window
 extern HINSTANCE GetGlobalHinst();
 
+extern HANDLE g_ini_file;
+
 #endif // CRYOCALC_GLOBALS_H_

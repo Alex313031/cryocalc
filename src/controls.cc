@@ -516,7 +516,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hRankineEdit, EM_SETREADONLY, TRUE, 0);
   // Set default selections
   SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0L);
-  SendMessageW(hPrecisionCombo, CB_SETCURSEL, static_cast<int>(DEFAULT_PRECISION), 0);
+  SendMessageW(hPrecisionCombo, CB_SETCURSEL, static_cast<int>(GetDefaultPrecision()), 0);
   SendMessageW(hCacheSizeCombo, CB_SETCURSEL, 1, 0);
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
   InitStatusBar(hWnd, hInst);
