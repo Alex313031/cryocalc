@@ -1,14 +1,18 @@
 #include "logging.h"
 
 namespace logging {
-
  volatile bool dcheck_log_ = false;
-
+ bool logging_initialized = false;
 }
 
 logging::LogMessage::LogMessage(LogLevel level) : level_(level) {}
 
 logging::LogMessage::~LogMessage() {
+  if (!logging_initialized) {
+    OutputDebugStringW(L"Logging not initialized!");
+    return;
+  }
+
   const wchar_t* prefix;
   if (level_ == MAX_LOGLEVEL) {
     std::wcerr << L"MAX_LOGLEVEL reached!" << std::endl;
@@ -31,7 +35,7 @@ logging::LogMessage::~LogMessage() {
       break;
     case MAX_LOGLEVEL:
     default:
-      std::wcerr << __func__ << L"INVALID LOG LEVEL" << std::endl;
+      std::wcerr << ToWide(__func__) << L"INVALID LOG LEVEL" << std::endl;
       NOTREACHED();
       return;
   }
@@ -52,6 +56,7 @@ logging::LogMessage::~LogMessage() {
     // Levels higher than INFO level go to stderr
     std::wcerr << prefix << stream_.str() << std::endl;
   }
+  AppendTextToFile(std::wstring(prefix) + stream_.str());
 }
 
 logging::LogMessage& logging::LogMessage::operator<<(char value) {
@@ -153,12 +158,50 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
   dcheck_log_ = set_is_dcheck;
 }
 
-bool logging::InitLogging(HINSTANCE hInstance) {
+bool logging::InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name) {
+  bool success = false;
+  if (!hInstance || log_sink >= MAX_LOG_DEST) {
+    logging_initialized = false;
+    return false;
+  }
+  const std::wstring logfile = GetCurrentRelDir() + logfile_name;
+  switch (log_sink) {
+    case LOG_NONE:
+    case MAX_LOG_DEST:
+      logging_initialized = false;
+      break;
+    case LOG_TO_FILE: {
+      if (!OpenFileForWriting(logfile)) {
+        success = false;
+      } else {
+        success = true;
+      }
+    } break;
+    case LOG_TO_ALL: {
+      if (!OpenFileForWriting(logfile)) {
+        success = false;
+      } else {
+        success = true;
+      }
+    } break;
+    case LOG_TO_STDERR:
+      success = true;
+      break;
+    default:
+      NOTREACHED();
+      break;
+  }
+  logging_initialized = success;
+
+  // TODO: Add code to log to file optionally
+  return success;
+}
+
+bool logging::DeInitLogging(HINSTANCE hInstance) {
   if (!hInstance) {
     return false;
   }
-  // TODO: Add code to log to file optionally
-  return true;
+  return CloseFileHandle();
 }
 
 // Tests the various operator overloads for basic types.
@@ -190,11 +233,12 @@ void logging::TestLogging() {
   if (test_fatal) {
     LOG(FATAL) << L"Testing wide character FATAL logging";
   }
+  AppendTextToFile(L"Hello world hawklogging");
 }
 
 void logging::NotReachedImpl() {
   // TODO, add way to get function name from caller from PiCalc
-  std::string func_name = __func__;
-  std::wcerr << L"NOTREACHED(): " << func_name.c_str() << std::endl;
+  std::wstring msg = L"NOTREACHED(): " + ToWide(__func__);
+  OutputDebugStringW(msg.c_str());
   __debugbreak();
 }

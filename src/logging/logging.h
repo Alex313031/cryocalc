@@ -69,7 +69,10 @@ class LogMessage {
 extern volatile bool dcheck_log_;
 
 // Initialize logging for this program
-bool InitLogging(HINSTANCE hInstance);
+bool InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name);
+
+// Call to clean up logging stream and any file handles
+bool DeInitLogging(HINSTANCE hInstance);
 
 // Set whether to use DLOG
 void SetIsDCheck(bool set_is_dcheck);

@@ -11,4 +11,8 @@
 #include <string>
 #include <limits>
 
+namespace logging {
+ extern bool logging_initialized;
+}
+
 #endif // MINI_LOGGER_LOGGING_BASE_H_
