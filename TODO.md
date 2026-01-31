@@ -10,5 +10,5 @@
  - Write full scale Chromium style streaming logger.
  - Convert to std::vector and C++17 types where appropriate.
  - Reduce flickering by not redrawing some backgrounds and using DeferWindowPos
- - Add hover tooltips for static items
+ - Fix hover tooltips not showing anymore after press.
  - Clang-format source
