@@ -42,7 +42,7 @@ DLL_OBJ_RC   := $(DLL_RC:.rc=.res)
 # Compiler flags #
 DEFINES  := -DUNICODE -D_UNICODE -D_WINDOWS -DWINVER=0x0500 -D_WIN32_WINNT=0x0500 -D_WIN64_WINNT=0x0502 -D_WIN32_IE=0x501
 # Project-specific include dirs
-INCLUDE_DIRS = -Isrc -Iosinfo
+INCLUDE_DIRS = -Isrc -Iosinfo -Isrc/logging
 # Show all errors, compile everything static, ensure src dir is included, -municode
 # since this is a GUI windows app, ensure relocatable data
 CFLAGS   := $(DEFINES) -Wall -static-libgcc -municode -finput-charset=UTF-8 -fexec-charset=UTF-8 $(INCLUDE_DIRS)
