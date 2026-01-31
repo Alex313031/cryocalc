@@ -75,5 +75,6 @@ constexpr unsigned int MAX_THREADS = 128u; // Threadrippers top out at 128
 #define RGB_YELLOW RGB(192, 192, 0)
 #define RGB_BLACK RGB(0, 0, 0)
 #define RGB_WHITE RGB(255, 255, 255)
+#define RGB_GREY RGB(48, 48, 48)
 
 #endif // CRYOCALC_CONSTANTS_H_
