@@ -175,17 +175,28 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     case WM_CTLCOLORSTATIC: {
       HDC hdc = reinterpret_cast<HDC>(wParam);
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
-      const COLORREF kWindowBackground = GetSysColor(COLOR_WINDOW);
-
+      static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
+      static const HBRUSH hBrushDefault = CreateSolidBrush(bgColorDefault);
+      static const COLORREF kTextColor = RGB_WHITE;
+      bool set_color = false;
+      COLORREF kWindowBackground = bgColorDefault;
+      HBRUSH hBrushToUse = hBrushDefault;
       // Check which edit control sent the message
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_OSINFO_OUT: {
-          static HBRUSH hBrush = CreateSolidBrush(kWindowBackground);
-          SetBkColor(hdc, kWindowBackground);
-          return reinterpret_cast<LRESULT>(hBrush);
+          kWindowBackground = RGB_GREY;
+          hBrushToUse = CreateSolidBrush(kWindowBackground);
+          set_color = true;
         } break;
         default:
           break;
+      }
+      if (set_color) {
+        SetBkColor(hdc, kWindowBackground);
+        SetTextColor(hdc, kTextColor);
+        return reinterpret_cast<LRESULT>(hBrushToUse);
+      } else {
+        return reinterpret_cast<LRESULT>(hBrushDefault);
       }
     } break;
     case WM_SIZE: {
