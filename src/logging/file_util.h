@@ -3,9 +3,13 @@
 
 #include "logging_base.h"
 
+#include "console.h"
+
 namespace logging {
 
 extern HANDLE g_log_file;
+
+extern volatile bool file_open;
 
 // Where to output logging to
 enum LogDest {
@@ -17,10 +21,18 @@ enum LogDest {
 };
 
 // Convert narrow string to wide string (ASCII only, suitable for __func__, __DATE__, etc.)
-inline std::wstring ToWide(const char* s) {
+inline const std::wstring ToWide(const char* s) {
   std::wstring result;
   while (*s) {
     result += static_cast<wchar_t>(*s++);
+  }
+  return result;
+}
+
+inline const std::wstring ToWide(const wchar_t* s) {
+  std::wstring result;
+  while (*s) {
+    result += *s++;
   }
   return result;
 }
@@ -39,6 +51,9 @@ bool AppendTextToFile(const std::wstring log_line);
 
 // Clears the logfile.
 bool ClearFileContents();
+
+// Gets whether file is currently open
+bool IsFileOpen();
 
 }
 

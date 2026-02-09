@@ -80,11 +80,9 @@ void SetIsDCheck(bool set_is_dcheck);
 // Test that logging works as expected.
 void TestLogging();
 
-void NotReachedImpl();
 }
 
 #define LOG(level) logging::LogMessage(LOG_##level)
 #define DLOG() logging::LogMessage(LOG_DEBUG)
-#define NOTREACHED() logging::NotReachedImpl()
 
 #endif // MINI_LOGGER_LOGGING_H_

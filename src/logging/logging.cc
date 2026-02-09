@@ -40,21 +40,15 @@ logging::LogMessage::~LogMessage() {
       return;
   }
 
-  if (level_ == LOG_FATAL) {
+  // Levels higher than INFO level go to stderr
+  if (level_ > LOG_INFO) {
     std::wcerr << prefix << stream_.str() << std::endl;
-#ifdef _DEBUG
-    // Catch for debugger on FATAL
-    __debugbreak();
-#else
-    // Crash more gracefully
-    ExitProcess(LOG_FATAL);
-#endif
-    return;
-  } else if (level_ == LOG_INFO) {
-    std::wcout << prefix << stream_.str() << std::endl;
+    if (level_ == LOG_FATAL) {
+      __debugbreak(); // Catch for debugger on FATAL
+      return;
+    }
   } else {
-    // Levels higher than INFO level go to stderr
-    std::wcerr << prefix << stream_.str() << std::endl;
+    std::wcout << prefix << stream_.str() << std::endl;
   }
   AppendTextToFile(std::wstring(prefix) + stream_.str());
 }
@@ -160,40 +154,47 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
 
 bool logging::InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name) {
   bool success = false;
+  DCHECK(!logging_initialized);
   if (!hInstance || log_sink >= MAX_LOG_DEST) {
     logging_initialized = false;
     return false;
   }
+  const bool is_console_attached = GetIsConsoleAttached();
   const std::wstring logfile = GetCurrentRelDir() + logfile_name;
   switch (log_sink) {
     case LOG_NONE:
-    case MAX_LOG_DEST:
       logging_initialized = false;
+      return true;
       break;
-    case LOG_TO_FILE: {
-      if (!OpenFileForWriting(logfile)) {
-        success = false;
-      } else {
-        success = true;
-      }
-    } break;
+    case MAX_LOG_DEST:
+      success = false;
+      break;
+    case LOG_TO_FILE:
+      success = OpenFileForWriting(logfile);
+      break;
     case LOG_TO_ALL: {
-      if (!OpenFileForWriting(logfile)) {
-        success = false;
+      if (!is_console_attached) {
+        if (AttachConsoleImpl()) {
+          success = OpenFileForWriting(logfile);
+        } else {
+          success = false;
+        }
+      } else {
+        success = OpenFileForWriting(logfile);
+      }
+    } break;
+    case LOG_TO_STDERR: {
+      if (!is_console_attached) {
+        success = AttachConsoleImpl();
       } else {
         success = true;
       }
     } break;
-    case LOG_TO_STDERR:
-      success = true;
-      break;
     default:
       NOTREACHED();
       break;
   }
   logging_initialized = success;
-
-  // TODO: Add code to log to file optionally
   return success;
 }
 
@@ -201,7 +202,18 @@ bool logging::DeInitLogging(HINSTANCE hInstance) {
   if (!hInstance) {
     return false;
   }
-  return CloseFileHandle();
+  const bool file_is_open = IsFileOpen();
+  const bool is_console_attached = GetIsConsoleAttached();
+  const bool closed_files = file_is_open ? CloseFileHandle() : true;
+  CHECK(closed_files);
+  bool detached_everything = false;
+  if (!is_console_attached) {
+    detached_everything = closed_files;
+  } else {
+    detached_everything = closed_files && DetachConsoleImpl();
+  }
+  logging_initialized = !detached_everything;
+  return detached_everything;
 }
 
 // Tests the various operator overloads for basic types.
@@ -234,11 +246,4 @@ void logging::TestLogging() {
     LOG(FATAL) << L"Testing wide character FATAL logging";
   }
   AppendTextToFile(L"Hello world hawklogging");
-}
-
-void logging::NotReachedImpl() {
-  // TODO, add way to get function name from caller from PiCalc
-  std::wstring msg = L"NOTREACHED(): " + ToWide(__func__);
-  OutputDebugStringW(msg.c_str());
-  __debugbreak();
 }

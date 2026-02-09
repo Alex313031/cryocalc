@@ -1,5 +1,12 @@
 #include "file_util.h"
 
+#include "check.h"
+
+namespace logging {
+ HANDLE g_log_file = INVALID_HANDLE_VALUE;
+ volatile bool file_open = false;
+}
+
 const std::wstring logging::GetCurrentRelDir() {
   wchar_t exe_path[MAX_PATH];
   HMODULE this_app = GetModuleHandleW(nullptr);
@@ -23,15 +30,12 @@ const std::wstring logging::GetCurrentRelDir() {
   return retval;
 }
 
-namespace logging {
-HANDLE g_log_file = INVALID_HANDLE_VALUE;
-}
-
 bool logging::OpenFileForWriting(std::wstring logfile_path) {
   if (logfile_path.length() >= MAX_PATH) {
     return false;
   }
-
+  CHECK(!file_open);
+  const bool is_console_attached = GetIsConsoleAttached();
   // Try to create a new file first
   g_log_file = CreateFileW(
       logfile_path.c_str(),
@@ -44,6 +48,7 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
 
   if (g_log_file == INVALID_HANDLE_VALUE) {
     DWORD err = GetLastError();
+    std::wstring msg = L"";
     if (err == ERROR_FILE_EXISTS) {
       // File exists, open it for appending
       g_log_file = CreateFileW(
@@ -52,30 +57,37 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
           FILE_SHARE_READ,
           nullptr,
           OPEN_EXISTING,
-          FILE_ATTRIBUTE_ARCHIVE | FILE_FLAG_WRITE_THROUGH,
+          FILE_ATTRIBUTE_NORMAL,
           nullptr);
 
       if (g_log_file == INVALID_HANDLE_VALUE) {
-        std::wcerr << L"[ERROR] Failed to open existing file: " << GetLastError() << std::endl;
+        msg = L"Failed to open existing file. Error = " + std::to_wstring(GetLastError());
+        MessageBoxW(nullptr, msg.c_str(), L"Open File Error", MB_OK | MB_ICONERROR);
+        file_open = false;
         return false;
       } else {
-        std::wcout << L"[INFO] Opened existing file " << logfile_path << std::endl;
+        file_open = true;
       }
 
       // Move to end of file for append mode
       if (SetFilePointer(g_log_file, 0, nullptr, FILE_END) == INVALID_SET_FILE_POINTER &&
           GetLastError() != NO_ERROR) {
-        std::wcerr << L"[ERROR] Failed to seek to end of file: " << GetLastError() << std::endl;
+        msg = L"Failed to seek to end of file. Error = " + std::to_wstring(GetLastError());
+        MessageBoxW(nullptr, msg.c_str(), L"Open File Error", MB_OK | MB_ICONERROR);
         CloseFileHandle();
         return false;
       }
     } else {
-      std::wcerr << L"[ERROR] Failed to open file for writing. Error = " << err << std::endl;
+      msg = L"Failed to open file for writing. Error = " + std::to_wstring(GetLastError());
+      MessageBoxW(nullptr, msg.c_str(), L"Open File Error", MB_OK | MB_ICONERROR);
       CloseFileHandle();
       return false;
     }
   } else {
-    std::wcout << L"[INFO] Creating new log file: " << logfile_path << std::endl;
+    if (is_console_attached) {
+      std::wcout << L"Note: Creating new log file: " << logfile_path << std::endl;
+    }
+    file_open = true;
   }
 
   return true;
@@ -83,14 +95,20 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
 
 bool logging::CloseFileHandle() {
   bool closed = false;
-  HANDLE this_handle = g_log_file;
+  CHECK(file_open);
+  HANDLE kFileHandle = g_log_file;
+  const std::wstring this_handle = std::to_wstring(reinterpret_cast<long long>(kFileHandle));
   if (g_log_file != INVALID_HANDLE_VALUE) {
     FlushFileBuffers(g_log_file);
     closed = CloseHandle(g_log_file);
-    g_log_file = INVALID_HANDLE_VALUE;
   }
   if (closed) {
-    std::wcerr << L"[DEBUG] Closed file handle " << reinterpret_cast<long long>(this_handle) << std::endl;
+    g_log_file = INVALID_HANDLE_VALUE;
+    file_open = false;
+    std::wcerr << L"[DEBUG] Closed file handle " << this_handle.c_str() << std::endl;
+  } else {
+    const std::wstring msg = L"Failed to close file handle " + this_handle;
+    MessageBoxW(nullptr, msg.c_str(), L"CloseFileHandle Error", MB_OK | MB_ICONERROR);
   }
   return closed;
 }
@@ -121,13 +139,19 @@ bool logging::AppendTextToFile(const std::wstring log_line) {
                           static_cast<DWORD>(utf8_str.length()),
                           &bytes_written, nullptr);
 
-  return result && (bytes_written == utf8_str.length());
+  if (result && (bytes_written == utf8_str.length())) {
+    return FlushFileBuffers(g_log_file);
+  }
+  return false;
 }
 
 bool logging::ClearFileContents() {
   if (g_log_file == INVALID_HANDLE_VALUE || !logging_initialized) {
     return false;
   }
+
+  // Flush any pending writes before truncating
+  FlushFileBuffers(g_log_file);
 
   // Move to beginning of file
   if (SetFilePointer(g_log_file, 0, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER &&
@@ -141,4 +165,11 @@ bool logging::ClearFileContents() {
   }
 
   return true;
+}
+
+bool logging::IsFileOpen() {
+  if (g_log_file != INVALID_HANDLE_VALUE && file_open) {
+    return true;
+  }
+  return false;
 }

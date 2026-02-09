@@ -9,6 +9,8 @@ static_library("mini_logger") {
   sources = [
     "check.h",
     "check.cc",
+    "console.h",
+    "console.cc",
     "file_util.h",
     "file_util.cc",
     "logging.h",
