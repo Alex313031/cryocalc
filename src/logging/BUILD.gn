@@ -1,11 +1,11 @@
-group("hawk_logger_all") {
+group("mini_logger_all") {
   public_deps = [
-    ":hawk_logger",
+    ":mini_logger",
   ]
 }
 
-static_library("hawk_logger") {
-  configs += [ ":hawk_logger_config" ]
+static_library("mini_logger") {
+  configs += [ ":mini_logger_config" ]
   sources = [
     "check.h",
     "check.cc",
@@ -17,7 +17,8 @@ static_library("hawk_logger") {
   ]
 }
 
-config("hawk_logger_config") {
+config("mini_logger_config") {
+  defines = [ "HAWK_LOGGER" ]
   include_dirs = [
     "./",
   ]
