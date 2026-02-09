@@ -9,14 +9,22 @@ unsigned int g_precision_;
 static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
+// Declare custom_settings here, to be set later, for all of cryocalc to use
 CustomSettings custom_settings;
+// To be set if we read .ini file correctly
 unsigned int custom_precision;
 bool custom_debug_mode;
 
+// Bools to toggle as we go down the line to get our settings
 bool got_ini = false;
 bool got_settings = false;
 bool set_settings = false;
+
+// Handle to our .ini file
 HANDLE g_ini_file;
+// Declare rects to use for all future window layout
+RECT kMainClientRect;
+RECT kMainWinRect;
 
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
@@ -120,20 +128,12 @@ const std::wstring GetVersionWstring() {
   return wostr.str();
 }
 
-const int ShowVersionAndExit() {
-  static const std::wstring ver = GetVersionWstring();
-  std::wcout << L"\n " << kAppName << " ver. " << ver << std::endl;
-  system("pause");
-  return 0;
-}
-
 void CloseAllWindows(HWND hWnd) {
   // Tell OsInfo Window to close, if it's open.
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
   logging::DeInitLogging(GetGlobalHinst());
-  DetachConsole(hWnd);
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
 }
 
@@ -169,15 +169,24 @@ bool ConfirmClearControls(HWND hWnd) {
   }
 }
 
+const int ShowVersionAndExit() {
+  static const std::wstring kVersion = GetVersionWstring();
+  std::wcout << L"\n " << kAppName << " ver. "
+             << kVersion << L"\n " << std::endl;
+  system("pause");
+  return 0;
+}
+
 const int ShowHelpAndExit() {
-  std::wostringstream wostr;
   std::wcout << L"\n " << GetExecutableName()
-             << L" Usage: \n" << std::endl;
+             << L" Usage: \n" << std::flush;
+  std::wostringstream wostr;
   wostr << L"   /d | -d | --debug   : Enable debug mode and enable logging\n"
         << L"   /l | -l | --logging : Enable logging in console Window \n"
         << L"   /v | -v | --version : Show version info \n"
-        << L"   /? | -h | --help    : Show this Help \n" << std::endl;
-  std::wcout << wostr.str();
+        << L"   /? | -h | --help    : Show this Help \n" << std::flush;
+  static const std::wstring kHelpMsg = wostr.str();
+  std::wcout << kHelpMsg.c_str() << std::endl;
   system("pause");
   return 0;
 }
@@ -337,13 +346,8 @@ bool show_version = false;
 bool show_help = false;
 
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
-  bool parsed = false;
-  bool is_debug_mode =
-#if defined(_DEBUG) || defined(DEBUG) || defined(DCHECK)
-    true;
-#else
-    GetDefaultWantDebug();
-#endif
+  bool parsed;
+  bool is_debug_mode = GetDefaultWantDebug();
   bool is_version_mode = false;
   bool is_help_mode = false;
   bool is_log_mode =
@@ -468,7 +472,7 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
     } else {
       LOG(ERROR) << message;
     }
-    MessageBoxW(hWnd, message.c_str(), treat_as_error ? L"Error" : L"Warning", MB_OK | MB_ICONERROR);
+    MessageBoxW(hWnd, message.c_str(), treat_as_error ? L"Error" : L"Warning", MB_OK | MB_ICONSTOP);
     success = false;
   } else {
     success = true;
@@ -527,35 +531,89 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
   SendMessageW(hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
   // Tooltip must be topmost to appear above other windows
   SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
-               SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+               SWP_NOMOVE | SWP_NOSIZE);
   // Finally, activate it to show it.
-  SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
+  //SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
 
   return hTooltip;
 }
 
-void DetachConsole(HWND hWnd) {
-  if (!hWnd) {
-    __debugbreak();
-    return;
-  }
-  FreeConsole();
+bool AttachConsole() {
+  return logging::AttachConsoleImpl();
+}
+
+bool DetachConsole() {
+  return logging::DetachConsoleImpl();
 }
 
 void ClearConsole(HWND hWnd) {
-  if (hWnd) {
-    system("cls");
+  if (!hWnd || !logging::GetIsConsoleAttached()) {
+    return;
+  }
+
+  // Open CONOUT$ directly since GetStdHandle may return the original
+  // (invalid) handle after freopen redirected the C runtime streams.
+  HANDLE hConsole = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE,
+                                FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
+                                0, nullptr);
+  if (hConsole == INVALID_HANDLE_VALUE) {
+    MessageBoxW(nullptr, L"Failed to open CONOUT$", L"Clear Console Error", MB_OK | MB_ICONERROR);
+    return;
+  }
+
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+    unsigned int err = GetLastError();
+    std::wstring msg = L"Failed to get screen buffer info. \nError: " + std::to_wstring(err);
+    MessageBoxW(nullptr, msg.c_str(), L"Clear Console Error", MB_OK | MB_ICONERROR);
+    CloseHandle(hConsole);
+    return;
+  }
+
+  // Calculate visible window size
+  SHORT windowWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  SHORT windowHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+  // Shrink buffer to window size - this clears scrollback history
+  COORD newSize = {windowWidth, windowHeight};
+  SetConsoleScreenBufferSize(hConsole, newSize);
+
+  // Clear the visible area
+  DWORD visibleSize = windowWidth * windowHeight;
+  COORD topLeft = {0, 0};
+  DWORD charsWritten;
+  FillConsoleOutputCharacterW(hConsole, L' ', visibleSize, topLeft, &charsWritten);
+  FillConsoleOutputAttribute(hConsole, csbi.wAttributes, visibleSize, topLeft, &charsWritten);
+
+  // Move cursor to top-left
+  SetConsoleCursorPosition(hConsole, topLeft);
+
+  CloseHandle(hConsole);
+}
+
+bool ClearLogFile(HWND hWnd) {
+  if (!hWnd || !logging::ClearFileContents()) {
+    MessageBoxW(nullptr, L"Failed to clear log file!", L"Logging Error", MB_OK | MB_ICONERROR);
+    return false;
+  } else {
+    return true;
   }
 }
 
-uint32_t* ClearLogFile(HWND hWnd) {
-  if (!hWnd) {
-    return nullptr;
+bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
+  RECT winRect;
+  RECT clientRect;
+  // Get rect size of window including titlebar, for setting other Window's positions relative to this window
+  if (!GetWindowRect(hMainWindow, &winRect)) {
+    return false;
   }
-  if (!logging::ClearFileContents()) {
-    return nullptr;
+  // Get internal rects inside Window, excluding titlebar, for setting control positions inside Window
+  if (!GetClientRect(hWnd, &clientRect)) {
+    return false;
   }
-  return 0x0000;
+  kMainClientRect = winRect;
+  kMainClientRect = clientRect;
+  return true;
 }
 
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
@@ -578,6 +636,10 @@ void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
     // Position at the right edge of the main window, aligned with its top
     *outX = thisRect.right;
     *outY = thisRect.top;
+    LOG(DEBUG) << L"thisRect.right = " << thisRect.right << L" \n"
+               << L"thisRect.top = " << thisRect.top << L" ";
+    LOG(DEBUG) << L"kMainWinRect.right = " << kMainWinRect.right << L" \n"
+               << L"kMainWinRect.top = " << kMainWinRect.top << L" ";
   } else {
     *outX = kDefaultX;
     *outY = kDefaultY;
@@ -607,7 +669,8 @@ bool GetCustomSettings() {
   std::string buffer(file_size, '\0');
   DWORD bytes_read = 0;
   if (!ReadFile(g_ini_file, &buffer[0], file_size, &bytes_read, nullptr)) {
-    std::wcerr << L"Failed to read " << kIniFileName << std::endl;
+    std::wstring msg = L"Failed to read " + logging::ToWide(kIniFileName);
+    OutputDebugStringW(msg.c_str());
     CloseHandle(g_ini_file);
     g_ini_file = INVALID_HANDLE_VALUE;
     return false;
@@ -645,21 +708,33 @@ bool GetCustomSettings() {
     }
 
     // Parse known settings
-    if (key == "default_precision") {
+    bool precisionkey = (key == "default_precision");
+    bool debugkey = (key == "debug_mode");
+    if (precisionkey) {
       const int precision = std::atoi(value.c_str());
       if (precision >= static_cast<int>(MIN_PRECISION) &&
           precision <= static_cast<int>(MAX_PRECISION)) {
-        custom_settings.default_precision = static_cast<unsigned int>(precision);
-        std::wcout << L"INI: default_precision=" << precision << std::endl;
+        const int prec_val = static_cast<unsigned int>(precision);
+        custom_settings.default_precision = prec_val;
       } else {
         std::wcerr << L"INI: default_precision=" << precision
-                   << L" out of range (" << MIN_PRECISION << L"-" << MAX_PRECISION << L")" << std::endl;
+                   << L" out of range (" << MIN_PRECISION << L"-" << MAX_PRECISION << L")!" << std::endl;
         custom_settings.default_precision = DEFAULT_PRECISION;
       }
-    } else if (key == "debug_mode") {
+    } else {
+      custom_settings.default_precision = DEFAULT_PRECISION;
+    }
+    if (debugkey) {
       const int debug_val = std::atoi(value.c_str());
-      custom_settings.set_debug_mode = (debug_val == 1);
-      std::wcout << L"INI: debug_mode=" << debug_val << std::endl;
+      if (debug_val == 0) {
+        custom_settings.set_debug_mode = false;
+      } else if (debug_val == 1) {
+        custom_settings.set_debug_mode = true;
+      } else {
+        custom_settings.set_debug_mode = false;
+      }
+    } else {
+      custom_settings.set_debug_mode = false;
     }
   }
 
@@ -673,8 +748,8 @@ bool SetCustomSettings() {
   }
   unsigned int want_prec = custom_settings.default_precision;
   bool want_debug = custom_settings.set_debug_mode;
-  LOG(INFO) << L"Got custom settings: " << L"Prec=" << want_prec
-            << L" Debug=" << static_cast<int>(want_debug);
+  std::wcout << L"Got custom settings: " << L"Prec=" << want_prec
+             << L" Debug=" << static_cast<int>(want_debug) << std::endl;
   custom_precision = want_prec;
   custom_debug_mode = want_debug;
   set_settings = true;
@@ -726,6 +801,21 @@ const bool GetDefaultWantDebug() {
   if (!set_settings) {
     return false;
   } else {
+#if defined(_DEBUG) || defined(DEBUG)
+    return true;
+#else
     return custom_debug_mode;
+#endif
+  }
+}
+
+errno_t AllocateMemory(const size_t num_bytes) {
+  LPVOID pMemory = VirtualAlloc(nullptr, num_bytes, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+  if (pMemory == NULL) {
+    MessageBoxW(nullptr, L"Failed to allocate memory", L"VirtualAlloc Error", MB_OK | MB_ICONERROR);
+    return 12; // ENOMEM
+  } else {
+    LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u) << " Megabytes memory allocated at address: " << std::showbase << std::hex << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
+    return 0;
   }
 }

@@ -29,6 +29,7 @@ inline const std::wstring ToWide(const char* s) {
   return result;
 }
 
+// wchar_t override for ease of use
 inline const std::wstring ToWide(const wchar_t* s) {
   std::wstring result;
   while (*s) {

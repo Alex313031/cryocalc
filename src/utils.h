@@ -29,8 +29,7 @@ extern bool show_help;
 #define RFD_WOW_APP             0x00000010
 #define RFD_NOSEPMEMORY_BOX     0x00000020
 typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
-typedef void (WINAPI *GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
-typedef int (* RUN_FILE_DLG_)(HWND hwndParent, HICON hIcon, LPCTSTR lpszWorkingDir, LPCTSTR lpszTitle, LPCTSTR lpszPrompt, DWORD dwFlags);
+typedef int (WINAPI *RUN_FILE_DLG_)(HWND hwndParent, HICON hIcon, LPCTSTR lpszWorkingDir, LPCTSTR lpszTitle, LPCTSTR lpszPrompt, DWORD dwFlags);
 
 struct CustomSettings {
   bool set_debug_mode;
@@ -67,9 +66,6 @@ const std::wstring GetExecutableName();
 // Gets the version number as human readable wstring.
 const std::wstring GetVersionWstring();
 
-// Shows the version info and quits
-const int ShowVersionAndExit();
-
 // Closes all sub-windows, then exits app.
 void CloseAllWindows(HWND hWnd);
 
@@ -78,6 +74,9 @@ int ConfirmExit(HWND hWnd);
 
 // Confirms the user wants to clear the controls
 bool ConfirmClearControls(HWND hWnd);
+
+// Shows the version info and quits
+const int ShowVersionAndExit();
 
 // Shows commandline usage and quits
 const int ShowHelpAndExit();
@@ -140,14 +139,20 @@ const size_t GetCacheSize();
 // Adds a tooltip to a control.
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText);
 
-// Detaches console to allow attaching a new one. See AttachConsole() in cryocalc.cc
-void DetachConsole(HWND hWnd);
+// Attaches console to window, only one allowed per process.
+bool AttachConsole();
+
+// Detaches console to allow attaching a new one.
+bool DetachConsole();
 
 // Clears console output without detaching it.
 void ClearConsole(HWND hWnd);
 
 // Clears log file, if any.
-uint32_t* ClearLogFile(HWND hWnd);
+bool ClearLogFile(HWND hWnd);
+
+// Set client rects for future resizing of a Window
+bool SetClientRects(HWND hWnd, HINSTANCE hInst);
 
 // Gets the position to place a window to the right of another window
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
@@ -166,5 +171,8 @@ const unsigned int GetDefaultPrecision();
 
 // Gets if the user set debug mode in .ini file, takes precedence over command line flag.
 const bool GetDefaultWantDebug();
+
+// Util to fill memory with zeros, used to stress VM.
+errno_t AllocateMemory(const size_t num_bytes);
 
 #endif // CRYOCALC_UTILS_H_
