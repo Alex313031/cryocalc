@@ -13,6 +13,7 @@ constexpr const WCHAR* CAPTION_TITLE = APP_NAME;
 // File name constants
 inline const wchar_t* kOsInfoDll    = L"osinfo.dll";
 inline const wchar_t* kShell32Dll   = L"shell32.dll";
+inline const wchar_t* kComCtl32Dll  = L"comctl32.dll";
 inline const wchar_t* kChmHelpFile  = L"cryocalc.chm";
 inline const wchar_t* kLogFileName  = L"cryocalc.log";
 inline const wchar_t* kIniFileName  = L"cryocalc.ini";
@@ -27,8 +28,8 @@ constexpr unsigned int MAX_PRECISION = 4u;
 constexpr unsigned int DEFAULT_PRECISION = 3u;
 
 // Natural Constants needed for temp conversion functions.
-constexpr long double KELVIN_OFFSET = 273.150L;
-constexpr long double RANKINE_OFFSET = 459.670L;
+inline constexpr long double KELVIN_OFFSET = 273.150L;
+inline constexpr long double RANKINE_OFFSET = 459.670L;
 
 // Dummy values for feeding unit test functions
 constexpr long double kDummyCelsius = 0.000L; // Freezing point of water
@@ -67,6 +68,11 @@ constexpr UINT PROGBAR_HEIGHT = CW_STATICLABEL_HEIGHT;
 // Minimum/Maximum number of threads for the CPU stressor.
 constexpr unsigned int MIN_THREADS = 1u; // Less than one thread doesn't make sense
 constexpr unsigned int MAX_THREADS = 128u; // Threadrippers top out at 128
+
+// Minimum common controls version for certain functions, used for fallback codepaths
+// See https://learn.microsoft.com/en-us/windows/win32/controls/common-control-versions
+inline constexpr DWORD dwComCtl32TargetVer =
+    _PACKVERSION(static_cast<DWORD>(5u), static_cast<DWORD>(82u));
 
 // Color constants
 #define RGB_RED RGB(255, 192, 192)

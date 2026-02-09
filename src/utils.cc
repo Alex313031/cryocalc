@@ -534,9 +534,17 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
     return nullptr;
   }
 
+  static const bool can_use_582_controls = IsCommCtrlAtLeast(dwComCtl32TargetVer);
   // Set up the TOOLINFO structure
   TOOLINFOW ti = {0};
-  ti.cbSize = sizeof(ti);
+  if (can_use_582_controls) {
+    ti.cbSize = sizeof(ti);
+  } else {
+    // MinGW's TOOLINFOW always includes lpReserved, but Windows 2000's
+    // comctl32 v5.81 only supports up to V2 (through lParam). Using
+    // sizeof(ti) gives V3 size which Win2000's TTM_ADDTOOLW rejects.
+    ti.cbSize = TTTOOLINFOW_V2_SIZE;
+  }
   ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
   ti.hwnd = hWndParent;
   ti.uId = reinterpret_cast<UINT_PTR>(hWndControl);
@@ -833,4 +841,53 @@ errno_t AllocateMemory(const size_t num_bytes) {
     LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u) << " Megabytes memory allocated at address: " << std::showbase << std::hex << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
     return 0;
   }
+}
+
+const bool IsCommCtrlAtLeast(const DWORD to_compare) {
+  const DWORD kCommCtrlVer = GetCommCtrlVersion();
+  LOG(DEBUG) << L"Target common controls version: " << std::showbase << std::hex
+             << to_compare << std::noshowbase << std::dec;
+  LOG(DEBUG) << L"Installed common controls version: " << std::showbase << std::hex
+             << kCommCtrlVer << std::noshowbase << std::dec;
+  return kCommCtrlVer >= to_compare;
+}
+
+DWORD GetCommCtrlVersion() {
+  HINSTANCE hComCtl32Dll = nullptr;
+  wchar_t systemDir[MAX_PATH];
+  UINT length = GetSystemDirectoryW(systemDir, MAX_PATH);
+  std::wstring kSystemDir;
+  if (length > 0 && length < MAX_PATH) {
+    kSystemDir = std::wstring(systemDir);
+  } else {
+    // Handle error or buffer too small
+    LOG(ERROR) << "Failed to get system directory!";
+  }
+  const std::wstring comctl32_path = kSystemDir + L"\\" + kComCtl32Dll; // Add \\ backslash before .dll file name
+  hComCtl32Dll = LoadLibraryW(comctl32_path.c_str()); // Explicity reference system installed version
+  DLLGETVERSIONPROC pDllGetVersion;
+  DLLVERSIONINFO dvi = {sizeof(dvi)};
+  DWORD dwVersion = 0;
+  DWORD error;
+  if (!hComCtl32Dll || hComCtl32Dll == nullptr) {
+    error = GetLastError();
+    LOG(ERROR) << L"Failed to load " << kComCtl32Dll << ", hComCtl32Dll was null! Error: " << error;
+    pDllGetVersion = nullptr;
+  } else {
+    pDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hComCtl32Dll, "DllGetVersion"));
+    if (!pDllGetVersion) {
+      error = GetLastError();
+      LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << error; 
+    } else {
+      HRESULT hr = pDllGetVersion(&dvi);
+      if (hr == S_OK) {
+        dwVersion = _PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
+      } else {
+        error = GetLastError();
+        LOG(ERROR) << L"Failed to run DllGetVersion. Error: " << error;
+      }
+    }
+    FreeLibrary(hComCtl32Dll);
+  }
+  return dwVersion;
 }
