@@ -45,6 +45,7 @@
 #define IDC_WINVER_BUTTON           307
 #define IDC_MSINFO_BUTTON           308
 #define IDC_RUNAPP_BUTTON           309
+#define IDC_ALLOC_MEM               310
 
 // User input controls
 #define IDC_INPUT                   320
