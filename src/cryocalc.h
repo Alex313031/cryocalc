@@ -26,7 +26,4 @@ bool LaunchHelpEx(HWND hWnd);
 // Registers the window class.
 ATOM RegisterWndClass(HINSTANCE hInstance);
 
-// Attaches console to window, only one allowed per HINSTANCE.
-bool AttachConsole();
-
 #endif // CRYOCALC_H_
