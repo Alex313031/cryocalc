@@ -23,15 +23,15 @@ bool logging::AttachConsoleImpl() {
   constexpr bool open_cmd_if_none = true;
   const bool attached_console = RouteStdioToConsole(open_cmd_if_none);
   if (!attached_console) {
-    MessageBoxW(nullptr, L"Failed to attach console!", L"Console Error", MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error", MB_OK | MB_ICONERROR);
   }
   console_attached = attached_console;
   return attached_console;
 }
 
 bool logging::DetachConsoleImpl() {
-  const bool is_console_attached = GetIsConsoleAttached();
-  if (!is_console_attached) {
+  if (!GetIsConsoleAttached()) {
+    MessageBoxW(nullptr, L"Console Already Detached!", L"Console Detach Warning", MB_OK | MB_ICONWARNING);
     return true;
   }
   if (FreeConsole()) {

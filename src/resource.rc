@@ -84,12 +84,15 @@ BEGIN
     END
     POPUP "&Dev"
     BEGIN
-        MENUITEM "&Attach Console", IDM_ATTACH_CON
-        MENUITEM "&Detach Console", IDM_DETACH_CON
         MENUITEM "&Clear Console",  IDM_CLEAR_CON
         MENUITEM "Clear &Log File", IDM_CLEAR_LOG
-        MENUITEM "&OS Info",        IDM_OSINFO
-        MENUITEM "&Test Logging",   IDM_TEST_LOG
+        POPUP "&More"
+        BEGIN
+            MENUITEM "&Attach Console", IDM_ATTACH_CON
+            MENUITEM "&Detach Console", IDM_DETACH_CON
+            MENUITEM "&OS Info",        IDM_OSINFO
+            MENUITEM "&Test Logging",   IDM_TEST_LOG
+        END
     END
     POPUP "&Help"
     BEGIN
