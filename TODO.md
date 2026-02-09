@@ -14,3 +14,4 @@
  - Fix max size for log cleanup.
  - Better colors for controls
  - Clang-format source
+ - Add out of bounds checking for absolute zero/plank temp.

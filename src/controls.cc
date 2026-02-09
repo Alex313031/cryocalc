@@ -15,7 +15,7 @@ static HWND hCacheSizeLabel;
 
 // Controls/buttons forward decl
 HWND hInputEdit;
-HWND hTempSelectEdit;
+HWND hTempSelectCombo;
 HWND hPrecisionCombo;
 HWND hCelsiusEdit;
 HWND hKelvinEdit;
@@ -82,7 +82,7 @@ bool HandleConvert(HWND hWnd) {
   long double input = 0.0L;
   // Get the length of the text in the edit control
   DWORD dwInputSize = GetWindowTextLength(hInputEdit);
-  DWORD dwScaleSize = GetWindowTextLength(hTempSelectEdit);
+  DWORD dwScaleSize = GetWindowTextLength(hTempSelectCombo);
   DWORD dwPrecisionSize = GetWindowTextLength(hPrecisionCombo);
   const bool is_empty = (BOOL)(dwInputSize == 0);
   bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
@@ -120,7 +120,7 @@ bool HandleConvert(HWND hWnd) {
       LOG(INFO) << L"Input = " << std::setprecision(MAX_PRECISION) << input;
     }
 
-    GetWindowTextW(hTempSelectEdit, &scale_buff[0], dwScaleSize + 1);
+    GetWindowTextW(hTempSelectCombo, &scale_buff[0], dwScaleSize + 1);
     GetWindowTextW(hPrecisionCombo, &preci_buff[0], dwPrecisionSize + 1);
 
     std::wstring scale(scale_buff.c_str());
@@ -311,13 +311,13 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_INPUT, hInst, nullptr
   );
   // Temperature scale Combobox
-  hTempSelectEdit = CreateWindowExW(
+  hTempSelectCombo = CreateWindowExW(
       0, WC_COMBOBOX, L"",
       CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
       kTempEditLeft + EDIT_WIDTH + INTRA_PADDING,
       STATIC_TOP,
       COMBO_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      COMBO_HEIGHT,
       hWnd, (HMENU)IDC_SCALE, hInst, nullptr
   );
 
@@ -375,7 +375,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kButtonColLeft + LABEL_WIDTH + INTRA_PADDING,
       kButtonRow2Top,
       COMBO_WIDTH,
-      BUTTON_HEIGHT,
+      COMBO_HEIGHT,
       hWnd, (HMENU)IDC_PRECISION, hInst, nullptr
   );
   // Create the "Clear" Button control
@@ -425,7 +425,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X,
       STATIC_TOP,
-      EDIT_WIDTH / 2u, CW_EDITCONTROL_HEIGHT,
+      EDIT_WIDTH / 2u,
+      CW_EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_THREADS, hInst, nullptr
   );
 
@@ -454,7 +455,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
-      COMBO_WIDTH + 16u, BUTTON_HEIGHT,
+      COMBO_WIDTH + 16u, COMBO_HEIGHT,
       hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr
   );
 
@@ -504,11 +505,11 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
 
   // Set temperature selection options in combobox
-  SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
-  SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempK.c_str()); // Kelvin
-  SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempF.c_str()); // Fahrenheit
-  SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kTempR.c_str()); // Rankine
-  //SendMessageW(hTempSelectEdit, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Unknown
+  SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
+  SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempK.c_str()); // Kelvin
+  SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempF.c_str()); // Fahrenheit
+  SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempR.c_str()); // Rankine
+  //SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Unknown
   // Precision combobox options
   SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"0");
   SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"1");
@@ -530,7 +531,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hFahrenheitEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hRankineEdit, EM_SETREADONLY, TRUE, 0);
   // Set default selections
-  SendMessageW(hTempSelectEdit, CB_SETCURSEL, 0, 0L);
+  SendMessageW(hTempSelectCombo, CB_SETCURSEL, 0, 0L);
   SendMessageW(hPrecisionCombo, CB_SETCURSEL, static_cast<int>(GetDefaultPrecision()), 0);
   SendMessageW(hCacheSizeCombo, CB_SETCURSEL, 1, 0);
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
@@ -541,7 +542,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hInputLabel, hInst, L"Input your temp to calculate here!");
   AddTooltip(hWnd, hInputEdit, hInst, L"Temperature input.");
-  AddTooltip(hWnd, hTempSelectEdit, hInst, L"Choose temperature scale for Input");
+  AddTooltip(hWnd, hTempSelectCombo, hInst, L"Choose temperature scale for Input");
   AddTooltip(hWnd, hConvButton, hInst, L"Convert input to all units");
   AddTooltip(hWnd, hStartStresButton, hInst, L"Start running specified number of CPU threads");
   AddTooltip(hWnd, hStopStresButton, hInst, L"Stop running all CPU threads");
@@ -588,7 +589,7 @@ void HandleResize(HWND hWnd) {
   MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
-  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, COMBO_HEIGHT, TRUE);
   MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);

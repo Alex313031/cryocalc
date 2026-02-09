@@ -23,7 +23,7 @@ extern HMODULE hOsInfoDll;
 
 // Edit control handles
 extern HWND hInputEdit;
-extern HWND hTempSelectEdit;
+extern HWND hTempSelectCombo;
 extern HWND hPrecisionCombo;
 extern HWND hCelsiusEdit;
 extern HWND hKelvinEdit;

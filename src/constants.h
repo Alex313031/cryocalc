@@ -58,6 +58,7 @@ constexpr UINT BUTTON_Y      = CW_MAINHEIGHT / 2u; // Y pixel units from top of 
 constexpr UINT BUTTON_WIDTH  = 75u;  // Width in pixels buttons
 constexpr UINT BUTTON_HEIGHT = 30u;  // Height in pixels of buttons
 constexpr UINT COMBO_WIDTH   = 40u;  // Width in pixels of comboboxes
+constexpr UINT COMBO_HEIGHT  = 200u; // Total height including dropdown list (must be > edit height for Win2K)
 constexpr UINT INTRA_PADDING = 3u;   // Value in pixels of intra-item padding
 constexpr UINT BOTTOM_AREA   = CW_MAINHEIGHT / 3u;   // Minimum height of bottom buttom controls area
 constexpr UINT PROGBAR_WIDTH = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
