@@ -50,9 +50,6 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst);
 // Handles resize events and repaints controls as necessary
 void HandleResize(HWND hWnd);
 
-// Set client rects for future resizing
-bool SetClientRects(HWND hWnd, HINSTANCE hInst);
-
 // Clears the input box
 void ClearInput(HWND hWnd);
 
@@ -83,6 +80,9 @@ INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 // Gets number of threads to launch from hThreadsEdit
 bool GetThreadsInput(HWND hWnd);
+
+// Progress bar animation function, to be used in a thread only on Windows 2000 which doesn't support the PBM_SETMARQUEE message.
+DWORD WINAPI AnimateProg();
 
 // Called when "Start" button pressed. Stresses CPU via StartThreads()
 void OnStartButtonClick(HWND hWnd);

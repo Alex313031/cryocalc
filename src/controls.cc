@@ -1,5 +1,7 @@
 #include "controls.h"
 
+#include <chrono>
+
 // Static labels
 static HWND hInputLabel;  
 static HWND hCelsiusLabel;  
@@ -30,6 +32,7 @@ HWND hThreadsEdit;
 HWND hProgressBar;
 HWND hSSE2Checkbox;
 HWND hCacheSizeCombo;
+HWND hAllocMemButton;
 HWND hStartStresButton;
 HWND hStopStresButton;
 
@@ -45,9 +48,8 @@ bool _about_handled = false;
 
 unsigned int num_threads_ = 0;
 
-// Declare rects to use for all future window layout
-RECT kMainClientRect;
-RECT kMainWinRect;
+static BOOL IsXP = false;
+static volatile bool animating = false; // Whether to animate the progress bar
 
 Scale parseScale(const std::wstring& wscale) {
   if (wscale == kTempC) return kScaleCelsius;
@@ -88,7 +90,7 @@ bool HandleConvert(HWND hWnd) {
   unsigned int found_prec = 255u;
   if (is_empty || bad_temp_scale) {
     if (bad_temp_scale) {
-      MessageBoxW(hWnd, L"Invalid Temp scale!", L"Error!", MB_OK | MB_ICONERROR);
+      MessageBoxW(hWnd, L"Invalid Temp scale!", L"Error!", MB_OK | MB_ICONSTOP);
     }
     if (is_empty) {
       MessageBoxW(hWnd, L"No text entered!", L"Empty Temp. Input", MB_OK | MB_ICONWARNING);
@@ -212,6 +214,7 @@ bool HandleConvert(HWND hWnd) {
 }
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
+  IsXP = IsAtLeast(kWinXP);
   const int kTempEditLeft = GetXOffset(STATIC_LEFT, LABEL_WIDTH + INTRA_PADDING, 1.0f);
   // Create staic box outline frame for all controls
   int padding = PADDING_X * 2; // Padding on left and right
@@ -426,10 +429,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       hWnd, (HMENU)IDC_THREADS, hInst, nullptr
   );
 
+  const DWORD kProgressStyle = IsXP ? PBS_MARQUEE | SS_NOTIFY
+                                    : SS_NOTIFY;
   // Create the CPU stressor progress bar.
   hProgressBar = CreateWindowExW(
       0, PROGRESS_CLASS, nullptr,
-      WS_CHILD | WS_VISIBLE | PBS_MARQUEE,
+      WS_CHILD | WS_VISIBLE | kProgressStyle,
       kButtonCol3Left,
       kProgressBarTop,
       PROGBAR_WIDTH, PROGBAR_HEIGHT,
@@ -446,7 +451,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hCacheSizeCombo = CreateWindowEx(
       0, WC_COMBOBOX, L"",
-      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
       COMBO_WIDTH + 16u, BUTTON_HEIGHT,
@@ -455,17 +460,25 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   hSSE2Checkbox = CreateWindowEx(
       0, WC_BUTTON, USE_SSE2Q,
-      WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX,
+      WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + CW_EDITCONTROL_HEIGHT + PADDING_Y,
       100u, CW_EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr
   );
+  hAllocMemButton = CreateWindowExW(
+      0, WC_BUTTON, ALLOC_MEM,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      kButtonCol3Left,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((CW_EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
+      PROGBAR_WIDTH, CW_EDITCONTROL_HEIGHT,
+      hWnd, (HMENU)IDC_ALLOC_MEM, hInst, nullptr
+  );
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(
       0, WC_BUTTON, START_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left,
       kButtonRowTop,
       BUTTON_WIDTH, BUTTON_HEIGHT,
@@ -474,7 +487,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Stop" CPU Stress Button control
   hStopStresButton = CreateWindowExW(
       0, WC_BUTTON, STOP_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left + BUTTON_WIDTH + PADDING_X,
       kButtonRowTop,
       BUTTON_WIDTH, BUTTON_HEIGHT,
@@ -483,7 +496,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Show OS Info" Button control
   hOsInfoButton = CreateWindowExW(
       0, WC_BUTTON, OSINFO_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left,
       kButtonRow2Top,
       BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
@@ -508,7 +521,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hCacheSizeCombo, CB_ADDSTRING, 0, (LPARAM)L"4MB");
   // Set Progress bar to initially stopped and in 0 position
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  if (IsXP) {
+    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  }
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -524,8 +539,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 }
 
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
-  AddTooltip(hWnd, hInputLabel, hInst, L"Temperature input.");
-  AddTooltip(hWnd, hInputEdit, hInst, L"Input your temp to calculate here!");
+  AddTooltip(hWnd, hInputLabel, hInst, L"Input your temp to calculate here!");
+  AddTooltip(hWnd, hInputEdit, hInst, L"Temperature input.");
   AddTooltip(hWnd, hTempSelectEdit, hInst, L"Choose temperature scale for Input");
   AddTooltip(hWnd, hConvButton, hInst, L"Convert input to all units");
   AddTooltip(hWnd, hStartStresButton, hInst, L"Start running specified number of CPU threads");
@@ -598,18 +613,6 @@ void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
     SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)status_text.c_str());
     SendMessageW(hStatusBar, SB_SETTEXT, 1, (LPARAM)status_bubble.c_str());
   }
-}
-
-bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
-  // Get rect size of window including titlebar, for setting other Window's positions relative to this window
-  if (!GetWindowRect(hMainWindow, &kMainWinRect)) {
-    return false;
-  }
-  // Get internal rects inside Window, excluding titlebar, for setting control positions inside Window
-  if (!GetClientRect(hWnd, &kMainClientRect)) {
-    return false;
-  }
-  return true;
 }
 
 void ClearInput(HWND hWnd) {
@@ -765,22 +768,6 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   return (INT_PTR)AboutHandled;
 }
 
-DWORD WINAPI AnimateProg(LPVOID lpParam) {
-  while (true) {
-    SendMessageW(hProgressBar, PBM_DELTAPOS, 25, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    SendMessageW(hProgressBar, PBM_DELTAPOS, 50, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    SendMessageW(hProgressBar, PBM_DELTAPOS, 75, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    SendMessageW(hProgressBar, PBM_DELTAPOS, 100, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    SendMessageW(hProgressBar, PBM_DELTAPOS, 0, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  }
-  return 0;
-}
-
 bool GetThreadsInput(HWND hWnd) {
   DWORD dwThrInputSize = GetWindowTextLength(hThreadsEdit);
   const bool is_empty = (BOOL)(dwThrInputSize == 0);
@@ -797,7 +784,11 @@ bool GetThreadsInput(HWND hWnd) {
   unsigned int get_threads;
   const unsigned int num_logical_cpus = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (is_invalid) {
-    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+    if (IsXP) {
+      SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+    } else {
+      SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
+    }
     const std::wstring valid_msg = L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
     MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
     return false;
@@ -832,26 +823,60 @@ bool GetThreadsInput(HWND hWnd) {
   return num_threads_ >= MIN_THREADS && num_threads_ <= MAX_THREADS;
 }
 
+DWORD WINAPI AnimateProg() {
+  while (animating) {
+    SendMessageW(hProgressBar, PBM_STEPIT, 0, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  return 0;
+}
+
 // Get number of threads and launch them.
 void OnStartButtonClick(HWND hWnd) {
-  // Start animating the progress bar marquee
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
-  if (GetThreadsInput(hWnd)) {
-    LOG(INFO) << L"Starting " << num_threads_ << L" CPU stressor threads.";
-    set_run_state(true);
-    std::thread StressorLaunchThread(LaunchThreads, num_threads_);
-    StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
+  if (!GetIsRunning()) {
+    std::vector<std::thread> ProgBarThread;
+    ProgBarThread.reserve(1u);
+    // Start animating the progress bar marquee
+    if (IsXP) {
+      SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
+    } else {
+      animating = true;
+      ProgBarThread.emplace_back(AnimateProg);
+    }
+    if (GetThreadsInput(hWnd)) {
+      for (auto& animate_thread : ProgBarThread) {
+        animate_thread.detach();
+      }
+      LOG(INFO) << L"Starting " << num_threads_ << L" CPU stressor threads.";
+      set_run_state(true);
+      std::thread StressorLaunchThread(LaunchThreads, num_threads_);
+      StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
+    } else {
+      animating = false;
+      for (auto& animate_thread : ProgBarThread) {
+        animate_thread.join();
+      }
+      LOG(ERROR) << __FUNC__ << L"() failed!";
+      // Stop animating if we failed for some reason.
+      if (IsXP) {
+        SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+      } else {
+        SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
+      }
+    }
   } else {
-    LOG(ERROR) << __FUNC__ << L"() failed!";
-    // Stop animating if we failed for some reason.
-    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+    MessageBoxW(nullptr, L"Threads are already running! \nYou must press Stop before changing thread paramaters.", L"Threads > 0",
+                MB_OK | MB_ICONERROR | MB_DEFBUTTON1);
   }
 }
 
 // Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
 void OnStopButtonClick(HWND hWnd) {
+  animating = false;
   // Stop animating the progress bar and reset to empty state
   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
-  SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  if (IsXP) {
+    SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  }
   StopAllThreads();
 }
