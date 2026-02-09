@@ -240,7 +240,7 @@ void OutputOsInfo(HWND hWnd) {
   std::wostringstream wostr;
   wostr << L"Raw NTVER: "
         << std::fixed << std::setprecision(8) << std::showbase << std::hex
-        << short_nt_ver << std::dec;
+        << short_nt_ver << std::noshowbase << std::dec;
   kNTVer = wostr.str();
   wostr.str(L"");
   wostr.clear();
@@ -267,7 +267,7 @@ void LogOsInfo() {
   const unsigned long long nt_ver = GetRawNTVer();
   if (debug_mode) {
     LOG(DEBUG) << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = "
-               << nt_ver << std::dec << std::defaultfloat;
+               << nt_ver << std::noshowbase << std::dec << std::defaultfloat;
     TestDllGetVersion();
   }
 }
@@ -281,8 +281,9 @@ bool TestDllGetVersion() {
   DWORD dwVersion2 = 0;
   DWORD error;
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
+    error = GetLastError();
+    LOG(ERROR) << L"hOsInfoDll was null! Error: " << error;
     fnDllGetVersion = nullptr;
-    LOG(ERROR) << L"hOsInfoDll was null!";
     return false;
   } else {
     fnDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hOsInfoDll, "DllGetVersion"));
@@ -299,6 +300,7 @@ bool TestDllGetVersion() {
       success = true;
     } else {
       error = GetLastError();
+      LOG(ERROR) << L"Failed to run DllGetVersion. Error: " << error;
     }
   }
   if (success) {
@@ -312,5 +314,6 @@ bool TestDllGetVersion() {
   } else {
     LOG(ERROR) << __FUNC__ << L"() Failed! Error: " << error; 
   }
+
   return success;
 }
