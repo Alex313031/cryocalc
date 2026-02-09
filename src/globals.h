@@ -45,14 +45,17 @@ extern HWND hClearButton;
 // Input box for CPU stressor for number of threads
 extern HWND hThreadsEdit;
 
-// Checkbox on whether to use the SSE2 version of the stressor.
-extern HWND hSSE2Checkbox;
+// Progress bar for CPU stressor
+extern HWND hProgressBar;
 
 // Combobox to select L2/L3 Cache multiplier
 extern HWND hCacheSizeCombo;
 
-// Progress bar for CPU stressor
-extern HWND hProgressBar;
+// Checkbox on whether to use the SSE2 version of the stressor.
+extern HWND hSSE2Checkbox;
+
+// Button to allocate huge amounts of memory for RAM stressing.
+extern HWND hAllocMemButton;
 
 // Start button handle for CPU stresser
 extern HWND hStartStresButton; // Intentionally called stres to make fun of
