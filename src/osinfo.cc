@@ -162,7 +162,6 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           CloseWindow(hWnd);
           DestroyWindow(hWnd);
           UnregisterClassW(szOSInfoWindowClass, this_hinst);
-          hOsInfoWin = nullptr;
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -215,6 +214,8 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     case WM_DESTROY:
       DestroyWindow(hWnd);
       UnregisterClassW(szOSInfoWindowClass, this_hinst);
+      break;
+    case WM_NCDESTROY:
       hOsInfoWin = nullptr;
       break;
     default:
@@ -251,14 +252,14 @@ void OutputOsInfo(HWND hWnd) {
 }
 
 void LogOsInfo() {
-  GetOsInfoDllVersionW_t pGetOsInfoDllVersionW =
-      reinterpret_cast<GetOsInfoDllVersionW_t>(GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW"));
+  pGetOsInfoDllVersionW GetOsInfoDllVersionW_t =
+      reinterpret_cast<pGetOsInfoDllVersionW>(GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW"));
   std::wstring OsInfoDllVer;
-  if (pGetOsInfoDllVersionW == nullptr) {
+  if (GetOsInfoDllVersionW_t == nullptr) {
     DWORD error = GetLastError();
     LOG(ERROR) << L"Failed to get function address. Error: " << error;
   } else {
-    OsInfoDllVer = pGetOsInfoDllVersionW();
+    OsInfoDllVer = GetOsInfoDllVersionW_t();
   }
   LOG(INFO) << kOsInfoDll << L" ver. " << OsInfoDllVer;
   LOG(INFO) << L"Windows Version: " << GetWinVersionW()
