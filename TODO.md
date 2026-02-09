@@ -10,5 +10,8 @@
  - Write full scale Chromium style streaming logger.
  - Convert to std::vector and C++17 types where appropriate.
  - Reduce flickering by not redrawing some backgrounds and using DeferWindowPos
- - Fix hover tooltips not showing anymore after press.
+ - Fix hover tooltips not showing anymore after press, and not showing at all on Win2K.
+ - Fix missing lines in cryocalc.ini causing set to 0
+ - Fix clearing log and max size for log.
+ - Better colors for controls
  - Clang-format source
