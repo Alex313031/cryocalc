@@ -1,7 +1,7 @@
 #ifndef CRYOCALC_CONSTANTS_H_
 #define CRYOCALC_CONSTANTS_H_
 
-#include "globals.h"
+#include "framework.h"
 #include "resource.h"
 
 // Name of the app
