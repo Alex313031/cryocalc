@@ -169,6 +169,21 @@ bool ConfirmClearControls(HWND hWnd) {
   }
 }
 
+bool ConfirmAndClearLog(HWND hWnd) {
+  int user_response_code =
+      MessageBoxW(nullptr, L"Clear all log file contents?", L"Confirm Clear LogFile",
+                  MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON2);
+  switch (user_response_code) {
+    case IDNO:
+    case IDCANCEL:
+      return false;
+    case IDYES:
+      return ClearLogFile(hWnd);
+    default:
+      return false;
+  }
+}
+
 const int ShowVersionAndExit() {
   static const std::wstring kVersion = GetVersionWstring();
   std::wcout << L"\n " << kAppName << " ver. "

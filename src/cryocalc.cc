@@ -290,8 +290,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         } break;
         case IDM_CLEAR_CON:
           ClearConsole(hWnd);
-          ClearLogFile(hWnd);
           break;
+        case IDM_CLEAR_LOG: {
+          bool clear_log = ConfirmAndClearLog(hWnd);
+          if (clear_log) {
+            LOG(INFO) << L"Cleared contents of log file.";
+          }
+        } break;
         case IDM_TEST_LOG: {
           logging::TestLogging();
         } break;

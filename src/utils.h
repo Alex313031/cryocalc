@@ -72,8 +72,11 @@ void CloseAllWindows(HWND hWnd);
 // Confirms whether the user wants to exit.
 int ConfirmExit(HWND hWnd);
 
-// Confirms the user wants to clear the controls
+// Confirms the user wants to clear the controls, doesn't actually clear them.
 bool ConfirmClearControls(HWND hWnd);
+
+// Confirms whether to clear the log file, and clears it if "Yes" is selected.
+bool ConfirmAndClearLog(HWND hWnd);
 
 // Shows the version info and quits
 const int ShowVersionAndExit();

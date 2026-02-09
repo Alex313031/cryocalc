@@ -32,7 +32,8 @@
 #define IDM_ATTACH_CON              211
 #define IDM_DETACH_CON              212
 #define IDM_CLEAR_CON               213
-#define IDM_TEST_LOG                214
+#define IDM_CLEAR_LOG               214
+#define IDM_TEST_LOG                215
 
 // Buttons
 #define IDC_CONVERT                 300
