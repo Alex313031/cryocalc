@@ -35,10 +35,11 @@
 #endif // __MINGW32__
 
 // Macro to convert to string
-#if !defined(_STRINGIZER) && !defined(STRINGIZE)
+#if !defined(_STRINGIZER_)
+ #define _STRINGIZER_
  #define _STRINGIZER(in) #in
  #define STRINGIZE(in) _STRINGIZER(in)
-#endif // !defined(_STRINGIZER) && !defined(STRINGIZE)
+#endif // !defined(_STRINGIZER_)
 
 // Main version constant
 #ifndef _VERSION
@@ -50,7 +51,7 @@
 // Adhere to semver > semver.org
 #define MAJOR_VERSION 0
 #define MINOR_VERSION 0
-#define BUILD_VERSION 8
+#define BUILD_VERSION 9
 
 #define VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
 #define ABOUT_TITLE L"About CryoCalc"

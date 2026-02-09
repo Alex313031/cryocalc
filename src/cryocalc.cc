@@ -10,9 +10,6 @@ HWND hMainWindow;
 unsigned int current_width;
 unsigned int current_height;
 
-// Dummy file output for conhost
-static FILE* fDummyFile;
-
 // The main window class name
 WCHAR szWindowClass[MAX_LOADSTRING];
 
@@ -20,6 +17,8 @@ WCHAR szWindowClass[MAX_LOADSTRING];
 static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 HMODULE hOsInfoDll = nullptr; // Module handle to osinfo.dll
+
+static constexpr bool early_attach_console = true;
 
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
@@ -34,10 +33,20 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   InitCommonControlsEx(&icex);
 
   // Check that we can load osinfo.dll and run init function.
+#if _WIN32_WINNT >= 0x0501
+  hOsInfoDll = LoadLibraryExW(kOsInfoDll, nullptr, static_cast<DWORD>(0x00000000));
+#else
   hOsInfoDll = LoadLibraryW(kOsInfoDll);
+#endif
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
     MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
     return -1;
+  }
+
+  if (early_attach_console) {
+    if (!AttachConsole()) {
+      return 1;
+    }
   }
 
   int argc = 0;
@@ -46,35 +55,36 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   // Get our custom settings from .ini file (if any)
   GetCustomSettings();
 
-  if (!ParseCommandLine(argc, argv)) {
-    LocalFree(argv);
+  const bool parsed_cmdline = ParseCommandLine(argc, argv);
+  LocalFree(argv);
+  if (!parsed_cmdline) {
     return 1;
   } else {
-    LocalFree(argv);
-
-    if (enable_logging) {
-      if (!AttachConsole()) {
+    if (!enable_logging) {
+      if (!DetachConsole()) {
         return 1;
       }
     }
-
-    static const std::wstring ver = GetVersionWstring();
     if (show_help) {
       return ShowHelpAndExit();
     }
     if (show_version) {
       return ShowVersionAndExit();
     }
-    HandleDebugMode(debug_mode); // Handle setting debug mode and welcome message
   }
 
   // Set up our logging using mini_logger library.
-  logging::LogDest kLogSink = logging::LOG_TO_ALL;
+  const logging::LogDest kLogSink = enable_logging ? logging::LOG_TO_ALL : logging::LOG_NONE;
   const std::wstring kLogFile(kLogFileName);
-  logging::InitLogging(hInstance, kLogSink, kLogFile);
-  logging::SetIsDCheck(is_dcheck);
-
-  LogOsInfo(); // Log Windows version info
+  const bool init_logging = logging::InitLogging(hInstance, kLogSink, kLogFile);
+  if (init_logging) {
+    logging::SetIsDCheck(is_dcheck);
+    HandleDebugMode(debug_mode ? debug_mode : is_dcheck); // Handle setting debug mode and welcome message
+    LogOsInfo(); // Log Windows version info
+  } else {
+    MessageBoxW(nullptr, L"InitLogging failed!", L"Logging Initialization Failure", MB_OK | MB_ICONERROR);
+    return 1;
+  }
 
   LoadStringW(hInstance, IDC_CRYOCALC, szWindowClass, MAX_LOADSTRING);
 
@@ -208,6 +218,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           OnConvertButtonClick(hWnd);
           break;
         }
+        case IDC_ALLOC_MEM: {
+          // Allocate Memory
+          static const size_t kAllocBytes = 104857600; // 100MB
+          AllocateMemory(kAllocBytes);
+        } break;
         case IDC_CLEAR_BUTTON:
         case IDM_CLEAR: {
           const bool can_clear = ConfirmClearControls(hWnd);
@@ -267,12 +282,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             return 1;
           }
         } break;
-        case IDM_DETACH_CON:
+        case IDM_DETACH_CON: {
           // Detach console
-          DetachConsole(hWnd);
-          break;
+          if (!DetachConsole()) {
+            return 1;
+          }
+        } break;
         case IDM_CLEAR_CON:
           ClearConsole(hWnd);
+          ClearLogFile(hWnd);
           break;
         case IDM_TEST_LOG: {
           logging::TestLogging();
@@ -296,7 +314,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         SetBkColor(winDC, COLOR_WINDOW);
         SetTextColor(winDC, COLOR_WINDOWTEXT);
         // Set window background painting behavior
-        SetBkMode(winDC, TRANSPARENT);
+        SetBkMode(winDC, OPAQUE);
         ReleaseDC(hWnd, winDC);
       }
       EndPaint(hWnd, &ps);
@@ -310,17 +328,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CTLCOLORSTATIC: {
       HDC hdc = reinterpret_cast<HDC>(wParam);
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
-
       // Create brushes once and reuse them (static prevents GDI handle leaks)
-      static HBRUSH hBrushDefault = CreateSolidBrush(GetSysColor(COLOR_WINDOW));
+      static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
+      static const HBRUSH hBrushDefault = CreateSolidBrush(bgColorDefault);
       static HBRUSH hBrushRed = CreateSolidBrush(RGB_RED);
       static HBRUSH hBrushGreen = CreateSolidBrush(RGB_GREEN);
       static HBRUSH hBrushCyan = CreateSolidBrush(RGB_CYAN);
-
+      // Initially set to default color
+      COLORREF bgColor = bgColorDefault;
       HBRUSH hBrushToUse = hBrushDefault;
-      COLORREF bgColor = GetSysColor(COLOR_WINDOW);
-      bool set_color = true;
-
+      bool set_color = false;
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_LABEL_C:
         case IDC_LABEL_K:
@@ -328,6 +345,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_R:
           bgColor = RGB_RED;
           hBrushToUse = hBrushRed;
+          set_color = true;
           break;
         case IDC_LABEL_INPUT:
         case IDC_LABEL_PREC:
@@ -335,19 +353,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_CACHE:
           bgColor = RGB_GREEN;
           hBrushToUse = hBrushGreen;
+          set_color = true;
           break;
         case IDC_INPUT:
         case IDC_THREADS:
           bgColor = RGB_CYAN;
           hBrushToUse = hBrushCyan;
+          set_color = true;
           break;
         default:
-          set_color = false;
           break;
       }
       if (set_color) {
         SetBkColor(hdc, bgColor);
         return reinterpret_cast<LRESULT>(hBrushToUse);
+      } else {
+        return reinterpret_cast<LRESULT>(hBrushDefault);
       }
     } break;
     // Handle resize events
@@ -385,6 +406,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       FreeLibrary(hOsInfoDll);
       PostQuitMessage(0);
       break;
+    case WM_NCDESTROY:
+      hMainWindow = nullptr;
+      break;
     default:
       return DefWindowProc(hWnd, uMsg, wParam, lParam);
   }
@@ -397,27 +421,5 @@ HINSTANCE GetGlobalHinst() {
   } else {
     __debugbreak();
     return nullptr;
-  }
-}
-
-bool AttachConsole() {
-  // Allow and allocate conhost for cmd.exe logging window
-  if (!AllocConsole()) {
-    return false;
-  }
-  // File handler pointer to a dummy file, possibly an actual logfile
-  FILE* fNonExistFile = fDummyFile;
-#ifndef __MINGW32__
-  freopen_s(&fNonExistFile, "CONOUT$", "w", stdout); // Standard error
-  freopen_s(&fNonExistFile, "CONOUT$", "w", stderr); // Standard out
-#else
-  // freopen_s doesn't exist in MinGW...
-  fNonExistFile = freopen("CONOUT$", "w", stdout); // Standard error
-  fNonExistFile = freopen("CONOUT$", "w", stderr); // Standard out
-#endif // __MINGW32__
-  if (!fNonExistFile) {
-    return false;
-  } else {
-    return true;
   }
 }
