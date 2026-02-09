@@ -12,6 +12,7 @@ volatile bool running = false;
 bool use_sse2_simd = false;
 
 static bool is_running = false;
+static volatile unsigned int rand_seed;
 
 void set_run_state(bool on) {
   if (on) {
@@ -21,12 +22,41 @@ void set_run_state(bool on) {
   }
 }
 
+bool GetIsRunning() {
+  return running || is_running;
+}
+
 void set_use_sse2(bool on) {
   if (on) {
     use_sse2_simd = true;
   } else {
     use_sse2_simd = false;
   }
+}
+
+static unsigned int GetSeed() {
+  unsigned int seed = 0;
+  static const bool isXP = IsAtLeast(kWinXP);
+  static const bool is2K = IsAtLeast(kWin2000);
+  if (isXP) {
+    LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
+    // Causes crash on Windows 2000 with rand_s() because it uses RtlGenRandom internally. Bug in MinGW.
+    std::random_device randd;
+    seed =  static_cast<unsigned int>(randd());
+  } else if (is2K) {
+    LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
+    HCRYPTPROV hProvider = 0;
+    unsigned int win2k_seed = 0;
+
+    // CryptGenRandom is available on Windows 2000+ (unlike RtlGenRandom/rand_s which requires XP+)
+    if (CryptAcquireContextW(&hProvider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+      CryptGenRandom(hProvider, sizeof(seed), (BYTE*)(&win2k_seed));
+      CryptReleaseContext(hProvider, 0);
+    }
+    seed = win2k_seed;
+  }
+  CHECK(seed != 0);
+  return seed;
 }
 
 // CPU-intensive stress test function  NOTE: Partially written by Claude AI!
@@ -42,7 +72,7 @@ void StressCPUVec(const size_t cache_size) {
   } else {
     mem_multiplier = 1u;
   }
-    
+
   const size_t NUM_VECTORS = static_cast<size_t>(mem_multiplier); // Multiple vectors to increase memory pressure
 
   std::vector<std::vector<double>> data(NUM_VECTORS);
@@ -51,8 +81,7 @@ void StressCPUVec(const size_t cache_size) {
   }
 
   // Initialize with random data
-  std::random_device rd;
-  std::mt19937 gen(rd());
+  std::mt19937 gen(rand_seed);
   std::uniform_real_distribution<double> dis(0.0, 1024.0);
 
   for (auto& vec : data) {
@@ -116,15 +145,14 @@ void StressCPUVec(const size_t cache_size) {
 void StressCPUSSE2(const size_t cache_size) {
   const size_t VECTOR_SIZE = 1024u * static_cast<size_t>(cache_size);
   std::vector<double> data(VECTOR_SIZE);
-    
-  std::random_device rd;
-  std::mt19937 gen(rd());
+
+  std::mt19937 gen(rand_seed);
   std::uniform_real_distribution<double> dis(0.0, 1024.0);
     
   for (size_t i = 0; i < VECTOR_SIZE; ++i) {
     data[i] = dis(gen);
   }
-    
+
   while (running) {
     for (size_t i = 0; i < VECTOR_SIZE - 4; i += 2) {
       // Use SSE2 intrinsics (128-bit operations, 2 doubles at a time)
@@ -158,11 +186,12 @@ bool LaunchThreads(const unsigned int num_threads) {
       LOG(ERROR) << L"Must run set_run_state(true) before calling " << __FUNC__;
       return false;
     } else if (is_running) {
-      MessageBoxW(nullptr, L"Threads are already running! \nYou must press Stop before changing thread paramaters.", L"Threads > 0",
-                  MB_OK | MB_ICONERROR | MB_DEFBUTTON1);
+      LOG(ERROR) << L"Threads are already running!";
       return false;
     } else {
       is_running = true;
+      rand_seed = GetSeed();
+      LOG(DEBUG) << L"Random seed = " << rand_seed;
       //std::vector<HANDLE> thread_handles;
       //thread_handles.push_back(CreateThread());
       // Create threads
