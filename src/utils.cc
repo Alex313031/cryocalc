@@ -511,8 +511,7 @@ const size_t GetCacheSize() {
   } else if ((wcscmp(cachesz_buff.c_str(), L"4MB") == 0)) {
     cache_size = 4096u;
   } else {
-    LOG(ERROR) << L"Default cache size was used!";
-    cache_size = 1024u;
+    LOG(ERROR) << L"Default cache size was used!" << cache_size;
   }
   return cache_size;
 }
