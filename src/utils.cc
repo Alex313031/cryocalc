@@ -373,7 +373,9 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
     false;
 #endif
   if (argv) {
-    for (int i = 1; i < argc; ++i) { // start at 1 (skip .exe path)
+    // TODO: Should start at 1 (skip .exe path), but fails on Windows Vista+ for some reason
+    // 0 Seems to work fine on all oses
+    for (int i = 0; i < argc; ++i) {
       wchar_t* arg = argv[i];
       is_debug_mode =
           (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
