@@ -83,12 +83,6 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
         MessageBoxW(nullptr, L"ERROR_ACCESS_DENIED", L"AttachConsole_t Error", MB_OK | MB_ICONERROR);
         return false;
       }
-      // Don't bother creating a new console for each child process if the
-      // parent process is invalid (eg: crashed). This can also arise if running cryocalc from using the START.exe
-      if (result == ERROR_GEN_FAILURE) {
-        MessageBoxW(nullptr, L"ERROR_GEN_FAILURE", L"AttachConsole_t Error", MB_OK | MB_ICONERROR);
-        return false;
-      }
       if (create_console_if_not_found) {
         // Make a new console if attaching to parent fails with any other error.
         // It should be ERROR_INVALID_HANDLE at this point, which means the
