@@ -362,7 +362,8 @@ bool show_help = false;
 
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
   bool parsed;
-  bool is_debug_mode = GetDefaultWantDebug();
+  const bool default_debug = GetDefaultWantDebug();
+  bool is_debug_mode = false;
   bool is_version_mode = false;
   bool is_help_mode = false;
   bool is_log_mode =
@@ -376,7 +377,7 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
       wchar_t* arg = argv[i];
       is_debug_mode =
           (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
-           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0)) && !(wcscmp(arg, L"--no-debug") == 0));
+           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0) || default_debug) && !(wcscmp(arg, L"--no-debug") == 0));
       is_log_mode =
           ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) || (wcscmp(arg, L"-log") == 0)
            || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
@@ -818,17 +819,13 @@ const unsigned int GetDefaultPrecision() {
   }
 }
 
-// Returns true if debug_mode=1 in .ini file
+// Returns true if debug_mode=1 in .ini file or DEBUG build
 const bool GetDefaultWantDebug() {
-  if (!set_settings) {
-    return false;
-  } else {
 #if defined(_DEBUG) || defined(DEBUG)
     return true;
 #else
-    return custom_debug_mode;
+    return set_settings ? custom_debug_mode : false;
 #endif
-  }
 }
 
 errno_t AllocateMemory(const size_t num_bytes) {
