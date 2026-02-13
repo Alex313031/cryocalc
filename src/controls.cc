@@ -361,7 +361,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Convert" Button control
   hConvButton = CreateWindowExW(
       0, WC_BUTTON, CONV_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | BS_DEFPUSHBUTTON,
       kButtonColLeft,
       kButtonRowTop,
       BUTTON_WIDTH,
@@ -381,7 +381,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Clear" Button control
   hClearButton = CreateWindowExW(
       0, WC_BUTTON, CLEAR_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER,
       kButtonCol2Left,
       kButtonRowTop,
       BUTTON_WIDTH,
@@ -391,7 +391,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "About" Button control
   hAboutButton = CreateWindowExW(
       0, WC_BUTTON, ABOUT_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER,
       kButtonCol2Left,
       kButtonRow2Top,
       BUTTON_WIDTH,
@@ -461,7 +461,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   hSSE2Checkbox = CreateWindowEx(
       0, WC_BUTTON, USE_SSE2Q,
-      WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX | BS_LEFTTEXT | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + CW_EDITCONTROL_HEIGHT + PADDING_Y,
       100u, CW_EDITCONTROL_HEIGHT,
@@ -469,7 +469,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hAllocMemButton = CreateWindowExW(
       0, WC_BUTTON, ALLOC_MEM,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_LEFT | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((CW_EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
       PROGBAR_WIDTH, CW_EDITCONTROL_HEIGHT,
@@ -479,7 +479,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(
       0, WC_BUTTON, START_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left,
       kButtonRowTop,
       BUTTON_WIDTH, BUTTON_HEIGHT,
@@ -488,7 +488,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Stop" CPU Stress Button control
   hStopStresButton = CreateWindowExW(
       0, WC_BUTTON, STOP_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left + BUTTON_WIDTH + PADDING_X,
       kButtonRowTop,
       BUTTON_WIDTH, BUTTON_HEIGHT,
@@ -497,7 +497,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Show OS Info" Button control
   hOsInfoButton = CreateWindowExW(
       0, WC_BUTTON, OSINFO_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left,
       kButtonRow2Top,
       BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
