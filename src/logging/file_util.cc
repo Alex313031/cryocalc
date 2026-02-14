@@ -114,7 +114,7 @@ bool logging::CloseFileHandle() {
 }
 
 bool logging::AppendTextToFile(const std::wstring log_line) {
-  if (g_log_file == INVALID_HANDLE_VALUE || !logging_initialized) {
+  if (!IsFileOpen() || !logging_initialized) {
     return false;
   }
 
@@ -146,7 +146,7 @@ bool logging::AppendTextToFile(const std::wstring log_line) {
 }
 
 bool logging::ClearFileContents() {
-  if (g_log_file == INVALID_HANDLE_VALUE || !logging_initialized) {
+  if (!IsFileOpen() || !logging_initialized) {
     return false;
   }
 
@@ -168,8 +168,8 @@ bool logging::ClearFileContents() {
 }
 
 bool logging::IsFileOpen() {
-  if (g_log_file != INVALID_HANDLE_VALUE && file_open) {
-    return true;
+  if (g_log_file == INVALID_HANDLE_VALUE) {
+    return false;
   }
-  return false;
+  return file_open;
 }
