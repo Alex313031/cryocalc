@@ -79,7 +79,6 @@ bool HandleConvert(HWND hWnd) {
   bool success = false;
   std::wstring kCelsius, kKelvin, kFahrenheit, kRankine;
   long double convCelsius, convKelvin, convFahrenheit, convRankine;
-  long double input = 0.0L;
   // Get the length of the text in the edit control
   DWORD dwInputSize = GetWindowTextLength(hInputEdit);
   DWORD dwScaleSize = GetWindowTextLength(hTempSelectCombo);
@@ -88,6 +87,8 @@ bool HandleConvert(HWND hWnd) {
   bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
   const bool bad_temp_scale = (BOOL)(dwScaleSize == 0);
   unsigned int found_prec = 255u;
+  std::wstring kInput = L"";
+  std::wstring kChosenScale = L"";
   if (is_empty || bad_temp_scale) {
     if (bad_temp_scale) {
       MessageBoxW(hWnd, L"Invalid Temp scale!", L"Error!", MB_OK | MB_ICONSTOP);
@@ -98,6 +99,7 @@ bool HandleConvert(HWND hWnd) {
     success = false;
   } else {
     std::wostringstream wostr;
+    long double input = 0.0L;
     // Create buffers to store the text (using wstring for automatic memory management)
     std::wstring input_buff(dwInputSize + 1, L'\0');
     std::wstring scale_buff(dwScaleSize + 1, L'\0');
@@ -117,7 +119,10 @@ bool HandleConvert(HWND hWnd) {
        return success; // Fail on invalid input.
     } else {
       input = ConvertInputToLD(input_buff.c_str());
-      LOG(INFO) << L"Input = " << std::setprecision(MAX_PRECISION) << input;
+      std::wostringstream wostr;
+      wostr << std::fixed << std::setprecision(3) << input;
+      kInput = wostr.str();
+      LOG(INFO) << L"Input = " << kInput;
     }
 
     GetWindowTextW(hTempSelectCombo, &scale_buff[0], dwScaleSize + 1);
@@ -137,7 +142,6 @@ bool HandleConvert(HWND hWnd) {
 
     Scale selected_scale = parseScale(scale);
     assert(((selected_scale >= kScaleCelsius && selected_scale < kMaxScale) || (selected_scale == kScaleUnknown)) && "Scale out of range");
-    std::wstring kChosenScale;
     switch (selected_scale) {
       case kScaleCelsius: {
         convCelsius = input;
@@ -209,6 +213,8 @@ bool HandleConvert(HWND hWnd) {
     SetWindowTextW(hKelvinEdit, kKelvin.c_str());
     SetWindowTextW(hFahrenheitEdit, kFahrenheit.c_str());
     SetWindowTextW(hRankineEdit, kRankine.c_str());
+    const std::wstring conv_status = L"Converted input " + kInput + L" °" + kChosenScale;
+    UpdateStatusBar(0, conv_status);
   }
   return success;
 }
@@ -361,7 +367,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Convert" Button control
   hConvButton = CreateWindowExW(
       0, WC_BUTTON, CONV_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | BS_DEFPUSHBUTTON,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | BS_DEFPUSHBUTTON | SS_NOTIFY,
       kButtonColLeft,
       kButtonRowTop,
       BUTTON_WIDTH,
@@ -381,7 +387,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "Clear" Button control
   hClearButton = CreateWindowExW(
       0, WC_BUTTON, CLEAR_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol2Left,
       kButtonRowTop,
       BUTTON_WIDTH,
@@ -391,7 +397,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the "About" Button control
   hAboutButton = CreateWindowExW(
       0, WC_BUTTON, ABOUT_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol2Left,
       kButtonRow2Top,
       BUTTON_WIDTH,
@@ -401,8 +407,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Lastly, create the status bar
   hStatusBar = CreateWindowExW(
       0, STATUSCLASSNAME, nullptr,
-      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
-      0, 0, 0, 0,
+      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
+      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
       hWnd, nullptr, hInst, nullptr
   );
 
@@ -469,7 +475,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   );
   hAllocMemButton = CreateWindowExW(
       0, WC_BUTTON, ALLOC_MEM,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_LEFT | SS_NOTIFY,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((CW_EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
       PROGBAR_WIDTH, CW_EDITCONTROL_HEIGHT,
@@ -561,10 +567,12 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hCacheSizeLabel, hInst, L"The L2 Cache size, in MB, to be used for stressor functions");
   AddTooltip(hWnd, hCacheSizeCombo, hInst, L"Choose the L2 Cache size, in MB, for stressor functions");
   AddTooltip(hWnd, hSSE2Checkbox, hInst, L"Whether to use the SSE2 SIMD stressor function instead of regular one.");
+  AddTooltip(hWnd, hAllocMemButton, hInst, L"Allocates 100 MB. of raw virtual memory. DANGER: Can cause system crash if abused.");
   AddTooltip(hWnd, hClearButton, hInst, L"Clear all temperature output");
   AddTooltip(hWnd, hOsInfoButton, hInst, L"Open OS Information window + utilities");
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
+  //AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
 }
 
 void HandleResize(HWND hWnd) {
@@ -576,7 +584,6 @@ void HandleResize(HWND hWnd) {
   const unsigned int width = current_width;
   const unsigned int height = current_height;
   const int kStatusSplit = width - LABEL_WIDTH;
-  const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 = extend to right edge
   const int frame_bottom = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
   const int button_top = frame_bottom + (INTRA_PADDING * 3u);
   const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
@@ -598,21 +605,31 @@ void HandleResize(HWND hWnd) {
 
   if (hStatusBar) {
     SendMessageW(hStatusBar, WM_SIZE, 0, 0);
+    const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 means extend to right edge
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
   }
 }
 
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
-  std::wstring status_text = kAppName + L" ver. " + GetVersionWstring();
-  static std::wstring status_bubble = L"Status";
+  static const std::wstring status_text = kAppName + L" ver. " + GetVersionWstring();
+  static const std::wstring status_bubble = L"Status";
   const int kStatusSplit = CW_MAINWIDTH - LABEL_WIDTH;
-  const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 means extend to right edge
   if (!hStatusBar) {
     LOG(ERROR) << __FUNC__ << L"() failed: Status bar not initialized";
   } else {
+    const int kStatusParts[2] = { kStatusSplit, -1 };
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
-    SendMessageW(hStatusBar, SB_SETTEXT, 0, (LPARAM)status_text.c_str());
-    SendMessageW(hStatusBar, SB_SETTEXT, 1, (LPARAM)status_bubble.c_str());
+    UpdateStatusBar(0, status_text);
+    UpdateStatusBar(1, status_bubble);
+  }
+}
+
+void UpdateStatusBar(const unsigned int part, const std::wstring text) {
+  if (part < 0 || part > 1) {
+    DCHECK(part < 0 || part > 1);
+    return;
+  } else {
+    SendMessageW(hStatusBar, SB_SETTEXT, static_cast<WPARAM>(part), (LPARAM)text.c_str());
   }
 }
 

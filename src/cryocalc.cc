@@ -18,6 +18,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 HMODULE hOsInfoDll = nullptr; // Module handle to osinfo.dll
 
+// Set to true to attach console before InitLogging
 static constexpr bool early_attach_console = true;
 
 int APIENTRY wWinMain(HINSTANCE hInstance,
