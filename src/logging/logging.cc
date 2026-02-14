@@ -5,7 +5,8 @@ namespace logging {
  bool logging_initialized = false;
 }
 
-logging::LogMessage::LogMessage(LogLevel level) : level_(level) {}
+logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console) :
+                                level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console) {}
 
 logging::LogMessage::~LogMessage() {
   if (!logging_initialized) {
@@ -40,17 +41,21 @@ logging::LogMessage::~LogMessage() {
       return;
   }
 
-  // Levels higher than INFO level go to stderr
-  if (level_ > LOG_INFO) {
-    std::wcerr << prefix << stream_.str() << std::endl;
-    if (level_ == LOG_FATAL) {
-      __debugbreak(); // Catch for debugger on FATAL
-      return;
+  if (log_to_console_) {
+    // Levels higher than INFO level go to stderr
+    if (level_ > LOG_INFO) {
+      std::wcerr << prefix << stream_.str() << std::endl;
+      if (level_ == LOG_FATAL) {
+        __debugbreak(); // Catch for debugger on FATAL
+        return;
+      }
+    } else {
+      std::wcout << prefix << stream_.str() << std::endl;
     }
-  } else {
-    std::wcout << prefix << stream_.str() << std::endl;
   }
-  AppendTextToFile(std::wstring(prefix) + stream_.str());
+  if (log_to_file_) {
+    AppendTextToFile(std::wstring(prefix) + stream_.str());
+  }
 }
 
 logging::LogMessage& logging::LogMessage::operator<<(char value) {
@@ -216,7 +221,7 @@ bool logging::DeInitLogging(HINSTANCE hInstance) {
   return detached_everything;
 }
 
-// Tests the various operator overloads for basic types.
+// Tests the various operator overloads for basic types, and macros.
 void logging::TestLogging() {
   std::cout << "[INFO] Testing logging with different types " << std::endl;
   LOG(INFO) << "Info1: ostream " << L"Info2 wostream ";
@@ -241,9 +246,19 @@ void logging::TestLogging() {
   LOG(DEBUG) << "Test long double: " <<  testDb;
   LOG(ERROR) << "Test Error";
   LOG(ERROR) << L"Test Error " << GetLastError();
-  DLOG() << L"DLOG Test";
+  DLOG() << L"DLOG() Test. CW_USEDEFAULT: " << CW_USEDEFAULT;
   if (test_fatal) {
     LOG(FATAL) << L"Testing wide character FATAL logging";
   }
-  AppendTextToFile(L"Hello world hawklogging");
+  CLOG(INFO) << L"CLOG() Test. YOU SHOULD NOT SEE THIS IN LOG FILE! ";
+  FLOG(INFO) << L"FLOG() Test. YOU SHOULD NOT SEE THIS IN CONSOLE! ";
+  //LOG(INFO) << L"IDR_MAINFRAME" << IDR_MAINFRAME;
+  //LOG(INFO) << L"IDI_MAINFRAME" << IDI_MAINFRAME;
+  //LOG(INFO) << L"IDC_MAINFRAME" << IDC_MAINFRAME;
+  //LOG(INFO) << L"IDM_MAINFRAME" << IDM_MAINFRAME;
+  //LOG(INFO) << L"_APS_NO_MFC" << _APS_NO_MFC;
+  //LOG(INFO) << L"_APS_NEXT_RESOURCE_VALUE" << _APS_NEXT_RESOURCE_VALUE;
+  //LOG(INFO) << L"_APS_NEXT_COMMAND_VALUE" << _APS_NEXT_COMMAND_VALUE;
+  //LOG(INFO) << L"_APS_NEXT_CONTROL_VALUE" << _APS_NEXT_CONTROL_VALUE;
+  //LOG(INFO) << L"_APS_NEXT_SYMED_VALUE" << _APS_NEXT_SYMED_VALUE;
 }

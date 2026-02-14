@@ -21,8 +21,8 @@ namespace logging {
 
 class LogMessage {
  public:
-  explicit LogMessage(LogLevel level);
-  ~LogMessage();
+  explicit LogMessage(LogLevel level, bool log_to_file, bool log_to_console); // Explicit constructor
+  ~LogMessage(); // Actual logging happens on destruction, simple lazy logger
 
   LogMessage(const LogMessage&) = delete;
   LogMessage& operator=(const LogMessage&) = delete;
@@ -59,10 +59,16 @@ class LogMessage {
   }
 
  protected:
-   bool IsDCheck(); // Whether to use DLOG
+   bool IsDCheck(); // Whether to use DCHECK
 
  private:
+  // Which logging level to use
   LogLevel level_;
+  // Whether to append stream to log file
+  bool log_to_file_;
+  // Whether to send stream to stdout/stderr
+  bool log_to_console_;
+  // The stream itself
   std::wostringstream stream_;
 };
 
@@ -82,7 +88,16 @@ void TestLogging();
 
 }
 
-#define LOG(level) logging::LogMessage(LOG_##level)
-#define DLOG() logging::LogMessage(LOG_DEBUG)
+// Regular logging
+#define LOG(level) logging::LogMessage(LOG_##level, true, true)
+
+// Log only to console
+#define CLOG(level) logging::LogMessage(LOG_##level, false, true)
+
+// Log only to file
+#define FLOG(level) logging::LogMessage(LOG_##level, true, false)
+
+// Debug logging
+#define DLOG() logging::LogMessage(LOG_DEBUG, true, true)
 
 #endif // MINI_LOGGER_LOGGING_H_
