@@ -75,13 +75,17 @@ inline constexpr DWORD dwComCtl32TargetVer =
     _PACKVERSION(static_cast<DWORD>(5u), static_cast<DWORD>(82u));
 
 // Color constants
-#define RGB_RED RGB(255, 192, 192)
-#define RGB_GREEN RGB(192, 255, 192)
-#define RGB_BLUE RGB(0, 0, 128)
-#define RGB_CYAN RGB(192, 255, 255)
-#define RGB_YELLOW RGB(192, 192, 0)
 #define RGB_BLACK RGB(0, 0, 0)
 #define RGB_WHITE RGB(255, 255, 255)
-#define RGB_GREY RGB(48, 48, 48)
+#define RGB_RED RGB(255, 0, 0)
+#define RGB_GREEN RGB(0, 255, 0)
+#define RGB_BLUE RGB(0, 0, 255)
+#define RGB_YELLOW RGB(255, 255, 0)
+#define RGB_REDISH RGB(255, 192, 192)
+#define RGB_GREENISH RGB(192, 255, 192)
+#define RGB_BLUEISH RGB(0, 0, 128)
+#define RGB_YELLOWISH RGB(192, 192, 0)
+#define RGB_CYAN RGB(192, 255, 255)
+#define RGB_DARKGREY RGB(32, 32, 32)
 
 #endif // CRYOCALC_CONSTANTS_H_

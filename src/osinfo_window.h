@@ -21,6 +21,7 @@ extern HWND hOsInfoStatusBar;
 extern HWND hWinVerButton;
 extern HWND hMsInfoButton;
 extern HWND hRunAppButton;
+extern HWND hCloseOSInfoButton;
 
 // Tests osinfo.dll by showing popup window with OS version info.
 bool ShowOsInfo(HWND hWnd);

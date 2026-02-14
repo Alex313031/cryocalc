@@ -48,6 +48,7 @@
 #define IDC_MSINFO_BUTTON           308
 #define IDC_RUNAPP_BUTTON           309
 #define IDC_ALLOC_MEM               310
+#define IDC_CLOSE_OSINFO_BUTTON     311
 
 // User input controls
 #define IDC_INPUT                   320

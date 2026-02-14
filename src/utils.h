@@ -157,6 +157,9 @@ void ClearConsole(HWND hWnd);
 // Clears log file, if any.
 bool ClearLogFile(HWND hWnd);
 
+// Gets the size of the desktop window (usually the screen), to position CryoCalc in the middle of it
+const RECT GetDesktopRect(HINSTANCE hInstance);
+
 // Set client rects for future resizing of a Window
 bool SetClientRects(HWND hWnd, HINSTANCE hInst);
 

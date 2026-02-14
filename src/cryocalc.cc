@@ -138,13 +138,17 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
 bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   bool success = false;
   hInst = hInstance;
+
+  static const RECT kThisDesktop = GetDesktopRect(hInstance);
+  const unsigned int top_position = (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (CW_MAINHEIGHT / 2u);
+  const unsigned int left_position = (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (CW_MAINWIDTH / 2u);
   // Create the main window
   hMainWindow = CreateWindowExW(WS_EX_WINDOWEDGE,
                                 szWindowClass,
                                 CAPTION_TITLE,
                                 WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
-                                512,
-                                512,
+                                left_position,
+                                top_position,
                                 CW_MAINWIDTH,
                                 CW_MAINHEIGHT,
                                 nullptr,
@@ -342,8 +346,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       // Create brushes once and reuse them (static prevents GDI handle leaks)
       static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
       static const HBRUSH hBrushDefault = CreateSolidBrush(bgColorDefault);
-      static HBRUSH hBrushRed = CreateSolidBrush(RGB_RED);
-      static HBRUSH hBrushGreen = CreateSolidBrush(RGB_GREEN);
+      static HBRUSH hBrushRed = CreateSolidBrush(RGB_REDISH);
+      static HBRUSH hBrushGreen = CreateSolidBrush(RGB_GREENISH);
       static HBRUSH hBrushCyan = CreateSolidBrush(RGB_CYAN);
       // Initially set to default color
       COLORREF bgColor = bgColorDefault;
@@ -354,7 +358,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_K:
         case IDC_LABEL_F:
         case IDC_LABEL_R:
-          bgColor = RGB_RED;
+          bgColor = RGB_REDISH;
           hBrushToUse = hBrushRed;
           set_color = true;
           break;
@@ -362,7 +366,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_PREC:
         case IDC_LABEL_THREADS:
         case IDC_LABEL_CACHE:
-          bgColor = RGB_GREEN;
+          bgColor = RGB_GREENISH;
           hBrushToUse = hBrushGreen;
           set_color = true;
           break;
@@ -423,7 +427,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     default:
       return DefWindowProc(hWnd, uMsg, wParam, lParam);
   }
-  return DefWindowProc(hWnd, uMsg, wParam, lParam);
+  return 0;
 }
 
 HINSTANCE GetGlobalHinst() {

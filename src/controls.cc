@@ -404,7 +404,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr
   );
-  // Lastly, create the status bar
+  // Create the status bar
   hStatusBar = CreateWindowExW(
       0, STATUSCLASSNAME, nullptr,
       WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,

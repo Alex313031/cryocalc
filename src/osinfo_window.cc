@@ -12,6 +12,7 @@ HWND hOsInfoStatusBar;
 HWND hWinVerButton;
 HWND hMsInfoButton;
 HWND hRunAppButton;
+HWND hCloseOSInfoButton;
 
 static const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u);
 
@@ -79,17 +80,17 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
       PADDING_X,
       PADDING_Y,
       OSINFO_WIDTH - END_PADDING,
-      GetYOffset(OSINFO_HEIGHT, 0, 0.75f) - END_PADDING,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - (END_PADDING * 2),
       hWnd, (HMENU)IDC_OSINFO_OUT, hInst, nullptr);
   hOsInfoStatusBar = CreateWindowExW(
       0, STATUSCLASSNAME, nullptr,
-      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
-      0, 0, 0, 0,
+      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
+      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
       hWnd, nullptr, hInst, nullptr
   );
   hWinVerButton = CreateWindowExW(
       0, WC_BUTTON, WINVER_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       PADDING_X,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING,
       kOsInfoButtonWidth,
@@ -98,7 +99,7 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   );
   hMsInfoButton = CreateWindowExW(
       0, WC_BUTTON, MSINFO_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING,
       kOsInfoButtonWidth,
@@ -107,17 +108,27 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   );
   hRunAppButton = CreateWindowExW(
       0, WC_BUTTON, RUN_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
-      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT - END_PADDING,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      PADDING_X,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
       kOsInfoButtonWidth,
       BUTTON_HEIGHT,
       hWnd, (HMENU)IDC_RUNAPP_BUTTON, hInst, nullptr
+  );
+  hCloseOSInfoButton = CreateWindowExW(
+      0, WC_BUTTON, CLOSE_OI_BUTT,
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
+      kOsInfoButtonWidth,
+      BUTTON_HEIGHT,
+      hWnd, (HMENU)IDC_CLOSE_OSINFO_BUTTON, hInst, nullptr
   );
   AddTooltip(hWnd, hOsInfoTextOut, hInst, L"Windows System Info Log");
   AddTooltip(hWnd, hWinVerButton, hInst, L"Open Windows Version shell dialog");
   AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");
   AddTooltip(hWnd, hRunAppButton, hInst, L"Open \"Run\" Dialog");
+  AddTooltip(hWnd, hCloseOSInfoButton, hInst, L"Close this OS Info Utilities Window");
   OutputOsInfo(hWnd);
 }
 
@@ -139,8 +150,9 @@ void HandleOsInfoResize(HWND hWnd) {
   const unsigned int kButtonWidth = is_compact ? kOsInfoButtonWidth - 16u : kOsInfoButtonWidth;
   const unsigned int kButtonLeft = is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
   MoveWindow(hWinVerButton, kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hRunAppButton, kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
   MoveWindow(hMsInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hRunAppButton, kButtonLeft + ((INTRA_PADDING + kButtonWidth) / 2u), kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
+  MoveWindow(hCloseOSInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
 }
 
 LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -159,9 +171,9 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           OpenRunDialog(hWnd);
           break;
         case IDC_CLOSE_OSINFO:
+        case IDC_CLOSE_OSINFO_BUTTON:
           CloseWindow(hWnd);
           DestroyWindow(hWnd);
-          UnregisterClassW(szOSInfoWindowClass, this_hinst);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -176,14 +188,14 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
       static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
       static const HBRUSH hBrushDefault = CreateSolidBrush(bgColorDefault);
-      static const COLORREF kTextColor = RGB_WHITE;
+      static const COLORREF kTextColor = RGB_GREEN;
       bool set_color = false;
       COLORREF kWindowBackground = bgColorDefault;
       HBRUSH hBrushToUse = hBrushDefault;
       // Check which edit control sent the message
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_OSINFO_OUT: {
-          kWindowBackground = RGB_GREY;
+          kWindowBackground = RGB_DARKGREY;
           hBrushToUse = CreateSolidBrush(kWindowBackground);
           set_color = true;
         } break;
@@ -211,17 +223,20 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       pMinMaxInfo->ptMaxTrackSize.y = 480;
     } break;
     case WM_CLOSE:
-    case WM_DESTROY:
       DestroyWindow(hWnd);
-      UnregisterClassW(szOSInfoWindowClass, this_hinst);
       break;
+    case WM_DESTROY: {
+      if (UnregisterClassW(szOSInfoWindowClass, this_hinst)) {
+        hOsInfoWin = nullptr;
+      }
+    } break;
     case WM_NCDESTROY:
       hOsInfoWin = nullptr;
       break;
     default:
       return DefWindowProc(hWnd, uMsg, wParam, lParam);
   }
-  return DefWindowProc(hWnd, uMsg, wParam, lParam);
+  return 0;
 }
 
 std::wstring GetWinInfo() {
