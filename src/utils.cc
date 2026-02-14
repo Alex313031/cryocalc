@@ -418,29 +418,6 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd) {
   return hInstance;
 }
 
-// Opens the "Run" shell dialog from shell32.dll
-void OpenRunDialog(HWND hWnd) {
-  static HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hWnd), MAKEINTRESOURCE(IDI_WINFLAG));
-  if (kSmallIcon) {
-    wchar_t szCurDir[MAX_PATH];
-    GetCurrentDirectoryW(MAX_PATH, szCurDir);
-    // Open "Run"
-    HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
-    if (hShell32Dll) {
-      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
-      if (pfnRunFileDlg) {
-        LOG(INFO) << L"Opening RunFileDlg";
-        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
-      } else {
-        LOG(ERROR) << L"Failed to open run dialog.";
-      }
-    } else {
-      LOG(ERROR) << L"Failed to get shell32.dll handle.";
-    }
-    DestroyIcon(kSmallIcon); // Cleanup icon
-  }
-}
-
 const std::wstring GetExeDir() {
   wchar_t exe_path[MAX_PATH];
   HMODULE this_app = GetModuleHandleW(nullptr);
@@ -465,6 +442,62 @@ const std::wstring GetExeDir() {
     LOG(DEBUG) << __func__ << L" = " << retval;
   }
   return retval;
+}
+
+// Opens the "Run" shell dialog from shell32.dll
+void OpenRunDialog(HWND hWnd) {
+  static HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hWnd), MAKEINTRESOURCE(IDI_WINFLAG));
+  if (kSmallIcon) {
+    wchar_t szCurDir[MAX_PATH];
+    GetCurrentDirectoryW(MAX_PATH, szCurDir);
+    // Open "Run"
+    HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
+    if (hShell32Dll) {
+      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
+      if (pfnRunFileDlg) {
+        LOG(INFO) << L"Opening RunFileDlg";
+        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
+      } else {
+        LOG(ERROR) << L"Failed to open run dialog.";
+      }
+    } else {
+      LOG(ERROR) << L"Failed to get shell32.dll handle.";
+    }
+    DestroyIcon(kSmallIcon); // Cleanup icon
+  }
+}
+
+// Opens log file with default .txt handler
+bool OpenLogFile(HWND hWnd, const std::wstring &file_path) {
+  bool success = false;
+  const wchar_t* path = file_path.c_str();
+  LOG(INFO) << L"Opening log file " << path;
+  HINSTANCE result = ShellExecuteW(hWnd, L"open", path, nullptr, nullptr, SW_NORMAL);
+  std::wostringstream wostr;
+  if (reinterpret_cast<INT_PTR>(result) <= 32) {
+    DWORD error = GetLastError();
+    wostr << L"Opening log file" << path << " failed! \n";
+    bool treat_as_error = true;
+    if (error == ERROR_FILE_NOT_FOUND) {
+      wostr << path << L" could not be found.";
+      treat_as_error = false;
+    } else {
+      wostr << L"Error = " << std::showbase << std::hex << error
+            << std::dec << std::defaultfloat;
+    }
+    const std::wstring message = wostr.str();
+    if (!treat_as_error) {
+      LOG(WARN) << message;
+    } else {
+      LOG(ERROR) << message;
+    }
+    success = false;
+  } else {
+    success = true;
+  }
+  wostr.str(L"");
+  wostr.clear();
+  return success;
 }
 
 // Run any shell app

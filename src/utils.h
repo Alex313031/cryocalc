@@ -127,11 +127,14 @@ bool ParseCommandLine(int argc, LPWSTR argv[]);
 // Returns an HINSTANCE for a given window HWND
 HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 
+// Returns path to the main .exe, for finding files side by side with it.
+const std::wstring GetExeDir();
+
 // Opens the "Run" applet
 void OpenRunDialog(HWND hWnd);
 
-// Returns path to the main .exe, for finding files side by side with it.
-const std::wstring GetExeDir();
+// Opens log file
+bool OpenLogFile(HWND hWnd, const std::wstring &file_path);
 
 // Launcher function to open shell applets
 bool RunShellApplet(HWND hWnd, const wchar_t* executable);
