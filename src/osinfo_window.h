@@ -1,5 +1,5 @@
-#ifndef CRYOCALC_OSINFO_H_
-#define CRYOCALC_OSINFO_H_
+#ifndef CRYOCALC_OSINFO_WINDOW_H_
+#define CRYOCALC_OSINFO_WINDOW_H_
 
 #include "framework.h"
 #include "resource.h"
@@ -46,4 +46,4 @@ void LogOsInfo();
 // Tests the DllGetVersion function in osinfo.dll
 bool TestDllGetVersion();
 
-#endif // CRYOCALC_OSINFO_H_
+#endif // CRYOCALC_OSINFO_WINDOW_H_

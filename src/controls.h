@@ -7,7 +7,7 @@
 #include "strings.h"
 #include "globals.h"
 #include "utils.h"
-#include "osinfo.h"
+#include "osinfo_window.h"
 
 extern bool _about_handled;
 

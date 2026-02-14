@@ -1,4 +1,4 @@
-#include "osinfo.h"
+#include "osinfo_window.h"
 
 static int this_width;
 static int this_height;
