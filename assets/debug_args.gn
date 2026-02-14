@@ -4,6 +4,7 @@ target_cpu = "x86"
 
 # Debug/Release Flags
 is_debug = true
+dcheck_enabled = false
 is_official_build = false
 
 # C++ Standard to use
@@ -11,7 +12,12 @@ cpp_std = "17"
 
 # Target Windows version.
 winver = "2000"
+
+# Whether to enable common controls
 use_common_controls = true
 
 # Whether to default to compiling as a console app or GUI app
 console_subsystem = false
+
+# Whether to use -Wl,--large-address-aware which is same as MSVC /LARGEADDRESSAWARE
+large_address_aware = true
