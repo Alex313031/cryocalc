@@ -9,6 +9,7 @@
 
 #include "controls.h"
 #include "framework.h"
+#include "painting.h"
 #include "resource.h"
 
 // Creates the main window with CreateWindowW()

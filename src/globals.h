@@ -79,4 +79,7 @@ extern HINSTANCE GetGlobalHinst();
 
 extern HANDLE g_ini_file;
 
+// Font handle for CryoCalc UI
+extern HFONT hCryoFont;
+
 #endif // CRYOCALC_GLOBALS_H_
