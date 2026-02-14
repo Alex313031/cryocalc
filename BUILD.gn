@@ -50,4 +50,6 @@ config("cryocalc_config") {
     "src",
     "osinfo",
   ]
+  # Track unused functions
+  cflags = [ "-Wunused-function" ]
 }

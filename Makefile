@@ -45,7 +45,7 @@ DEFINES  := -DUNICODE -D_UNICODE -D_WINDOWS -DWINVER=0x0500 -D_WIN32_WINNT=0x050
 INCLUDE_DIRS = -Isrc -Iosinfo -Isrc/logging
 # Show all errors, compile everything static, ensure src dir is included, -municode
 # since this is a GUI windows app, ensure relocatable data
-CFLAGS   := $(DEFINES) -Wall -static-libgcc -municode -finput-charset=UTF-8 -fexec-charset=UTF-8 $(INCLUDE_DIRS)
+CFLAGS   := $(DEFINES) -Wall -Wunused-function -static-libgcc -municode -finput-charset=UTF-8 -fexec-charset=UTF-8 $(INCLUDE_DIRS)
 
 # Compiler optimization and architecture flags
 ifeq ($(BUILDTYPE), Release)
