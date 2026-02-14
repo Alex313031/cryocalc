@@ -289,17 +289,22 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             return 1;
           }
         } break;
-        case IDM_CLEAR_CON:
+        case IDM_CLEAR_CON: {
           ClearConsole(hWnd);
-          break;
+          FLOG(WARN) << L"Cleared console";
+        } break;
         case IDM_CLEAR_LOG: {
           bool clear_log = ConfirmAndClearLog(hWnd);
           if (clear_log) {
-            LOG(INFO) << L"Cleared contents of log file.";
+            CLOG(WARN) << L"Cleared contents of log file.";
           }
         } break;
         case IDM_TEST_LOG: {
           logging::TestLogging();
+        } break;
+        case IDM_OPEN_LOG: {
+          const std::wstring cryocalc_logfile_path = GetExeDir() + kLogFileName;
+          OpenLogFile(hWnd, cryocalc_logfile_path);
         } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);

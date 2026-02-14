@@ -90,7 +90,8 @@ BEGIN
         BEGIN
             MENUITEM "&Attach Console", IDM_ATTACH_CON
             MENUITEM "&Detach Console", IDM_DETACH_CON
-            MENUITEM "&OS Info",        IDM_OSINFO
+            MENUITEM "&Open Log File",  IDM_OPEN_LOG
+            MENUITEM "OS &Info",        IDM_OSINFO
             MENUITEM "&Test Logging",   IDM_TEST_LOG
         END
     END

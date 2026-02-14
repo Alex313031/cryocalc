@@ -635,7 +635,7 @@ void UpdateStatusBar(const unsigned int part, const std::wstring text) {
 
 void ClearInput(HWND hWnd) {
   SetWindowTextW(hInputEdit, kBlank);
-  LOG(WARN) << L"Cleared input";
+  LOG(INFO) << L"Cleared input";
 }
 
 void ClearControls(HWND hWnd) {
@@ -643,7 +643,7 @@ void ClearControls(HWND hWnd) {
   SetWindowTextW(hKelvinEdit, kBlank);
   SetWindowTextW(hFahrenheitEdit, kBlank);
   SetWindowTextW(hRankineEdit, kBlank);
-  LOG(WARN) << L"Cleared controls";
+  LOG(INFO) << L"Cleared controls";
 }
 
 static errno_t wcsncpy_s_compat(wchar_t* dest, size_t destsz, const wchar_t* src, size_t count) {

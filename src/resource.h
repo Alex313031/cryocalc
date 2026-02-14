@@ -34,6 +34,7 @@
 #define IDM_CLEAR_CON               213
 #define IDM_CLEAR_LOG               214
 #define IDM_TEST_LOG                215
+#define IDM_OPEN_LOG                216
 
 // Buttons
 #define IDC_CONVERT                 300
