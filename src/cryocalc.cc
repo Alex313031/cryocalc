@@ -318,9 +318,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       }
     } break;
     // When window is shown
-    case WM_CREATE: {
+    case WM_CREATE:
       InitControls(hWnd, hInst);
-    } break;
+      break;
     // Start painting
     case WM_PAINT: {
       PAINTSTRUCT ps;
