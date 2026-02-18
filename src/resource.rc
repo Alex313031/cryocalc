@@ -69,20 +69,21 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Run",     IDM_RUN
-        MENUITEM             SEPARATOR
+        MENUITEM SEPARATOR
         MENUITEM "E&xit",    IDM_CEXIT
     END
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Cut",     IDM_CUT, GRAYED
         MENUITEM "&Copy",    IDM_COPY, GRAYED
-        MENUITEM             SEPARATOR
+        MENUITEM SEPARATOR
         MENUITEM "&Paste",   IDM_PASTE
     END
     POPUP "&Dev"
     BEGIN
         MENUITEM "&Clear Console",  IDM_CLEAR_CON
         MENUITEM "Clear &Log File", IDM_CLEAR_LOG
+        MENUITEM SEPARATOR
         POPUP "&More"
         BEGIN
             MENUITEM "&Attach Console", IDM_ATTACH_CON
@@ -95,7 +96,7 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&Help",    IDM_HELP
-        MENUITEM             SEPARATOR
+        MENUITEM SEPARATOR
         MENUITEM "&About",   IDM_ABOUT
     END
     POPUP "?" HELP
