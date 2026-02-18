@@ -144,6 +144,7 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   static const RECT kThisDesktop = GetDesktopRect(hInstance);
   const unsigned int top_position = (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (CW_MAINHEIGHT / 2u);
   const unsigned int left_position = (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (CW_MAINWIDTH / 2u);
+  const bool got_main_font = CreateMainFont();
   // Create the main window
   hMainWindow = CreateWindowExW(WS_EX_WINDOWEDGE,
                                 szWindowClass,
@@ -158,7 +159,7 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
                                 hInstance,
                                 nullptr);
 
-  if (!hMainWindow) {
+  if (!hMainWindow || !got_main_font) {
     success = false;
   } else {
     // Show the window
@@ -317,9 +318,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       }
     } break;
     // When window is shown
-    case WM_CREATE:
+    case WM_CREATE: {
       InitControls(hWnd, hInst);
-      break;
+    } break;
     // Start painting
     case WM_PAINT: {
       PAINTSTRUCT ps;

@@ -1,5 +1,7 @@
 #include "controls.h"
 
+#include "painting.h"
+
 #include <chrono>
 
 // Static labels
@@ -541,8 +543,10 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hPrecisionCombo, CB_SETCURSEL, static_cast<int>(GetDefaultPrecision()), 0);
   SendMessageW(hCacheSizeCombo, CB_SETCURSEL, 1, 0);
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
-  InitStatusBar(hWnd, hInst);
-  AppendTooltips(hWnd, hInst);
+  InitStatusBar(hWnd, hInst); // Set up status bar at bottom
+  // Stuff to do after controls are initialized
+  SetFontAllControls(hWnd); // Set initial font for all controls in main Window
+  AppendTooltips(hWnd, hInst); // Add hover tooltips to everything, lol
 }
 
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {

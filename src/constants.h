@@ -20,6 +20,10 @@ inline const wchar_t* kIniFileName  = L"cryocalc.ini";
 inline const wchar_t* kWinVerExe    = L"winver.exe";
 inline const wchar_t* kMsInfo32Exe  = L"msinfo32.exe";
 
+// Font and GDI constants
+inline const wchar_t* kMainFont     = L"Tahoma"; // Font to use for all controls by default, unless set otherwise
+inline const wchar_t* kInputFont    = L"Arial"; // Font to use for input controls
+
 // Min/Max decimal precision for output.
 constexpr unsigned int MIN_PRECISION = 0u;
 constexpr unsigned int MAX_PRECISION = 4u;
