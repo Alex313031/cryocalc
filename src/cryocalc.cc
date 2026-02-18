@@ -105,8 +105,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   // Main window message loop:
   while (GetMessage(&msg, nullptr, 0, 0)) {
     if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
+      if (!IsDialogMessage(hMainWindow, &msg)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
     }
   }
 
@@ -117,19 +119,19 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   // Declare and set size of this window class struct.
   WNDCLASSEXW wcex;
   wcex.cbSize = sizeof(WNDCLASSEX);
-
+  static const HICON main_icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC));
   // Set styles, icons, and window message handling function.  
   wcex.style          = CS_HREDRAW | CS_VREDRAW; // Drawing style
   wcex.lpfnWndProc    = WindowProc; // Window Procedure function
   wcex.cbClsExtra     = 0; // Extra bytes to add to end of this window class
   wcex.cbWndExtra     = 0; // Extra bytes to add to end hInstance
   wcex.hInstance      = hInstance; // This instance
-  wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load our main app icon
+  wcex.hIcon          = nullptr; // Load our main app icon
   wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
   wcex.hbrBackground  = reinterpret_cast<HBRUSH>(COLOR_WINDOW); // Choose window client area background color
   wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName  = szWindowClass; // Use our unique window class name
-  wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_CRYOCALC)); // Load titlebar icon
+  wcex.hIconSm        = main_icon; // Load titlebar icon
 
   // Returns a "class atom", a win32 specific data type.
   return RegisterClassExW(&wcex);
