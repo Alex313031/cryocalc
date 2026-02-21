@@ -52,8 +52,11 @@ NamespaceIndentation: All
 # No spaces between C casts
 SpaceAfterCStyleCast: false
 
+# Allow Macros to be spaced how we like
+AlignConsecutiveMacros: false
+
 # Should never use tab chars
-#UseTab: Never
+UseTab: Never
 
 # Sort #includes by following
 # https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
