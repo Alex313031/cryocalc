@@ -5,19 +5,19 @@ BasedOnStyle: Chromium
 Language: Cpp
 
 # Global line length limit
-ColumnLimit: '100'
+ColumnLimit: 100
 
 # General indent width
-IndentWidth: '2'
+IndentWidth: 2
 
 # Don't allow more than 1 empty line
-MaxEmptyLinesToKeep: '1'
+MaxEmptyLinesToKeep: 1
 
 # 1 space before trailing comments
-SpacesBeforeTrailingComments: '1'
+SpacesBeforeTrailingComments: 1
 
 # Align multiple trailing comments for readability
-AlignTrailingComments: 'true'
+AlignTrailingComments: true
 
 # Leave comments alone, some are longer than 80 lines
 ReflowComments: false
@@ -26,28 +26,31 @@ ReflowComments: false
 Standard: Cpp11
 
 # Braces for everything
-InsertBraces: 'true'
+InsertBraces: true
 
 # Always insert newline
-InsertNewlineAtEOF: 'true'
+InsertNewlineAtEOF: true
 
 # Don't use compact namespaces like Chromium
-CompactNamespaces: 'false'
+CompactNamespaces: false
 
 # Modern braced lists
-Cpp11BracedListStyle: 'true'
+Cpp11BracedListStyle: true
 
 # std::string* str
 PointerAlignment: Left
 
 # No C style spaces cluttering things
-SpacesInParentheses: 'false'
+SpacesInParentheses: false
 
 # Arrays don't have padding spaces
-SpacesInSquareBrackets: 'false'
+SpacesInSquareBrackets: false
 
 # Always indent namespaces
 NamespaceIndentation: All
+
+# No spaces between C casts
+SpaceAfterCStyleCast: false
 
 # Should never use tab chars
 #UseTab: Never
@@ -55,9 +58,9 @@ NamespaceIndentation: All
 # Sort #includes by following
 # https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
 # ref: https://clang.llvm.org/docs/ClangFormatStyleOptions.html#includeblocks
-SortIncludes: 'true'
-
+SortIncludes: true
 IncludeBlocks: Regroup
+
 # ref: https://clang.llvm.org/docs/ClangFormatStyleOptions.html#includecategories
 IncludeCategories:
   # The win32 api has all sorts of implicit include order dependencies :-/
