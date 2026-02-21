@@ -274,6 +274,7 @@ DWORD GetLogicalProcessorCount() {
 #if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
   whichfunc =  L"GetNativeSystemInfo";
   GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
+  pfnGetNativeSystemInfo = nullptr;
 #else
   // Note: Do not call FreeLibrary() on GetModuleHandle() results
   HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
@@ -297,7 +298,8 @@ DWORD GetLogicalProcessorCount() {
     LOG(DEBUG) << L"Using " << whichfunc << " for " << __FUNC__;
   }
 #endif
-  return sysInfo.dwNumberOfProcessors;
+  const DWORD num_cpus = sysInfo.dwNumberOfProcessors;
+  return num_cpus;
 }
 
 unsigned int GetDefaultNumThreads() {
@@ -765,6 +767,8 @@ bool GetCustomSettings() {
   // Format: key=value (e.g., default_precision=4, debug_mode=1)
   std::istringstream stream(buffer);
   std::string line;
+  bool set_debug = false;
+  unsigned int set_precision = DEFAULT_PRECISION;
   while (std::getline(stream, line)) {
     // Skip empty lines and comments
     if (line.empty() || line[0] == '#' || line[0] == ';') {
@@ -789,35 +793,33 @@ bool GetCustomSettings() {
     }
 
     // Parse known settings
-    bool precisionkey = (key == "default_precision");
+    bool precisionkey = (key == "precision");
     bool debugkey = (key == "debug_mode");
     if (precisionkey) {
       const int precision = std::atoi(value.c_str());
       if (precision >= static_cast<int>(MIN_PRECISION) &&
           precision <= static_cast<int>(MAX_PRECISION)) {
         const int prec_val = static_cast<unsigned int>(precision);
-        custom_settings.default_precision = prec_val;
+        set_precision = prec_val;
       } else {
         std::wcerr << L"INI: default_precision=" << precision
                    << L" out of range (" << MIN_PRECISION << L"-" << MAX_PRECISION << L")!" << std::endl;
-        custom_settings.default_precision = DEFAULT_PRECISION;
+        set_precision = DEFAULT_PRECISION;
       }
-    } else {
-      custom_settings.default_precision = DEFAULT_PRECISION;
     }
     if (debugkey) {
       const int debug_val = std::atoi(value.c_str());
       if (debug_val == 0) {
-        custom_settings.set_debug_mode = false;
+        set_debug = false;
       } else if (debug_val == 1) {
-        custom_settings.set_debug_mode = true;
+        set_debug = true;
       } else {
-        custom_settings.set_debug_mode = false;
+        set_debug = false;
       }
-    } else {
-      custom_settings.set_debug_mode = false;
     }
   }
+  custom_settings.set_debug_mode = set_debug;
+  custom_settings.default_precision = set_precision;
 
   got_settings = true;
   return SetCustomSettings();
