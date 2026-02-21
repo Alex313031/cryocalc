@@ -18,8 +18,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 HMODULE hOsInfoDll = nullptr; // Module handle to osinfo.dll
 
-// Set to true to attach console before InitLogging
-static constexpr bool early_attach_console = true;
+static constexpr bool early_attach_console = true; // Set to true to early attach console before InitLogging
+static constexpr bool hold_console_for_testing = false; // Don't detach console even if non logging
 
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
@@ -61,7 +61,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   if (!parsed_cmdline) {
     return 1;
   } else {
-    if (!enable_logging) {
+    if (!enable_logging && !hold_console_for_testing) {
       if (!DetachConsole()) {
         return 1;
       }
