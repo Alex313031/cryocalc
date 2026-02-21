@@ -38,7 +38,8 @@ static unsigned int GetSeed() {
   unsigned int seed = 0;
   static const bool isXP = IsAtLeast(kWinXP);
   static const bool is2K = IsAtLeast(kWin2000);
-  if (isXP) {
+  static constexpr bool force_rand_s = true;
+  if (isXP || force_rand_s) {
     LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
     // Causes crash on Windows 2000 with rand_s() because it uses RtlGenRandom internally. Bug in MinGW.
     std::random_device randd;
