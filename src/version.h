@@ -1,12 +1,21 @@
 #ifndef CRYOCALC_VERSION_H_
 #define CRYOCALC_VERSION_H_
 
-#ifdef __clang__
- #pragma code_page(65001) // UTF-8
-#endif // __clang__
-
 // This file is for specifying the target windows version, as well as application
 // version constants.
+
+// We need to define _UNICODE and UNICODE for TCHAR
+#ifndef UNICODE
+ #define UNICODE
+#endif
+
+#ifndef _UNICODE
+ #define _UNICODE
+#endif
+
+#ifdef __clang__
+ #pragma code_page(65001) // UTF-8
+#endif
 
 /* Including SDKDDKVer.h defines the highest available Windows platform.
    If you wish to build your application for a previous Windows platform, include WinSDKVer.h and
@@ -14,25 +23,31 @@
 
 #ifndef __MINGW32__
  #include <WinSDKVer.h> // Doesn't exist in MinGW
-#endif // __MINGW32__
+#endif
 
 #ifndef _WIN32_WINNT
  #define _WIN32_WINNT 0x0500 // Windows 2000
-#endif // _WIN32_WINNT
+#endif
+
+#ifndef WINVER
+ #define WINVER 0x0500 // Same as _WIN32_WINNT above
+#endif 
+
 #ifndef _WIN64_WINNT
  #define _WIN64_WINNT 0x0502 // Minimum version for 64 bit, Windows Server 2003
-#endif // _WIN64_WINNT
+#endif
+
 #ifndef _WIN32_IE
  #define _WIN32_IE 0x0501 // Minimum Internet Explorer version for common controls
-#endif // _WIN32_IE
+#endif
 
 #ifndef _ATL_XP_TARGETING
  #define _ATL_XP_TARGETING // For using XP-compatible ATL/MFC functions
-#endif // _ATL_XP_TARGETING
+#endif
 
 #ifndef __MINGW32__
  #include <SDKDDKVer.h> // Doesn't exist in MinGW
-#endif // __MINGW32__
+#endif
 
 // Macro to convert to string
 #if !defined(_STRINGIZER_)
