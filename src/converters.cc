@@ -1,4 +1,5 @@
 #include "converters.h"
+
 #include "framework.h"
 
 /* functions that return Kelvin */
@@ -18,7 +19,6 @@ long double kelvin::fromRankine(long double in_rankine) {
 }
 /* end Kelvin functions */
 
-
 /* functions that return Celsius */
 long double celsius::fromKelvin(long double in_kelvin) {
   long double retval = in_kelvin - KELVIN_OFFSET;
@@ -37,7 +37,6 @@ long double celsius::fromRankine(long double in_rankine) {
 }
 /* end Celsius functions */
 
-
 /* functions that return Fahrenheit */
 long double fahrenheit::fromCelsius(long double in_celsius) {
   long double retval = (in_celsius * 9.0L / 5.0L) + 32.0L;
@@ -55,7 +54,6 @@ long double fahrenheit::fromRankine(long double in_rankine) {
   return retval;
 }
 /* end Fahrenheit functions */
-
 
 /* functions that return Rankine */
 long double rankine::fromCelsius(long double in_celsius) {
