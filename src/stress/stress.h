@@ -6,7 +6,7 @@
 // Volatile variables to be used by stress threads
 extern volatile bool running; // For controlling thread activation state
 
-extern bool use_sse2_simd; // For controlling which stress function to use.
+extern bool use_sse2_simd;    // For controlling which stress function to use.
 
 // Call this before launching threads. Set to false to stop threads
 void set_run_state(bool on);

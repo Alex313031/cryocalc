@@ -1,92 +1,94 @@
 #ifndef MINI_LOGGER_LOGGING_H_
 #define MINI_LOGGER_LOGGING_H_
 
-#include "logging_base.h"
 #include "check.h"
 #include "file_util.h"
+#include "logging_base.h"
 
 enum LogLevel {
-  LOG_INFO = 0,
-  LOG_WARN = 1,
-  LOG_ERROR = 2,
-  LOG_DEBUG = 3,
-  LOG_FATAL = 4,
+  LOG_INFO     = 0,
+  LOG_WARN     = 1,
+  LOG_ERROR    = 2,
+  LOG_DEBUG    = 3,
+  LOG_FATAL    = 4,
   MAX_LOGLEVEL = 5
 };
 
 // Toggle to test LOG(FATAL) which will crash the app
-static constexpr bool test_fatal = false; 
+static constexpr bool test_fatal = false;
 
 namespace logging {
 
-class LogMessage {
- public:
-  explicit LogMessage(LogLevel level, bool log_to_file, bool log_to_console); // Explicit constructor
-  ~LogMessage(); // Actual logging happens on destruction, simple lazy logger
+  class LogMessage {
+   public:
+    explicit LogMessage(LogLevel level,
+                        bool log_to_file,
+                        bool log_to_console); // Explicit constructor
+    ~LogMessage(); // Actual logging happens on destruction, simple lazy logger
 
-  LogMessage(const LogMessage&) = delete;
-  LogMessage& operator=(const LogMessage&) = delete;
+    LogMessage(const LogMessage&)            = delete;
+    LogMessage& operator=(const LogMessage&) = delete;
 
-  // Narrow string/char overloads - convert to wide
-  LogMessage& operator<<(char value);
-  LogMessage& operator<<(const char* value);
+    // Narrow string/char overloads - convert to wide
+    LogMessage& operator<<(char value);
+    LogMessage& operator<<(const char* value);
 
-  // Wide string/char overloads - stream directly
-  LogMessage& operator<<(wchar_t value);
-  LogMessage& operator<<(const wchar_t* value);
-  LogMessage& operator<<(const std::string& value);
-  LogMessage& operator<<(const std::wstring& value);
+    // Wide string/char overloads - stream directly
+    LogMessage& operator<<(wchar_t value);
+    LogMessage& operator<<(const wchar_t* value);
+    LogMessage& operator<<(const std::string& value);
+    LogMessage& operator<<(const std::wstring& value);
 
-  // Numeric type overloads
-  LogMessage& operator<<(int value);
-  LogMessage& operator<<(unsigned int value);
-  LogMessage& operator<<(long value);
-  LogMessage& operator<<(unsigned long value);
-  LogMessage& operator<<(long long value);
-  LogMessage& operator<<(unsigned long long value);
-  LogMessage& operator<<(float value);
-  LogMessage& operator<<(double value);
-  LogMessage& operator<<(long double value);
+    // Numeric type overloads
+    LogMessage& operator<<(int value);
+    LogMessage& operator<<(unsigned int value);
+    LogMessage& operator<<(long value);
+    LogMessage& operator<<(unsigned long value);
+    LogMessage& operator<<(long long value);
+    LogMessage& operator<<(unsigned long long value);
+    LogMessage& operator<<(float value);
+    LogMessage& operator<<(double value);
+    LogMessage& operator<<(long double value);
 
-  // Other overloads
-  LogMessage& operator<<(HWND value);
+    // Other overloads
+    LogMessage& operator<<(HWND value);
 
-  // Generic template for streams and other types (manipulators, etc.)
-  template <typename T>
-  LogMessage& operator<<(const T& value) {
-    stream_ << value;
-    return *this;
-  }
+    // Generic template for streams and other types (manipulators, etc.)
+    template <typename T>
+    LogMessage& operator<<(const T& value) {
+      stream_ << value;
+      return *this;
+    }
 
- protected:
-   bool IsDCheck(); // Whether to use DCHECK
+   protected:
+    bool IsDCheck(); // Whether to use DCHECK
 
- private:
-  // Which logging level to use
-  LogLevel level_;
-  // Whether to append stream to log file
-  bool log_to_file_;
-  // Whether to send stream to stdout/stderr
-  bool log_to_console_;
-  // The stream itself
-  std::wostringstream stream_;
-};
+   private:
+    // Which logging level to use
+    LogLevel level_;
+    // Whether to append stream to log file
+    bool log_to_file_;
+    // Whether to send stream to stdout/stderr
+    bool log_to_console_;
+    // The stream itself
+    std::wostringstream stream_;
+  };
 
-extern volatile bool dcheck_log_;
+  extern volatile bool dcheck_log_;
 
-// Initialize logging for this program
-bool InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name);
+  // Initialize logging for this program
+  bool InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name);
 
-// Call to clean up logging stream and any file handles
-bool DeInitLogging(HINSTANCE hInstance);
+  // Call to clean up logging stream and any file handles
+  bool DeInitLogging(HINSTANCE hInstance);
 
-// Set whether to use DLOG
-void SetIsDCheck(bool set_is_dcheck);
+  // Set whether to use DLOG
+  void SetIsDCheck(bool set_is_dcheck);
 
-// Test that logging works as expected.
-void TestLogging();
+  // Test that logging works as expected.
+  void TestLogging();
 
-}
+} // namespace logging
 
 // Regular logging
 #define LOG(level) logging::LogMessage(LOG_##level, true, true)
