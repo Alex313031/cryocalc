@@ -31,7 +31,7 @@
 
 #ifndef WINVER
  #define WINVER 0x0500 // Same as _WIN32_WINNT above
-#endif 
+#endif
 
 #ifndef _WIN64_WINNT
  #define _WIN64_WINNT 0x0502 // Minimum version for 64 bit, Windows Server 2003
@@ -48,6 +48,8 @@
 #ifndef __MINGW32__
  #include <SDKDDKVer.h> // Doesn't exist in MinGW
 #endif
+
+// clang-format off: Version DEFINES left alone
 
 // Macro to convert to string
 #if !defined(_STRINGIZER_)
@@ -69,8 +71,8 @@
 #define BUILD_VERSION 0
 
 #define VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
-#define ABOUT_TITLE L"About CryoCalc"
-#define ABOUT_CONTENT L"CryoCalc ver. " VERSION_STRING
+#define ABOUT_TITLE    L"About CryoCalc"
+#define ABOUT_CONTENT  L"CryoCalc ver. " VERSION_STRING
 // TODO: Rebuilt win32devkit with UTF8 rc support and convert to ©
 #define ABOUT_COPYRIGHT L"\251 2025-2026 Alex313031" // \251 is the © symbol
 #define LEGAL_COPYRIGHT L"\251 2025-2026 Alex313031"
@@ -78,5 +80,7 @@
 #ifndef _PACKVERSION
  #define _PACKVERSION(major,minor) MAKELONG((minor), ((major) << 8))
 #endif
+
+// clang-format on: Done with version DEFINES
 
 #endif // CRYOCALC_VERSION_H_

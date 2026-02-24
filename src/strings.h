@@ -1,6 +1,8 @@
 #ifndef CRYOCALC_STRINGS_H_
 #define CRYOCALC_STRINGS_H_
 
+// clang-format off: Strings left alone
+
 // Button/Controls titles
 constexpr wchar_t convert_button[]  = L"Convert";
 constexpr wchar_t input_label[]     = L"Input:";
@@ -124,5 +126,7 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
 #endif
+
+// clang-format on: Done with strings.h
 
 #endif // CRYOCALC_STRINGS_H_
