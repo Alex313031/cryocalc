@@ -1,12 +1,13 @@
 #include "logging.h"
 
 namespace logging {
- volatile bool dcheck_log_ = false;
- bool logging_initialized = false;
+  volatile bool dcheck_log_ = false;
+  bool logging_initialized  = false;
 }
 
-logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console) :
-                                level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console) {}
+logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console)
+    : level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console) {
+}
 
 logging::LogMessage::~LogMessage() {
   if (!logging_initialized) {
@@ -143,14 +144,14 @@ logging::LogMessage& logging::LogMessage::operator<<(long double value) {
 }
 
 logging::LogMessage& logging::LogMessage::operator<<(HWND value) {
-  stream_ << std::fixed << std::showbase << std::hex
-          << reinterpret_cast<unsigned long long>(value) << std::dec << std::noshowbase << std::defaultfloat;
+  stream_ << std::fixed << std::showbase << std::hex << reinterpret_cast<unsigned long long>(value)
+          << std::dec << std::noshowbase << std::defaultfloat;
   return *this;
 }
 
 // TODO: Add DCHECK/DLOG
 bool logging::LogMessage::IsDCheck() {
- return dcheck_log_;
+  return dcheck_log_;
 }
 
 void logging::SetIsDCheck(bool set_is_dcheck) {
@@ -165,7 +166,7 @@ bool logging::InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstr
     return false;
   }
   const bool is_console_attached = GetIsConsoleAttached();
-  const std::wstring logfile = GetCurrentRelDir() + logfile_name;
+  const std::wstring logfile     = GetCurrentRelDir() + logfile_name;
   switch (log_sink) {
     case LOG_NONE:
       logging_initialized = false;
@@ -207,9 +208,9 @@ bool logging::DeInitLogging(HINSTANCE hInstance) {
   if (!hInstance) {
     return false;
   }
-  const bool file_is_open = IsFileOpen();
+  const bool file_is_open        = IsFileOpen();
   const bool is_console_attached = GetIsConsoleAttached();
-  const bool closed_files = file_is_open ? CloseFileHandle() : true;
+  const bool closed_files        = file_is_open ? CloseFileHandle() : true;
   CHECK(closed_files);
   bool detached_everything = false;
   if (!is_console_attached) {
@@ -225,25 +226,25 @@ bool logging::DeInitLogging(HINSTANCE hInstance) {
 void logging::TestLogging() {
   std::cout << "[INFO] Testing logging with different types " << std::endl;
   LOG(INFO) << "Info1: ostream " << L"Info2 wostream ";
-  static constexpr char info3[] = "Info3 char ";
+  static constexpr char info3[]    = "Info3 char ";
   static constexpr wchar_t info4[] = L"Info4 wchar_t ";
-  static const std::string info5 = "Info5 string ";
-  static const std::wstring info6 = L"Info6 wstring ";
+  static const std::string info5   = "Info5 string ";
+  static const std::wstring info6  = L"Info6 wstring ";
   std::ostringstream info7;
   std::wostringstream info8;
   info7 << "Info7 ostringstream ";
   info8 << L"Info8 wostringstream ";
-  static constexpr float testFl = 3.141592f;
+  static constexpr float testFl               = 3.141592f;
   static constexpr unsigned long long testULL = std::numeric_limits<unsigned long long>::max();
-  static constexpr long double testDb = 3.141592653589793238462643383279L;
-  static constexpr DWORD testDword = static_cast<DWORD>(0x0003);
+  static constexpr long double testDb         = 3.141592653589793238462643383279L;
+  static constexpr DWORD testDword            = static_cast<DWORD>(0x0003);
   LOG(INFO) << info3 << info4;
   LOG(INFO) << info5 << info6;
   LOG(INFO) << info7.str() << info8.str();
   LOG(WARN) << "Test DWORD: " << testDword;
   LOG(WARN) << "Test float: " << testFl;
-  LOG(DEBUG) << "Test unsigned long long: " <<  testULL;
-  LOG(DEBUG) << "Test long double: " <<  testDb;
+  LOG(DEBUG) << "Test unsigned long long: " << testULL;
+  LOG(DEBUG) << "Test long double: " << testDb;
   LOG(ERROR) << "Test Error";
   LOG(ERROR) << L"Test Error " << GetLastError();
   DLOG() << L"DLOG() Test. CW_USEDEFAULT: " << CW_USEDEFAULT;
@@ -252,13 +253,13 @@ void logging::TestLogging() {
   }
   CLOG(INFO) << L"CLOG() Test. YOU SHOULD NOT SEE THIS IN LOG FILE! ";
   FLOG(INFO) << L"FLOG() Test. YOU SHOULD NOT SEE THIS IN CONSOLE! ";
-  //LOG(INFO) << L"IDR_MAINFRAME" << IDR_MAINFRAME;
-  //LOG(INFO) << L"IDI_MAINFRAME" << IDI_MAINFRAME;
-  //LOG(INFO) << L"IDC_MAINFRAME" << IDC_MAINFRAME;
-  //LOG(INFO) << L"IDM_MAINFRAME" << IDM_MAINFRAME;
-  //LOG(INFO) << L"_APS_NO_MFC" << _APS_NO_MFC;
-  //LOG(INFO) << L"_APS_NEXT_RESOURCE_VALUE" << _APS_NEXT_RESOURCE_VALUE;
-  //LOG(INFO) << L"_APS_NEXT_COMMAND_VALUE" << _APS_NEXT_COMMAND_VALUE;
-  //LOG(INFO) << L"_APS_NEXT_CONTROL_VALUE" << _APS_NEXT_CONTROL_VALUE;
-  //LOG(INFO) << L"_APS_NEXT_SYMED_VALUE" << _APS_NEXT_SYMED_VALUE;
+  // LOG(INFO) << L"IDR_MAINFRAME" << IDR_MAINFRAME;
+  // LOG(INFO) << L"IDI_MAINFRAME" << IDI_MAINFRAME;
+  // LOG(INFO) << L"IDC_MAINFRAME" << IDC_MAINFRAME;
+  // LOG(INFO) << L"IDM_MAINFRAME" << IDM_MAINFRAME;
+  // LOG(INFO) << L"_APS_NO_MFC" << _APS_NO_MFC;
+  // LOG(INFO) << L"_APS_NEXT_RESOURCE_VALUE" << _APS_NEXT_RESOURCE_VALUE;
+  // LOG(INFO) << L"_APS_NEXT_COMMAND_VALUE" << _APS_NEXT_COMMAND_VALUE;
+  // LOG(INFO) << L"_APS_NEXT_CONTROL_VALUE" << _APS_NEXT_CONTROL_VALUE;
+  // LOG(INFO) << L"_APS_NEXT_SYMED_VALUE" << _APS_NEXT_SYMED_VALUE;
 }

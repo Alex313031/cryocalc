@@ -5,9 +5,9 @@
 #include "check.h"
 
 namespace logging {
- // For tracking console attach state.
- volatile bool console_attached = false;
- static ATTACH_CONSOLE_ pAttachConsole = nullptr;
+  // For tracking console attach state.
+  volatile bool console_attached        = false;
+  static ATTACH_CONSOLE_ pAttachConsole = nullptr;
 }
 
 bool logging::GetIsConsoleAttached() {
@@ -20,10 +20,10 @@ bool logging::AttachConsoleImpl() {
     return false;
   }
   // Allow and allocate conhost for cmd.exe logging window
-  constexpr bool open_cmd_if_none = true;
-  const bool attached_console = RouteStdioToConsole(open_cmd_if_none);
+  const bool attached_console = RouteStdioToConsole(true /* open cmd if none */);
   if (!attached_console) {
-    MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error", MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error",
+                MB_OK | MB_ICONERROR);
   }
   console_attached = attached_console;
   return attached_console;
@@ -31,14 +31,16 @@ bool logging::AttachConsoleImpl() {
 
 bool logging::DetachConsoleImpl() {
   if (!GetIsConsoleAttached()) {
-    MessageBoxW(nullptr, L"Console Already Detached!", L"Console Detach Warning", MB_OK | MB_ICONWARNING);
+    MessageBoxW(nullptr, L"Console Already Detached!", L"Console Detach Warning",
+                MB_OK | MB_ICONWARNING);
     return true;
   }
   if (FreeConsole()) {
     console_attached = false;
     return true;
   } else {
-    const std::wstring msg = L"Failed to detach console! Error = " + std::to_wstring(GetLastError());
+    const std::wstring msg =
+        L"Failed to detach console! Error = " + std::to_wstring(GetLastError());
     MessageBoxW(nullptr, msg.c_str(), L"Console Detach Failure", MB_OK | MB_ICONERROR);
     return false;
   }
@@ -57,8 +59,8 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
   // _fileno(stdout) will return -2 (_NO_CONSOLE_FILENO) if stdout was
   // invalid.
   if (_fileno(stdout) >= 0 || _fileno(stderr) >= 0) {
-    // _fileno was broken for SUBSYSTEM:WINDOWS from VS2010 to VS2012/2013. See http://crbug.com/358267.
-    // Confirm that the underlying HANDLE is valid before aborting.
+    // _fileno was broken for SUBSYSTEM:WINDOWS from VS2010 to VS2012/2013. See
+    // http://crbug.com/358267. Confirm that the underlying HANDLE is valid before aborting.
     intptr_t stdout_handle = _get_osfhandle(_fileno(stdout));
     intptr_t stderr_handle = _get_osfhandle(_fileno(stderr));
     if (stdout_handle >= 0 || stderr_handle >= 0) {
@@ -66,8 +68,8 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
     }
   }
 
-  pAttachConsole =
-      reinterpret_cast<ATTACH_CONSOLE_>(GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "AttachConsole"));
+  pAttachConsole = reinterpret_cast<ATTACH_CONSOLE_>(
+      GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "AttachConsole"));
   if (!pAttachConsole) {
     // Didn't get AttachConsole, probably running on Windows 2000, in which case just AllocConsole.
     if (!AllocConsole()) {
@@ -80,7 +82,8 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
       unsigned int result = GetLastError();
       // Was probably already attached.
       if (result == ERROR_ACCESS_DENIED) {
-        MessageBoxW(nullptr, L"ERROR_ACCESS_DENIED", L"AttachConsole_t Error", MB_OK | MB_ICONERROR);
+        MessageBoxW(nullptr, L"ERROR_ACCESS_DENIED", L"AttachConsole_t Error",
+                    MB_OK | MB_ICONERROR);
         return false;
       }
       if (create_console_if_not_found) {
@@ -88,12 +91,14 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
         // It should be ERROR_INVALID_HANDLE at this point, which means the
         // browser was likely not started from a console.
         if (!AllocConsole()) {
-          MessageBoxW(nullptr, L"AllocConsole failed!", L"AllocConsole Error", MB_OK | MB_ICONERROR);
+          MessageBoxW(nullptr, L"AllocConsole failed!", L"AllocConsole Error",
+                      MB_OK | MB_ICONERROR);
           NOTREACHED();
           return false;
         }
       } else {
-        MessageBoxW(nullptr, L"Not creating console", L"RouteStdioToConsole Warning", MB_OK | MB_ICONWARNING);
+        MessageBoxW(nullptr, L"Not creating console", L"RouteStdioToConsole Warning",
+                    MB_OK | MB_ICONWARNING);
         return false;
       }
     }
