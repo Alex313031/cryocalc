@@ -3,21 +3,21 @@
 
 #include "converters.h"
 #include "framework.h"
+#include "globals.h"
+#include "osinfo_window.h"
 #include "resource.h"
 #include "strings.h"
-#include "globals.h"
 #include "utils.h"
-#include "osinfo_window.h"
 
 extern bool _about_handled;
 
 enum Scale {
-  kScaleCelsius = 0,
-  kScaleKelvin = 1,
+  kScaleCelsius    = 0,
+  kScaleKelvin     = 1,
   kScaleFahrenheit = 2,
-  kScaleRankine = 3,
-  kScaleUnknown = -1,
-  kMaxScale = 4
+  kScaleRankine    = 3,
+  kScaleUnknown    = -1,
+  kMaxScale        = 4
 };
 
 Scale parseScale(const std::wstring& wscale);

@@ -142,8 +142,8 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   hInst = hInstance;
 
   static const RECT kThisDesktop = GetDesktopRect(hInstance);
-  const unsigned int top_position = (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (CW_MAINHEIGHT / 2u);
-  const unsigned int left_position = (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (CW_MAINWIDTH / 2u);
+  const unsigned int top_position = (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (MAINHEIGHT / 2u);
+  const unsigned int left_position = (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (MAINWIDTH / 2u);
   const bool got_main_font = CreateMainFont();
   // Create the main window
   hMainWindow = CreateWindowExW(WS_EX_WINDOWEDGE,
@@ -152,8 +152,8 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
                                 WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
                                 left_position,
                                 top_position,
-                                CW_MAINWIDTH,
-                                CW_MAINHEIGHT,
+                                MAINWIDTH,
+                                MAINHEIGHT,
                                 nullptr,
                                 nullptr,
                                 hInstance,

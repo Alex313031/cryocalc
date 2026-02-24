@@ -227,16 +227,16 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create staic box outline frame for all controls
   int padding = PADDING_X * 2; // Padding on left and right
   const int x_padding = -(PADDING_X + padding); // Padding already applied to left side + padding
-  const int kFrameWidth = GetXOffset(CW_MAINWIDTH, x_padding, 1.0f);
-  const unsigned int kLabelYPad = CW_STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
-  const unsigned int kEditYPad = CW_EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
-  const unsigned int kFrameBottom = STATIC_TOP + CW_EDITCONTROL_HEIGHT + (kEditYPad * 4);
+  const int kFrameWidth = GetXOffset(MAINWIDTH, x_padding, 1.0f);
+  const unsigned int kLabelYPad = STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
+  const unsigned int kEditYPad = EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
+  const unsigned int kFrameBottom = STATIC_TOP + EDITCONTROL_HEIGHT + (kEditYPad * 4);
   unsigned int kButtonColLeft = PADDING_X;
-  const unsigned int kButtonCol2Left = (CW_MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
+  const unsigned int kButtonCol2Left = (MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
   const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
   const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
-  const unsigned int kProgressBarTop = STATIC_TOP + CW_STATICLABEL_HEIGHT + PADDING_Y;
+  const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
   hFrameOutline = CreateWindowExW(
       0, WC_STATIC, nullptr,
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
@@ -255,7 +255,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       STATIC_LEFT,            // x position
       STATIC_TOP,             // y position
       LABEL_WIDTH,            // Width
-      CW_STATICLABEL_HEIGHT,  // Height
+      STATICLABEL_HEIGHT,  // Height
       hWnd,                   // Parent window
       (HMENU)IDC_LABEL_INPUT, // No menu, but control ID
       hInst,                 // This window instance
@@ -267,7 +267,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       STATIC_LEFT,
       STATIC_TOP + kLabelYPad,
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_C, hInst, nullptr
   );
   hKelvinLabel = CreateWindowExW(
@@ -276,7 +276,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * 2),
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_K, hInst, nullptr
   );
   hFahrenheitLabel = CreateWindowExW(
@@ -285,7 +285,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * INTRA_PADDING),
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr
   );
   hRankineLabel = CreateWindowExW(
@@ -294,7 +294,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       STATIC_LEFT,
       STATIC_TOP + (kLabelYPad * 4),
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr
   );
   hPrecisionLabel = CreateWindowExW(
@@ -303,7 +303,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kButtonColLeft,
       kButtonRow2Top,
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_PREC, hInst, nullptr
   );
 
@@ -315,7 +315,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kTempEditLeft,
       STATIC_TOP,
       EDIT_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_INPUT, hInst, nullptr
   );
   // Temperature scale Combobox
@@ -335,7 +335,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kTempEditLeft,
       STATIC_TOP + (kEditYPad),
       EDIT_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_CELSIUS, hInst, nullptr
   );
   hKelvinEdit = CreateWindowExW(
@@ -344,7 +344,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 2),
       EDIT_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_KELVIN, hInst, nullptr
   );
   hFahrenheitEdit = CreateWindowExW(
@@ -353,7 +353,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * INTRA_PADDING),
       EDIT_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
   );
   hRankineEdit = CreateWindowExW(
@@ -362,7 +362,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kTempEditLeft,
       STATIC_TOP + (kEditYPad * 4),
       EDIT_WIDTH,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
   );
 
@@ -420,7 +420,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kButtonCol3Left,
       STATIC_TOP,
       LABEL_WIDTH,
-      CW_STATICLABEL_HEIGHT,
+      STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr
   );
 
@@ -434,7 +434,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       kButtonCol3Left + LABEL_WIDTH + PADDING_X,
       STATIC_TOP,
       EDIT_WIDTH / 2u,
-      CW_EDITCONTROL_HEIGHT,
+      EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_THREADS, hInst, nullptr
   );
 
@@ -455,7 +455,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
-      LABEL_WIDTH - 16u, CW_STATICLABEL_HEIGHT,
+      LABEL_WIDTH - 16u, STATICLABEL_HEIGHT,
       hWnd, (HMENU)IDC_LABEL_CACHE, hInst, nullptr
   );
   hCacheSizeCombo = CreateWindowEx(
@@ -471,16 +471,16 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       0, WC_BUTTON, USE_SSE2Q,
       WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + CW_EDITCONTROL_HEIGHT + PADDING_Y,
-      100u, CW_EDITCONTROL_HEIGHT,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y,
+      100u, EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr
   );
   hAllocMemButton = CreateWindowExW(
       0, WC_BUTTON, ALLOC_MEM,
       WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((CW_EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
-      PROGBAR_WIDTH, CW_EDITCONTROL_HEIGHT,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
+      PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
       hWnd, (HMENU)IDC_ALLOC_MEM, hInst, nullptr
   );
 
@@ -584,7 +584,7 @@ void HandleResize(HWND hWnd) {
     return;
   }
 
-  // TODO, move copy of this to InitControls with CW_MAINWIDTH/CW_MAINHEIGHT
+  // TODO, move copy of this to InitControls with MAINWIDTH/MAINHEIGHT
   const unsigned int width = current_width;
   const unsigned int height = current_height;
   const int kStatusSplit = width - LABEL_WIDTH;
@@ -599,7 +599,7 @@ void HandleResize(HWND hWnd) {
 
   MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, CW_STATICLABEL_HEIGHT, TRUE);
+  MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT, TRUE);
   MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, COMBO_HEIGHT, TRUE);
   MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
@@ -617,7 +617,7 @@ void HandleResize(HWND hWnd) {
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
   static const std::wstring status_text = kAppName + L" ver. " + GetVersionWstring();
   static const std::wstring status_bubble = L"Status";
-  const int kStatusSplit = CW_MAINWIDTH - LABEL_WIDTH;
+  const int kStatusSplit = MAINWIDTH - LABEL_WIDTH;
   if (!hStatusBar) {
     LOG(ERROR) << __FUNC__ << L"() failed: Status bar not initialized";
   } else {

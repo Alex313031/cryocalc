@@ -11,7 +11,7 @@ bool CreateMainFont();
 bool CreateEditFont();
 
 // Creates font for logging windows (like the OS Info Window)
-bool CreateLogFont(const std::wstring &font);
+bool CreateLogFont(const std::wstring& font);
 
 // Sets font for a window/control
 bool SetFontForControl(HWND hWnd, const std::wstring font);

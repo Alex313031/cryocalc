@@ -2,8 +2,8 @@
 #define CRYOCALC_OSINFO_WINDOW_H_
 
 #include "framework.h"
-#include "resource.h"
 #include "globals.h"
+#include "resource.h"
 #include "strings.h"
 #include "utils.h"
 
