@@ -1,17 +1,18 @@
 #include "stress.h"
 
-#include <cmath>
 #include <emmintrin.h>
-#include <random>
+
 #include <algorithm>
+#include <cmath>
+#include <random>
 
 #include "../utils.h"
 
 // Maybe use std::atomic instead?
-volatile bool running = false;
-bool use_sse2_simd = false;
-
+volatile bool running  = false;
 static bool is_running = false;
+
+bool use_sse2_simd = false;
 static volatile unsigned int rand_seed;
 
 void set_run_state(bool on) {
@@ -35,22 +36,24 @@ void set_use_sse2(bool on) {
 }
 
 static unsigned int GetSeed() {
-  unsigned int seed = 0;
+  unsigned int seed      = 0;
   static const bool isXP = IsAtLeast(kWinXP);
   static const bool is2K = IsAtLeast(kWin2000);
+
   static constexpr bool force_rand_s = true;
   if (isXP || force_rand_s) {
     LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
-    // Causes crash on Windows 2000 with rand_s() because it uses RtlGenRandom internally. Bug in MinGW.
+    // Causes rand_s() crash on Windows 2000 because it uses RtlGenRandom internally. Bug in MinGW.
     std::random_device randd;
-    seed =  static_cast<unsigned int>(randd());
+    seed = static_cast<unsigned int>(randd());
   } else if (is2K) {
     LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
-    HCRYPTPROV hProvider = 0;
+    HCRYPTPROV hProvider    = 0;
     unsigned int win2k_seed = 0;
 
     // CryptGenRandom is available on Windows 2000+ (unlike RtlGenRandom/rand_s which requires XP+)
-    if (CryptAcquireContextW(&hProvider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+    if (CryptAcquireContextW(&hProvider, nullptr, nullptr, PROV_RSA_FULL,
+                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
       CryptGenRandom(hProvider, sizeof(seed), (BYTE*)(&win2k_seed));
       CryptReleaseContext(hProvider, 0);
     }
@@ -62,7 +65,7 @@ static unsigned int GetSeed() {
 
 // CPU-intensive stress test function  NOTE: Partially written by Claude AI!
 void StressCPUVec(const size_t cache_size) {
-  const size_t VECTOR_SIZE = 1024u * static_cast<size_t>(cache_size); // 1M elements to thrash L2/L3 cache
+  const size_t VECTOR_SIZE = 1024u * cache_size; // 1M elements to thrash L2/L3 cache
   unsigned int mem_multiplier;
   if (cache_size <= 1024u) {
     mem_multiplier = 4u;
@@ -74,7 +77,8 @@ void StressCPUVec(const size_t cache_size) {
     mem_multiplier = 1u;
   }
 
-  const size_t NUM_VECTORS = static_cast<size_t>(mem_multiplier); // Multiple vectors to increase memory pressure
+  const size_t NUM_VECTORS =
+      static_cast<size_t>(mem_multiplier); // Multiple vectors to increase memory pressure
 
   std::vector<std::vector<double>> data(NUM_VECTORS);
   for (auto& vec : data) {
@@ -109,7 +113,7 @@ void StressCPUVec(const size_t cache_size) {
 
         // More integer operations
         size_t idx = static_cast<size_t>(std::abs(val)) % VECTOR_SIZE;
-        vec[i] = val + vec[idx] * 0.5;
+        vec[i]     = val + vec[idx] * 0.5;
       }
     }
 
@@ -126,16 +130,14 @@ void StressCPUVec(const size_t cache_size) {
     for (size_t v1 = 0; v1 < NUM_VECTORS - 1; ++v1) {
       for (size_t v2 = v1 + 1; v2 < NUM_VECTORS; ++v2) {
         for (size_t i = 0; i < VECTOR_SIZE; i += 128u) {
-          data[v1][i] = data[v1][i] * data[v2][i] + 
-                        std::sin(data[v1][i]) * std::cos(data[v2][i]);
+          data[v1][i] = data[v1][i] * data[v2][i] + std::sin(data[v1][i]) * std::cos(data[v2][i]);
         }
       }
     }
 
     // Sorting to add branch misprediction pressure
     if (iteration % 10 == 0) {
-      std::sort(data[iteration % NUM_VECTORS].begin(), 
-                data[iteration % NUM_VECTORS].end());
+      std::sort(data[iteration % NUM_VECTORS].begin(), data[iteration % NUM_VECTORS].end());
     }
 
     iteration++;
@@ -144,12 +146,12 @@ void StressCPUVec(const size_t cache_size) {
 
 // Version with inline SSE2 assembly for x86-64 (optional) NOTE: Written by Claude AI!
 void StressCPUSSE2(const size_t cache_size) {
-  const size_t VECTOR_SIZE = 1024u * static_cast<size_t>(cache_size);
+  const size_t VECTOR_SIZE = 1024u * cache_size;
   std::vector<double> data(VECTOR_SIZE);
 
   std::mt19937 gen(rand_seed);
   std::uniform_real_distribution<double> dis(0.0, 1024.0);
-    
+
   for (size_t i = 0; i < VECTOR_SIZE; ++i) {
     data[i] = dis(gen);
   }
@@ -160,6 +162,7 @@ void StressCPUSSE2(const size_t cache_size) {
       __m128d a = _mm_loadu_pd(&data[i]);
       __m128d b = _mm_loadu_pd(&data[i + 2]);
       // Multiple SSE2 operations (no FMA in SSE2, so use mul+add)
+      // clang-format off
       for (int j = 0; j < 100; ++j) {
           __m128d temp_a = _mm_mul_pd(a, b);
           a = _mm_add_pd(temp_a, a);
@@ -171,6 +174,7 @@ void StressCPUSSE2(const size_t cache_size) {
       }
       _mm_storeu_pd(&data[i], a);
       _mm_storeu_pd(&data[i + 2], b);
+      // clang-format on
     }
   }
 }
@@ -191,11 +195,11 @@ bool LaunchThreads(const unsigned int num_threads) {
       return false;
     } else {
       is_running = true;
-      rand_seed = GetSeed();
+      rand_seed  = GetSeed();
       LOG(DEBUG) << L"Random seed = " << rand_seed;
-      //std::vector<HANDLE> thread_handles;
-      //thread_handles.push_back(CreateThread());
-      // Create threads
+      // std::vector<HANDLE> thread_handles;
+      // thread_handles.push_back(CreateThread());
+      //  Create threads
       const size_t cache_bytes = GetCacheSize();
       if (use_sse2_simd) {
         LOG(DEBUG) << L"Using SSE2 assembly stressor function";
