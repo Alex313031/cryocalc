@@ -102,8 +102,8 @@ bool IsValidThreadsInput(const wchar_t* text);
 // Gets the number of logical CPU threads of the host system.
 DWORD GetLogicalProcessorCount();
 
-// Gets the default number of threads to use for stressor: the number of logical CPUs within bounds of
-// MIN_THREADS and MAX_THREADS.
+// Gets the default number of threads to use for stressor: the number of logical CPUs within bounds
+// of MIN_THREADS and MAX_THREADS.
 unsigned int GetDefaultNumThreads();
 
 // Converts input with decimal point to long double representation
@@ -162,7 +162,7 @@ void ClearConsole(HWND hWnd);
 // Clears log file, if any.
 bool ClearLogFile(HWND hWnd);
 
-// Gets the size of the desktop window (usually the screen), to position CryoCalc in the middle of it
+// Gets the size of the desktop window (usually the screen), to position app in the middle of it
 const RECT GetDesktopRect(HINSTANCE hInstance);
 
 // Set client rects for future resizing of a Window

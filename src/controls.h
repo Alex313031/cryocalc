@@ -84,7 +84,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 // Gets number of threads to launch from hThreadsEdit
 bool GetThreadsInput(HWND hWnd);
 
-// Progress bar animation function, to be used in a thread only on Windows 2000 which doesn't support the PBM_SETMARQUEE message.
+// Progress bar animation function, to be used in a thread only on Windows 2000 which doesn't
+// support the PBM_SETMARQUEE message.
 DWORD WINAPI AnimateProg();
 
 // Called when "Start" button pressed. Stresses CPU via StartThreads()

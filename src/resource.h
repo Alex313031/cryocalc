@@ -2,6 +2,7 @@
 // For #define-ing static resources for resource script file(s).
 // Used by resource.rc
 
+// clang-format off
 // For importing .manifest in .rc file
 #define APP_MANIFEST                1
 
@@ -83,16 +84,13 @@
 // Os Info Logging Output Window
 #define IDC_OSINFO_OUT              352
 
-// Name of the App
-#define APP_NAME L"CryoCalc"
-
-// Our main Window Class unique name
-#define CRYOCALC_MAIN_WNDCLASS      L"CryoCalcClass"
-
-// Os Info Window Class
-#define CRYOCALC_OSINFO_WNDCLASS    L"CryoCalcOsInfoClass"
-
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC
- #define IDC_STATIC                -1
+ #define IDC_STATIC                 -1
 #endif // IDC_STATIC
+// clang-format on
+
+// String constants
+#define APP_NAME                 L"CryoCalc"            // Name of the App
+#define CRYOCALC_MAIN_WNDCLASS   L"CryoCalcClass"       // Our main Window Class unique name
+#define CRYOCALC_OSINFO_WNDCLASS L"CryoCalcOsInfoClass" // OS Info Window Class

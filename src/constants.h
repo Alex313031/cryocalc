@@ -35,6 +35,7 @@ constexpr unsigned int DEFAULT_PRECISION = 3u;
 inline constexpr long double KELVIN_OFFSET  = 273.150L;
 inline constexpr long double RANKINE_OFFSET = 459.670L;
 
+// clang-format off
 // Dummy values for feeding unit test functions
 constexpr long double kDummyCelsius    = 0.000L;   // Freezing point of water
 constexpr long double kDummyKelvin     = 77.000L;  // Boiling point of Liquid Nitrogen
@@ -69,6 +70,7 @@ constexpr UINT BOTTOM_AREA   = MAINHEIGHT / 3u; // Minimum height of bottom butt
 // Progress bar metrics
 constexpr UINT PROGBAR_WIDTH = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
 constexpr UINT PROGBAR_HEIGHT = STATICLABEL_HEIGHT;
+// clang-format on
 
 // Minimum/Maximum number of threads for the CPU stressor.
 constexpr unsigned int MIN_THREADS = 1u;   // Less than one thread doesn't make sense
