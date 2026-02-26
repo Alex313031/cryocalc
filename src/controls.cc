@@ -1,12 +1,12 @@
 #include "controls.h"
 
-#include "painting.h"
-
 #include <chrono>
 
+#include "painting.h"
+
 // Static labels
-static HWND hInputLabel;  
-static HWND hCelsiusLabel;  
+static HWND hInputLabel;
+static HWND hCelsiusLabel;
 static HWND hKelvinLabel;
 static HWND hFahrenheitLabel;
 static HWND hRankineLabel;
@@ -39,25 +39,33 @@ HWND hStartStresButton;
 HWND hStopStresButton;
 
 // Temp select titles
-static const wchar_t* kBlank = L"";
-static const std::wstring kTempC = L"C";
-static const std::wstring kTempK = L"K";
-static const std::wstring kTempF = L"F";
-static const std::wstring kTempR = L"R";
+static const wchar_t* kBlank          = L"";
+static const std::wstring kTempC      = L"C";
+static const std::wstring kTempK      = L"K";
+static const std::wstring kTempF      = L"F";
+static const std::wstring kTempR      = L"R";
 static const std::wstring kDummyScale = L"U";
 
 bool _about_handled = false;
 
 unsigned int num_threads_ = 0;
 
-static BOOL IsXP = false;
+static BOOL IsXP               = false;
 static volatile bool animating = false; // Whether to animate the progress bar
 
 Scale parseScale(const std::wstring& wscale) {
-  if (wscale == kTempC) return kScaleCelsius;
-  if (wscale == kTempK) return kScaleKelvin;
-  if (wscale == kTempF) return kScaleFahrenheit;
-  if (wscale == kTempR) return kScaleRankine;
+  if (wscale == kTempC) {
+    return kScaleCelsius;
+  }
+  if (wscale == kTempK) {
+    return kScaleKelvin;
+  }
+  if (wscale == kTempF) {
+    return kScaleFahrenheit;
+  }
+  if (wscale == kTempR) {
+    return kScaleRankine;
+  }
   if (wscale == kDummyScale) {
     LOG(DEBUG) << L"Using dummy unknown scale \"" << kDummyScale << L"\" for testing";
     return kScaleUnknown;
@@ -82,14 +90,14 @@ bool HandleConvert(HWND hWnd) {
   std::wstring kCelsius, kKelvin, kFahrenheit, kRankine;
   long double convCelsius, convKelvin, convFahrenheit, convRankine;
   // Get the length of the text in the edit control
-  DWORD dwInputSize = GetWindowTextLength(hInputEdit);
-  DWORD dwScaleSize = GetWindowTextLength(hTempSelectCombo);
-  DWORD dwPrecisionSize = GetWindowTextLength(hPrecisionCombo);
-  const bool is_empty = (BOOL)(dwInputSize == 0);
-  bool is_invalid = is_empty; // Initial value is is_empty, since that's invalid too
+  DWORD dwInputSize         = GetWindowTextLength(hInputEdit);
+  DWORD dwScaleSize         = GetWindowTextLength(hTempSelectCombo);
+  DWORD dwPrecisionSize     = GetWindowTextLength(hPrecisionCombo);
+  const bool is_empty       = (BOOL)(dwInputSize == 0);
+  bool is_invalid           = is_empty; // Initial value is is_empty, since that's invalid too
   const bool bad_temp_scale = (BOOL)(dwScaleSize == 0);
-  unsigned int found_prec = 255u;
-  std::wstring kInput = L"";
+  unsigned int found_prec   = 255u;
+  std::wstring kInput       = L"";
   std::wstring kChosenScale = L"";
   if (is_empty || bad_temp_scale) {
     if (bad_temp_scale) {
@@ -115,10 +123,10 @@ bool HandleConvert(HWND hWnd) {
     }
 
     if (is_invalid) {
-       MessageBoxW(hWnd, L"Invalid Input!", L"Error!", MB_OK | MB_ICONWARNING);
-       success = false;
-       ClearInput(hWnd);
-       return success; // Fail on invalid input.
+      MessageBoxW(hWnd, L"Invalid Input!", L"Error!", MB_OK | MB_ICONWARNING);
+      success = false;
+      ClearInput(hWnd);
+      return success; // Fail on invalid input.
     } else {
       input = ConvertInputToLD(input_buff.c_str());
       std::wostringstream wostr;
@@ -135,55 +143,56 @@ bool HandleConvert(HWND hWnd) {
 
     unsigned int precision_ = std::stoi(preci);
     if (precision_ < MIN_PRECISION || precision_ > MAX_PRECISION) {
-      LOG(ERROR) << L"Precision out of range " << MIN_PRECISION
-                 << L" - " << MAX_PRECISION << L" Setting precision to max: " 
-                 << MAX_PRECISION;
+      LOG(ERROR) << L"Precision out of range " << MIN_PRECISION << L" - " << MAX_PRECISION
+                 << L" Setting precision to max: " << MAX_PRECISION;
       precision_ = MAX_PRECISION;
     }
     SetCryoCalcPrecision(precision_);
 
     Scale selected_scale = parseScale(scale);
-    assert(((selected_scale >= kScaleCelsius && selected_scale < kMaxScale) || (selected_scale == kScaleUnknown)) && "Scale out of range");
+    assert(((selected_scale >= kScaleCelsius && selected_scale < kMaxScale) ||
+            (selected_scale == kScaleUnknown)) &&
+           "Scale out of range");
     switch (selected_scale) {
       case kScaleCelsius: {
-        convCelsius = input;
-        convKelvin = kelvin::fromCelsius(input);
+        convCelsius    = input;
+        convKelvin     = kelvin::fromCelsius(input);
         convFahrenheit = fahrenheit::fromCelsius(input);
-        convRankine = rankine::fromCelsius(input);
-        kChosenScale = L"Celsius";
+        convRankine    = rankine::fromCelsius(input);
+        kChosenScale   = L"Celsius";
       } break;
       case kScaleKelvin:
-        convCelsius = celsius::fromKelvin(input);
-        convKelvin = input;
+        convCelsius    = celsius::fromKelvin(input);
+        convKelvin     = input;
         convFahrenheit = fahrenheit::fromKelvin(input);
-        convRankine = rankine::fromKelvin(input);
-        kChosenScale = L"Kelvin";
+        convRankine    = rankine::fromKelvin(input);
+        kChosenScale   = L"Kelvin";
         break;
       case kScaleFahrenheit:
-        convCelsius = celsius::fromFahrenheit(input);
-        convKelvin = kelvin::fromFahrenheit(input);
+        convCelsius    = celsius::fromFahrenheit(input);
+        convKelvin     = kelvin::fromFahrenheit(input);
         convFahrenheit = input;
-        convRankine = rankine::fromFahrenheit(input);
-        kChosenScale = L"Fahrenheit";
+        convRankine    = rankine::fromFahrenheit(input);
+        kChosenScale   = L"Fahrenheit";
         break;
       case kScaleRankine:
-        convCelsius = celsius::fromRankine(input);
-        convKelvin = kelvin::fromRankine(input);
+        convCelsius    = celsius::fromRankine(input);
+        convKelvin     = kelvin::fromRankine(input);
         convFahrenheit = fahrenheit::fromRankine(input);
-        convRankine = input;
-        kChosenScale = L"Rankine";
+        convRankine    = input;
+        kChosenScale   = L"Rankine";
         break;
       default:
-        convCelsius = static_cast<long double>(INT_MAX);
-        convKelvin = static_cast<long double>(INT_MAX);
+        convCelsius    = static_cast<long double>(INT_MAX);
+        convKelvin     = static_cast<long double>(INT_MAX);
         convFahrenheit = static_cast<long double>(INT_MAX);
-        convRankine = static_cast<long double>(INT_MAX);
-        kChosenScale = L"Unknown";
+        convRankine    = static_cast<long double>(INT_MAX);
+        kChosenScale   = L"Unknown";
         MessageBoxW(hWnd, L"Temp scale not handled", L"Error", MB_OK | MB_ICONERROR);
     }
     LOG(INFO) << L"Scale = " << kChosenScale;
     const unsigned int precision = GetCryoCalcPrecision();
-    found_prec = precision;
+    found_prec                   = precision;
     wostr << std::fixed << std::setprecision(precision) << convCelsius;
     kCelsius = wostr.str();
     wostr.str(L"");
@@ -222,303 +231,180 @@ bool HandleConvert(HWND hWnd) {
 }
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
-  IsXP = IsAtLeast(kWinXP);
+  IsXP                    = IsAtLeast(kWinXP);
   const int kTempEditLeft = GetXOffset(STATIC_LEFT, LABEL_WIDTH + INTRA_PADDING, 1.0f);
   // Create staic box outline frame for all controls
-  int padding = PADDING_X * 2; // Padding on left and right
-  const int x_padding = -(PADDING_X + padding); // Padding already applied to left side + padding
+  int padding           = PADDING_X * 2;          // Padding on left and right
+  const int x_padding   = -(PADDING_X + padding); // Padding already applied to left side + padding
   const int kFrameWidth = GetXOffset(MAINWIDTH, x_padding, 1.0f);
-  const unsigned int kLabelYPad = STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
-  const unsigned int kEditYPad = EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
-  const unsigned int kFrameBottom = STATIC_TOP + EDITCONTROL_HEIGHT + (kEditYPad * 4);
-  unsigned int kButtonColLeft = PADDING_X;
+  const unsigned int kLabelYPad =
+      STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
+  const unsigned int kEditYPad =
+      EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
+  const unsigned int kFrameBottom    = STATIC_TOP + EDITCONTROL_HEIGHT + (kEditYPad * 4);
+  unsigned int kButtonColLeft        = PADDING_X;
   const unsigned int kButtonCol2Left = (MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
   const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
-  const unsigned int kButtonRowTop = kFrameBottom + (PADDING_Y * 2u);
-  const unsigned int kButtonRow2Top = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
+  const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 2u);
+  const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
   const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
-  hFrameOutline = CreateWindowExW(
-      0, WC_STATIC, nullptr,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME,
-      PADDING_X,
-      PADDING_Y,
-      kFrameWidth,
-      kFrameBottom,
-      hWnd, nullptr, hInst, nullptr
-  );
+  hFrameOutline                      = CreateWindowExW(
+      0, WC_STATIC, nullptr, WS_CHILD | WS_VISIBLE | SS_LEFT | SS_ETCHEDFRAME, PADDING_X, PADDING_Y,
+      kFrameWidth, kFrameBottom, hWnd, nullptr, hInst, nullptr);
   // Static labels
-  hInputLabel = CreateWindowExW(
-      0,                      // Optional window styles
-      WC_STATIC,              // Predefined class: Static
-      INPUT_LABEL,             // Text
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY, // Styles
-      STATIC_LEFT,            // x position
-      STATIC_TOP,             // y position
-      LABEL_WIDTH,            // Width
-      STATICLABEL_HEIGHT,  // Height
-      hWnd,                   // Parent window
-      (HMENU)IDC_LABEL_INPUT, // No menu, but control ID
-      hInst,                 // This window instance
-      nullptr                 // Additional app data
-  );
-  hCelsiusLabel = CreateWindowExW(
-      0, WC_STATIC, L"Celsius:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      STATIC_LEFT,
-      STATIC_TOP + kLabelYPad,
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_C, hInst, nullptr
-  );
-  hKelvinLabel = CreateWindowExW(
-      0, WC_STATIC, L"Kelvin:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      STATIC_LEFT,
-      STATIC_TOP + (kLabelYPad * 2),
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_K, hInst, nullptr
-  );
+  hInputLabel      = CreateWindowExW(0,           // Optional window styles
+                                     WC_STATIC,   // Predefined class: Static
+                                     INPUT_LABEL, // Text
+                                     WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY, // Styles
+                                     STATIC_LEFT,            // x position
+                                     STATIC_TOP,             // y position
+                                     LABEL_WIDTH,            // Width
+                                     STATICLABEL_HEIGHT,     // Height
+                                     hWnd,                   // Parent window
+                                     (HMENU)IDC_LABEL_INPUT, // No menu, but control ID
+                                     hInst,                  // This window instance
+                                     nullptr                 // Additional app data
+       );
+  hCelsiusLabel    = CreateWindowExW(0, WC_STATIC, L"Celsius:",
+                                     WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+                                     STATIC_LEFT, STATIC_TOP + kLabelYPad, LABEL_WIDTH,
+                                     STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_C, hInst, nullptr);
+  hKelvinLabel     = CreateWindowExW(0, WC_STATIC, L"Kelvin:",
+                                     WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+                                     STATIC_LEFT, STATIC_TOP + (kLabelYPad * 2), LABEL_WIDTH,
+                                     STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_K, hInst, nullptr);
   hFahrenheitLabel = CreateWindowExW(
-      0, WC_STATIC, L"Fahrenheit:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      STATIC_LEFT,
-      STATIC_TOP + (kLabelYPad * INTRA_PADDING),
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr
-  );
-  hRankineLabel = CreateWindowExW(
-      0, WC_STATIC, L"Rankine:",
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      STATIC_LEFT,
-      STATIC_TOP + (kLabelYPad * 4),
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr
-  );
-  hPrecisionLabel = CreateWindowExW(
-      0, WC_STATIC, PREC_LABEL,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      kButtonColLeft,
-      kButtonRow2Top,
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_PREC, hInst, nullptr
-  );
+      0, WC_STATIC, L"Fahrenheit:", WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+      STATIC_LEFT, STATIC_TOP + (kLabelYPad * INTRA_PADDING), LABEL_WIDTH, STATICLABEL_HEIGHT, hWnd,
+      (HMENU)IDC_LABEL_F, hInst, nullptr);
+  hRankineLabel   = CreateWindowExW(0, WC_STATIC, L"Rankine:",
+                                    WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+                                    STATIC_LEFT, STATIC_TOP + (kLabelYPad * 4), LABEL_WIDTH,
+                                    STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr);
+  hPrecisionLabel = CreateWindowExW(0, WC_STATIC, PREC_LABEL,
+                                    WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+                                    kButtonColLeft, kButtonRow2Top, LABEL_WIDTH, STATICLABEL_HEIGHT,
+                                    hWnd, (HMENU)IDC_LABEL_PREC, hInst, nullptr);
 
   // Create the Edit controls
   // Temperature input
-  hInputEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"77",
-      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft,
-      STATIC_TOP,
-      EDIT_WIDTH,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_INPUT, hInst, nullptr
-  );
+  hInputEdit = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"77",
+                               WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+                               STATIC_TOP, EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_INPUT,
+                               hInst, nullptr);
   // Temperature scale Combobox
-  hTempSelectCombo = CreateWindowExW(
-      0, WC_COMBOBOX, L"",
-      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kTempEditLeft + EDIT_WIDTH + INTRA_PADDING,
-      STATIC_TOP,
-      COMBO_WIDTH,
-      COMBO_HEIGHT,
-      hWnd, (HMENU)IDC_SCALE, hInst, nullptr
-  );
+  hTempSelectCombo =
+      CreateWindowExW(0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                      kTempEditLeft + EDIT_WIDTH + INTRA_PADDING, STATIC_TOP, COMBO_WIDTH,
+                      COMBO_HEIGHT, hWnd, (HMENU)IDC_SCALE, hInst, nullptr);
 
-  hCelsiusEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft,
-      STATIC_TOP + (kEditYPad),
-      EDIT_WIDTH,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_CELSIUS, hInst, nullptr
-  );
-  hKelvinEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft,
-      STATIC_TOP + (kEditYPad * 2),
-      EDIT_WIDTH,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_KELVIN, hInst, nullptr
-  );
+  hCelsiusEdit    = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
+                                    WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+                                    STATIC_TOP + (kEditYPad), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
+                                    (HMENU)IDC_CELSIUS, hInst, nullptr);
+  hKelvinEdit     = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
+                                    WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+                                    STATIC_TOP + (kEditYPad * 2), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
+                                    (HMENU)IDC_KELVIN, hInst, nullptr);
   hFahrenheitEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE |  ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft,
-      STATIC_TOP + (kEditYPad * INTRA_PADDING),
-      EDIT_WIDTH,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
-  );
-  hRankineEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"",
-      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft,
-      STATIC_TOP + (kEditYPad * 4),
-      EDIT_WIDTH,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr
-  );
+      WS_EX_CLIENTEDGE, WC_EDIT, L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
+      kTempEditLeft, STATIC_TOP + (kEditYPad * INTRA_PADDING), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
+      (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
+  hRankineEdit = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
+                                 WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+                                 STATIC_TOP + (kEditYPad * 4), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
+                                 (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
 
   // Create the "Convert" Button control
   hConvButton = CreateWindowExW(
       0, WC_BUTTON, CONV_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | BS_DEFPUSHBUTTON | SS_NOTIFY,
-      kButtonColLeft,
-      kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr
-  );
+      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | BS_DEFPUSHBUTTON | SS_NOTIFY, kButtonColLeft,
+      kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr);
   // Create the "Precision" combobox
-  hPrecisionCombo = CreateWindowExW(
-      0, WC_COMBOBOX, L"",
-      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-      kButtonColLeft + LABEL_WIDTH + INTRA_PADDING,
-      kButtonRow2Top,
-      COMBO_WIDTH,
-      COMBO_HEIGHT,
-      hWnd, (HMENU)IDC_PRECISION, hInst, nullptr
-  );
+  hPrecisionCombo =
+      CreateWindowExW(0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                      kButtonColLeft + LABEL_WIDTH + INTRA_PADDING, kButtonRow2Top, COMBO_WIDTH,
+                      COMBO_HEIGHT, hWnd, (HMENU)IDC_PRECISION, hInst, nullptr);
   // Create the "Clear" Button control
-  hClearButton = CreateWindowExW(
-      0, WC_BUTTON, CLEAR_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
-      kButtonCol2Left,
-      kButtonRowTop,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_CLEAR_BUTTON, hInst, nullptr
-  );
+  hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON,
+                                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+                                 kButtonCol2Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+                                 (HMENU)IDC_CLEAR_BUTTON, hInst, nullptr);
   // Create the "About" Button control
-  hAboutButton = CreateWindowExW(
-      0, WC_BUTTON, ABOUT_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
-      kButtonCol2Left,
-      kButtonRow2Top,
-      BUTTON_WIDTH,
-      BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr
-  );
+  hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON,
+                                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+                                 kButtonCol2Left, kButtonRow2Top, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+                                 (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr);
   // Create the status bar
-  hStatusBar = CreateWindowExW(
-      0, STATUSCLASSNAME, nullptr,
-      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
-      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
-      hWnd, nullptr, hInst, nullptr
-  );
+  hStatusBar = CreateWindowExW(0, STATUSCLASSNAME, nullptr,
+                               WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
+                               CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hWnd, nullptr, hInst, nullptr);
 
-  hThreadsLabel = CreateWindowExW(
-      0, WC_STATIC, THREADS_LABEL,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      kButtonCol3Left,
-      STATIC_TOP,
-      LABEL_WIDTH,
-      STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr
-  );
+  hThreadsLabel = CreateWindowExW(0, WC_STATIC, THREADS_LABEL,
+                                  WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+                                  kButtonCol3Left, STATIC_TOP, LABEL_WIDTH, STATICLABEL_HEIGHT,
+                                  hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr);
 
   const unsigned int default_threads = GetDefaultNumThreads();
-  std::wstring ws = std::to_wstring(default_threads);
-  const wchar_t* THREADS_DEFAULT = ws.c_str();
+  std::wstring ws                    = std::to_wstring(default_threads);
+  const wchar_t* THREADS_DEFAULT     = ws.c_str();
   // Create the threads number input combobox.
-  hThreadsEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT,
-      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
-      kButtonCol3Left + LABEL_WIDTH + PADDING_X,
-      STATIC_TOP,
-      EDIT_WIDTH / 2u,
-      EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_THREADS, hInst, nullptr
-  );
+  hThreadsEdit =
+      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT,
+                      WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP,
+                      kButtonCol3Left + LABEL_WIDTH + PADDING_X, STATIC_TOP, EDIT_WIDTH / 2u,
+                      EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_THREADS, hInst, nullptr);
 
-  const DWORD kProgressStyle = IsXP ? PBS_MARQUEE | SS_NOTIFY
-                                    : SS_NOTIFY;
+  const DWORD kProgressStyle = IsXP ? PBS_MARQUEE | SS_NOTIFY : SS_NOTIFY;
   // Create the CPU stressor progress bar.
-  hProgressBar = CreateWindowExW(
-      0, PROGRESS_CLASS, nullptr,
-      WS_CHILD | WS_VISIBLE | kProgressStyle,
-      kButtonCol3Left,
-      kProgressBarTop,
-      PROGBAR_WIDTH, PROGBAR_HEIGHT,
-      hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr
-  );
+  hProgressBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, WS_CHILD | WS_VISIBLE | kProgressStyle,
+                                 kButtonCol3Left, kProgressBarTop, PROGBAR_WIDTH, PROGBAR_HEIGHT,
+                                 hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr);
 
   hCacheSizeLabel = CreateWindowEx(
-      0, WC_STATIC, CACHE_SIZEQ,
-      WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
-      kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
-      LABEL_WIDTH - 16u, STATICLABEL_HEIGHT,
-      hWnd, (HMENU)IDC_LABEL_CACHE, hInst, nullptr
-  );
+      0, WC_STATIC, CACHE_SIZEQ, WS_CHILD | WS_VISIBLE | SS_LEFT | SS_SUNKEN | SS_NOTIFY,
+      kButtonCol3Left, kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y, LABEL_WIDTH - 16u,
+      STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_CACHE, hInst, nullptr);
   hCacheSizeCombo = CreateWindowEx(
-      0, WC_COMBOBOX, L"",
-      CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
-      kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
-      COMBO_WIDTH + 16u, COMBO_HEIGHT,
-      hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr
-  );
+      0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_TABSTOP | SS_NOTIFY,
+      kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u, kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
+      COMBO_WIDTH + 16u, COMBO_HEIGHT, hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr);
 
   hSSE2Checkbox = CreateWindowEx(
       0, WC_BUTTON, USE_SSE2Q,
       WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y,
-      100u, EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr
-  );
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y, 100u,
+      EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr);
   hAllocMemButton = CreateWindowExW(
-      0, WC_BUTTON, ALLOC_MEM,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      0, WC_BUTTON, ALLOC_MEM, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT + PADDING_Y) * 2u),
-      PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
-      hWnd, (HMENU)IDC_ALLOC_MEM, hInst, nullptr
-  );
+      PROGBAR_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_ALLOC_MEM, hInst, nullptr);
 
   // Create the "Start" CPU Stress Button control
-  hStartStresButton = CreateWindowExW(
-      0, WC_BUTTON, START_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
-      kButtonCol3Left,
-      kButtonRowTop,
-      BUTTON_WIDTH, BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr
-  );
+  hStartStresButton = CreateWindowExW(0, WC_BUTTON, START_BUTTON,
+                                      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+                                      kButtonCol3Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT,
+                                      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr);
   // Create the "Stop" CPU Stress Button control
   hStopStresButton = CreateWindowExW(
-      0, WC_BUTTON, STOP_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
-      kButtonCol3Left + BUTTON_WIDTH + PADDING_X,
-      kButtonRowTop,
-      BUTTON_WIDTH, BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr
-  );
+      0, WC_BUTTON, STOP_BUTTON, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      kButtonCol3Left + BUTTON_WIDTH + PADDING_X, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+      (HMENU)IDC_STOP_BUTTON, hInst, nullptr);
   // Create the "Show OS Info" Button control
-  hOsInfoButton = CreateWindowExW(
-      0, WC_BUTTON, OSINFO_BUTTON,
-      WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
-      kButtonCol3Left,
-      kButtonRow2Top,
-      BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
-      hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr
-  );
+  hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON,
+                                  WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+                                  kButtonCol3Left, kButtonRow2Top, BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
+                                  hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempK.c_str()); // Kelvin
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempF.c_str()); // Fahrenheit
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempR.c_str()); // Rankine
-  //SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Unknown
-  // Precision combobox options
+  // SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kDummyScale.c_str()); // Unknown
+  //  Precision combobox options
   SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"0");
   SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"1");
   SendMessageW(hPrecisionCombo, CB_ADDSTRING, 0, (LPARAM)L"2");
@@ -545,7 +431,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
   InitStatusBar(hWnd, hInst); // Set up status bar at bottom
   // Stuff to do after controls are initialized
-  SetFontAllControls(hWnd); // Set initial font for all controls in main Window
+  SetFontAllControls(hWnd);    // Set initial font for all controls in main Window
   AppendTooltips(hWnd, hInst); // Add hover tooltips to everything, lol
 }
 
@@ -568,15 +454,19 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hFahrenheitEdit, hInst, L"° Fahrenheit");
   AddTooltip(hWnd, hRankineLabel, hInst, L"Converted Rankine output");
   AddTooltip(hWnd, hRankineEdit, hInst, L"° Rankine");
-  AddTooltip(hWnd, hCacheSizeLabel, hInst, L"The L2 Cache size, in MB, to be used for stressor functions");
-  AddTooltip(hWnd, hCacheSizeCombo, hInst, L"Choose the L2 Cache size, in MB, for stressor functions");
-  AddTooltip(hWnd, hSSE2Checkbox, hInst, L"Whether to use the SSE2 SIMD stressor function instead of regular one.");
-  AddTooltip(hWnd, hAllocMemButton, hInst, L"Allocates 100 MB. of raw virtual memory. DANGER: Can cause system crash if abused.");
+  AddTooltip(hWnd, hCacheSizeLabel, hInst,
+             L"The L2 Cache size, in MB, to be used for stressor functions");
+  AddTooltip(hWnd, hCacheSizeCombo, hInst,
+             L"Choose the L2 Cache size, in MB, for stressor functions");
+  AddTooltip(hWnd, hSSE2Checkbox, hInst,
+             L"Whether to use the SSE2 SIMD stressor function instead of regular one.");
+  AddTooltip(hWnd, hAllocMemButton, hInst,
+             L"Allocates 100 MB. of raw virtual memory. DANGER: Can cause system crash if abused.");
   AddTooltip(hWnd, hClearButton, hInst, L"Clear all temperature output");
   AddTooltip(hWnd, hOsInfoButton, hInst, L"Open OS Information window + utilities");
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
-  //AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
+  // AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
 }
 
 void HandleResize(HWND hWnd) {
@@ -585,22 +475,23 @@ void HandleResize(HWND hWnd) {
   }
 
   // TODO, move copy of this to InitControls with MAINWIDTH/MAINHEIGHT
-  const unsigned int width = current_width;
-  const unsigned int height = current_height;
-  const int kStatusSplit = width - LABEL_WIDTH;
-  const int frame_bottom = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
-  const int button_top = frame_bottom + (INTRA_PADDING * 3u);
-  const int button2_top = button_top + BUTTON_HEIGHT + PADDING_Y;
-  const int kButtonCol2Left = (width / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
-  const int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
-  const int kButtonCol4Left = kButtonCol3Left + BUTTON_WIDTH + PADDING_X;
+  const unsigned int width              = current_width;
+  const unsigned int height             = current_height;
+  const int kStatusSplit                = width - LABEL_WIDTH;
+  const int frame_bottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+  const int button_top                  = frame_bottom + (INTRA_PADDING * 3u);
+  const int button2_top                 = button_top + BUTTON_HEIGHT + PADDING_Y;
+  const int kButtonCol2Left             = (width / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
+  const int kButtonCol3Left             = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
+  const int kButtonCol4Left             = kButtonCol3Left + BUTTON_WIDTH + PADDING_X;
   const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u) + PADDING_X;
-  const unsigned int kFrameWidth = width - END_PADDING;
+  const unsigned int kFrameWidth        = width - END_PADDING;
 
   MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
   MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT, TRUE);
-  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH, COMBO_HEIGHT, TRUE);
+  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH,
+             COMBO_HEIGHT, TRUE);
   MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
   MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
@@ -609,19 +500,19 @@ void HandleResize(HWND hWnd) {
 
   if (hStatusBar) {
     SendMessageW(hStatusBar, WM_SIZE, 0, 0);
-    const int kStatusParts[2] = { kStatusSplit, -1 }; // -1 means extend to right edge
+    const int kStatusParts[2] = {kStatusSplit, -1}; // -1 means extend to right edge
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
   }
 }
 
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
-  static const std::wstring status_text = kAppName + L" ver. " + GetVersionWstring();
+  static const std::wstring status_text   = kAppName + L" ver. " + GetVersionWstring();
   static const std::wstring status_bubble = L"Status";
-  const int kStatusSplit = MAINWIDTH - LABEL_WIDTH;
+  const int kStatusSplit                  = MAINWIDTH - LABEL_WIDTH;
   if (!hStatusBar) {
     LOG(ERROR) << __FUNC__ << L"() failed: Status bar not initialized";
   } else {
-    const int kStatusParts[2] = { kStatusSplit, -1 };
+    const int kStatusParts[2] = {kStatusSplit, -1};
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
     UpdateStatusBar(0, status_text);
     UpdateStatusBar(1, status_bubble);
@@ -668,7 +559,7 @@ static errno_t wcsncpy_s_compat(wchar_t* dest, size_t destsz, const wchar_t* src
     }
 
     dest[i] = L'\0';
-    return 0;  // truncation is NOT an error
+    return 0; // truncation is NOT an error
   }
 
   // Normal bounded copy
@@ -696,8 +587,7 @@ bool GetClipboardTextW(wchar_t* buffer, size_t bufferSize) {
 
   HANDLE hData = GetClipboardData(CF_UNICODETEXT);
   if (hData) {
-    const wchar_t* pText =
-        static_cast<const wchar_t*>(GlobalLock(hData));
+    const wchar_t* pText = static_cast<const wchar_t*>(GlobalLock(hData));
     if (pText) {
       if (debug_mode) {
         LOG(DEBUG) << __FUNC__ << L"() got: " << pText;
@@ -780,7 +670,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
           SetAboutHandled(AboutHandled);
           break;
         }
-      } break;
+      }
+      break;
     default:
       SetAboutHandled(true);
       break;
@@ -792,8 +683,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
 bool GetThreadsInput(HWND hWnd) {
   DWORD dwThrInputSize = GetWindowTextLength(hThreadsEdit);
-  const bool is_empty = (BOOL)(dwThrInputSize == 0);
-  bool is_invalid = is_empty;
+  const bool is_empty  = (BOOL)(dwThrInputSize == 0);
+  bool is_invalid      = is_empty;
   if (is_empty) {
     MessageBoxW(hWnd, L"No threads entered!", L"Empty Threads Input", MB_OK | MB_ICONWARNING);
     return false;
@@ -811,7 +702,8 @@ bool GetThreadsInput(HWND hWnd) {
     } else {
       SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
     }
-    const std::wstring valid_msg = L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
+    const std::wstring valid_msg =
+        L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
     MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
     return false;
   } else {
@@ -819,14 +711,14 @@ bool GetThreadsInput(HWND hWnd) {
     get_threads = std::stoi(threads_input);
     LOG(DEBUG) << L"Number of system CPU threads: " << num_logical_cpus;
     if (get_threads > num_logical_cpus) {
-      LOG(ERROR) << L"Threads input is larger than the number of system CPU threads! " << num_logical_cpus;
+      LOG(ERROR) << L"Threads input is larger than the number of system CPU threads! "
+                 << num_logical_cpus;
       std::wostringstream wostr;
-      wostr << L"You have entered more threads (" << get_threads << ") than the machine's CPU has (" << num_logical_cpus << ") "
-            << L"\nWould you still like to continue?";
+      wostr << L"You have entered more threads (" << get_threads << ") than the machine's CPU has ("
+            << num_logical_cpus << ") " << L"\nWould you still like to continue?";
       std::wstring wout = wostr.str();
-      int allow_threads =
-          MessageBoxW(nullptr, wout.c_str(), L"Threads Confirmation",
-                      MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
+      int allow_threads = MessageBoxW(nullptr, wout.c_str(), L"Threads Confirmation",
+                                      MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
       switch (allow_threads) {
         case IDNO:
         case IDCANCEL:
@@ -887,8 +779,10 @@ void OnStartButtonClick(HWND hWnd) {
       }
     }
   } else {
-    MessageBoxW(nullptr, L"Threads are already running! \nYou must press Stop before changing thread paramaters.", L"Threads > 0",
-                MB_OK | MB_ICONERROR | MB_DEFBUTTON1);
+    MessageBoxW(
+        nullptr,
+        L"Threads are already running! \nYou must press Stop before changing thread paramaters.",
+        L"Threads > 0", MB_OK | MB_ICONERROR | MB_DEFBUTTON1);
   }
 }
 

@@ -7,6 +7,7 @@
 unsigned int g_precision_;
 
 static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
+
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
 // Declare custom_settings here, to be set later, for all of cryocalc to use
@@ -16,7 +17,7 @@ unsigned int custom_precision;
 bool custom_debug_mode;
 
 // Bools to toggle as we go down the line to get our settings
-bool got_ini = false;
+bool got_ini      = false;
 bool got_settings = false;
 bool set_settings = false;
 
@@ -37,9 +38,9 @@ std::wstring& GetTempString(long double in_temperature) {
 }
 
 std::wstring fromCelsius(long double in_celsius) {
-  long double out_kelvin = kelvin::fromCelsius(in_celsius);
+  long double out_kelvin     = kelvin::fromCelsius(in_celsius);
   long double out_fahrenheit = fahrenheit::fromCelsius(in_celsius);
-  long double out_rankine = rankine::fromCelsius(in_celsius);
+  long double out_rankine    = rankine::fromCelsius(in_celsius);
   std::wostringstream wostr;
   const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_celsius << L" \u00B0 Celsius \n"
@@ -50,9 +51,9 @@ std::wstring fromCelsius(long double in_celsius) {
 }
 
 std::wstring fromKelvin(long double in_kelvin) {
-  long double out_celsius = celsius::fromKelvin(in_kelvin);
+  long double out_celsius    = celsius::fromKelvin(in_kelvin);
   long double out_fahrenheit = fahrenheit::fromKelvin(in_kelvin);
-  long double out_rankine = rankine::fromKelvin(in_kelvin);
+  long double out_rankine    = rankine::fromKelvin(in_kelvin);
   std::wostringstream wostr;
   const unsigned int precision = GetCryoCalcPrecision();
   wostr << std::fixed << std::setprecision(precision) << "  " << in_kelvin << L" \u00B0 Kelvin \n"
@@ -64,11 +65,12 @@ std::wstring fromKelvin(long double in_kelvin) {
 
 std::wstring fromFahrenheit(long double in_fahrenheit) {
   long double out_celsius = celsius::fromFahrenheit(in_fahrenheit);
-  long double out_kelvin = kelvin::fromFahrenheit(in_fahrenheit);
+  long double out_kelvin  = kelvin::fromFahrenheit(in_fahrenheit);
   long double out_rankine = rankine::fromFahrenheit(in_fahrenheit);
   std::wostringstream wostr;
   const unsigned int precision = GetCryoCalcPrecision();
-  wostr << std::fixed << std::setprecision(precision) << "  " << in_fahrenheit << L" \u00B0 Fahrenheit \n"
+  wostr << std::fixed << std::setprecision(precision) << "  " << in_fahrenheit
+        << L" \u00B0 Fahrenheit \n"
         << "  " << out_celsius << L" = \u00B0 Celsius \n"
         << "  " << out_kelvin << L" = \u00B0 Kelvin \n"
         << "  " << out_rankine << L" = \u00B0 Rankine \n";
@@ -76,8 +78,8 @@ std::wstring fromFahrenheit(long double in_fahrenheit) {
 }
 
 std::wstring fromRankine(long double in_rankine) {
-  long double out_celsius = celsius::fromRankine(in_rankine);
-  long double out_kelvin = kelvin::fromRankine(in_rankine);
+  long double out_celsius    = celsius::fromRankine(in_rankine);
+  long double out_kelvin     = kelvin::fromRankine(in_rankine);
   long double out_fahrenheit = fahrenheit::fromRankine(in_rankine);
   std::wostringstream wostr;
   const unsigned int precision = GetCryoCalcPrecision();
@@ -138,9 +140,8 @@ void CloseAllWindows(HWND hWnd) {
 }
 
 int ConfirmExit(HWND hWnd) {
-  int user_response_code =
-      MessageBoxW(nullptr, L"Are you sure you want to exit?", L"Confirm Exit",
-                  MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
+  int user_response_code = MessageBoxW(nullptr, L"Are you sure you want to exit?", L"Confirm Exit",
+                                       MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
   switch (user_response_code) {
     case IDNO:
     case IDCANCEL:
@@ -155,9 +156,8 @@ int ConfirmExit(HWND hWnd) {
 }
 
 bool ConfirmClearControls(HWND hWnd) {
-  int user_response_code =
-      MessageBoxW(nullptr, L"Clear All Temperature Output?", L"Confirm Clear",
-                  MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
+  int user_response_code = MessageBoxW(nullptr, L"Clear All Temperature Output?", L"Confirm Clear",
+                                       MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
   switch (user_response_code) {
     case IDNO:
     case IDCANCEL:
@@ -186,20 +186,19 @@ bool ConfirmAndClearLog(HWND hWnd) {
 
 const int ShowVersionAndExit() {
   static const std::wstring kVersion = GetVersionWstring();
-  std::wcout << L"\n " << kAppName << " ver. "
-             << kVersion << L"\n " << std::endl;
+  std::wcout << L"\n " << kAppName << " ver. " << kVersion << L"\n " << std::endl;
   system("pause");
   return 0;
 }
 
 const int ShowHelpAndExit() {
-  std::wcout << L"\n " << GetExecutableName()
-             << L" Usage: \n" << std::flush;
+  std::wcout << L"\n " << GetExecutableName() << L" Usage: \n" << std::flush;
   std::wostringstream wostr;
   wostr << L"   /d | -d | --debug   : Enable debug mode and enable logging\n"
         << L"   /l | -l | --logging : Enable logging in console Window \n"
         << L"   /v | -v | --version : Show version info \n"
-        << L"   /? | -h | --help    : Show this Help \n" << std::flush;
+        << L"   /? | -h | --help    : Show this Help \n"
+        << std::flush;
   static const std::wstring kHelpMsg = wostr.str();
   std::wcout << kHelpMsg.c_str() << std::endl;
   system("pause");
@@ -219,7 +218,7 @@ void HandleDebugMode(const bool debug_mode) {
 bool IsValidNumericInput(const wchar_t* text) {
   assert(text);
   bool decimalFound = false;
-  bool minusFound = false;
+  bool minusFound   = false;
   for (const wchar_t* p = text; *p != L'\0'; ++p) {
     if (*p >= L'0' && *p <= L'9') {
       continue; // Safe numerals
@@ -248,7 +247,7 @@ bool IsValidNumericInput(const wchar_t* text) {
 // Verifies that threads input is a whole integer
 bool IsValidThreadsInput(const wchar_t* text) {
   assert(text);
-    // Check that all characters are digits
+  // Check that all characters are digits
   for (const wchar_t* p = text; *p != L'\0'; ++p) {
     if (*p < L'0' || *p > L'9') {
       return false;
@@ -272,7 +271,7 @@ DWORD GetLogicalProcessorCount() {
   SYSTEM_INFO sysInfo;
   std::wstring whichfunc;
 #if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
-  whichfunc =  L"GetNativeSystemInfo";
+  whichfunc = L"GetNativeSystemInfo";
   GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
   pfnGetNativeSystemInfo = nullptr;
 #else
@@ -284,7 +283,8 @@ DWORD GetLogicalProcessorCount() {
     GetSystemInfo(&sysInfo);
   } else {
     // Dynamically get GetNativeSystemInfo
-    pfnGetNativeSystemInfo = reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
+    pfnGetNativeSystemInfo =
+        reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
     // Windows 2000 won't have this function, use GetSystemInfo instead
     if (pfnGetNativeSystemInfo) {
       whichfunc = L"pfnGetNativeSystemInfo";
@@ -304,7 +304,7 @@ DWORD GetLogicalProcessorCount() {
 
 unsigned int GetDefaultNumThreads() {
   unsigned int def_threads = 0;
-  def_threads = static_cast<unsigned int>(GetLogicalProcessorCount());
+  def_threads              = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (def_threads == 0) {
     return MIN_THREADS;
   } else if (def_threads > MAX_THREADS) {
@@ -322,8 +322,9 @@ long double ConvertInputToLD(const wchar_t* input) {
 
 void AppendTextToEditControl(HWND hWnd, const std::wstring line) {
   const WCHAR* text = line.c_str();
-  int length = GetWindowTextLength(hWnd); // Get current text length
-  SendMessageW(hWnd, EM_SETSEL, static_cast<WPARAM>(length), static_cast<LPARAM>(length)); // Set cursor at the end
+  int length        = GetWindowTextLength(hWnd); // Get current text length
+  SendMessageW(hWnd, EM_SETSEL, static_cast<WPARAM>(length),
+               static_cast<LPARAM>(length));     // Set cursor at the end
   SendMessageW(hWnd, EM_REPLACESEL, FALSE, reinterpret_cast<LPARAM>(text)); // Append the text
 }
 
@@ -338,9 +339,8 @@ const unsigned int GetCryoCalcPrecision() {
 
 const int GetPercentInt(const int in, const float percent) {
   if (percent > 1.0f || percent <= 0.0f) {
-    LOG(ERROR) << L"Percentage " << percent
-               << L" is too large or zero!";
-    return in;    
+    LOG(ERROR) << L"Percentage " << percent << L" is too large or zero!";
+    return in;
   } else {
     const int retval = static_cast<int>(in * percent);
     return retval;
@@ -357,40 +357,41 @@ const int GetYOffset(const int in, const int offset, const float percent) {
   return retval;
 }
 
-bool debug_mode = false;
+bool debug_mode     = false;
 bool enable_logging = false;
-bool show_version = false;
-bool show_help = false;
+bool show_version   = false;
+bool show_help      = false;
 
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
   bool parsed;
   const bool default_debug = GetDefaultWantDebug();
-  bool is_debug_mode = false;
-  bool is_version_mode = false;
-  bool is_help_mode = false;
+  bool is_debug_mode       = false;
+  bool is_version_mode     = false;
+  bool is_help_mode        = false;
   bool is_log_mode =
 #if defined(CRYOCALC_LOGBYDEFAULT)
-    true;
+      true;
 #else
-    false;
+      false;
 #endif
   if (argv) {
     // TODO: Should start at 1 (skip .exe path), but fails on Windows Vista+ for some reason
     // 0 Seems to work fine on all oses
     for (int i = 0; i < argc; ++i) {
-      wchar_t* arg = argv[i];
-      is_debug_mode =
-          (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) || (wcscmp(arg, L"-debug") == 0)
-           || (wcscmp(arg, L"/d") == 0) || (wcscmp(arg, L"/D") == 0) || default_debug) && !(wcscmp(arg, L"--no-debug") == 0));
+      wchar_t* arg  = argv[i];
+      is_debug_mode = (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) ||
+                        (wcscmp(arg, L"-debug") == 0) || (wcscmp(arg, L"/d") == 0) ||
+                        (wcscmp(arg, L"/D") == 0) || default_debug) &&
+                       !(wcscmp(arg, L"--no-debug") == 0));
       is_log_mode =
-          ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) || (wcscmp(arg, L"-log") == 0)
-           || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
+          ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) ||
+           (wcscmp(arg, L"-log") == 0) || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
       is_version_mode =
-          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) || (wcscmp(arg, L"-ver")) == 0
-           || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
-      is_help_mode =
-          ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) || (wcscmp(arg, L"-?") == 0)
-           || (wcscmp(arg, L"/h") == 0) || (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
+          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) ||
+           (wcscmp(arg, L"-ver")) == 0 || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
+      is_help_mode = ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) ||
+                      (wcscmp(arg, L"-?") == 0) || (wcscmp(arg, L"/h") == 0) ||
+                      (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
     }
     parsed = true;
   } else {
@@ -436,7 +437,7 @@ const std::wstring GetExeDir() {
   size_t lastSlash = fullPath.find_last_of(L"\\/");
   std::wstring retval;
   if (lastSlash != std::wstring::npos) {
-    retval = fullPath.substr(0, lastSlash + 1);  // Include trailing slash
+    retval = fullPath.substr(0, lastSlash + 1); // Include trailing slash
   } else {
     retval = fullPath;
   }
@@ -458,7 +459,8 @@ void OpenRunDialog(HWND hWnd) {
       pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
       if (pfnRunFileDlg) {
         LOG(INFO) << L"Opening RunFileDlg";
-        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT, RFD_USEFULLPATHDIR | RFD_WOW_APP);
+        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT,
+                      RFD_USEFULLPATHDIR | RFD_WOW_APP);
       } else {
         LOG(ERROR) << L"Failed to open run dialog.";
       }
@@ -470,8 +472,8 @@ void OpenRunDialog(HWND hWnd) {
 }
 
 // Opens log file with default .txt handler
-bool OpenLogFile(HWND hWnd, const std::wstring &file_path) {
-  bool success = false;
+bool OpenLogFile(HWND hWnd, const std::wstring& file_path) {
+  bool success        = false;
   const wchar_t* path = file_path.c_str();
   LOG(INFO) << L"Opening log file " << path;
   HINSTANCE result = ShellExecuteW(hWnd, L"open", path, nullptr, nullptr, SW_NORMAL);
@@ -484,8 +486,7 @@ bool OpenLogFile(HWND hWnd, const std::wstring &file_path) {
       wostr << path << L" could not be found.";
       treat_as_error = false;
     } else {
-      wostr << L"Error = " << std::showbase << std::hex << error
-            << std::dec << std::defaultfloat;
+      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat;
     }
     const std::wstring message = wostr.str();
     if (!treat_as_error) {
@@ -516,8 +517,7 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
       wostr << executable << L" could not be found.";
       treat_as_error = false;
     } else {
-      wostr << L"Error = " << std::showbase << std::hex << error
-            << std::dec << std::defaultfloat;
+      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat;
     }
     const std::wstring message = wostr.str();
     if (!treat_as_error) {
@@ -536,7 +536,7 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
 }
 
 const size_t GetCacheSize() {
-  size_t cache_size = 1024u;
+  size_t cache_size      = 1024u;
   DWORD dwCacheComboSize = GetWindowTextLength(hCacheSizeCombo);
   std::wstring cachesz_buff(dwCacheComboSize + 1, L'\0');
   GetWindowTextW(hCacheSizeCombo, &cachesz_buff[0], dwCacheComboSize + 1);
@@ -561,11 +561,8 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
 
   // Create the tooltip window
   HWND hTooltip = CreateWindowExW(
-      0, TOOLTIPS_CLASS, nullptr,
-      WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
-      CW_USEDEFAULT, CW_USEDEFAULT,
-      CW_USEDEFAULT, CW_USEDEFAULT,
-      hWndParent, nullptr, hInst, nullptr);
+      0, TOOLTIPS_CLASS, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
+      CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hWndParent, nullptr, hInst, nullptr);
 
   if (!hTooltip) {
     return nullptr;
@@ -582,18 +579,17 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
     // sizeof(ti) gives V3 size which Win2000's TTM_ADDTOOLW rejects.
     ti.cbSize = TTTOOLINFOW_V2_SIZE;
   }
-  ti.uFlags = TTF_SUBCLASS | TTF_IDISHWND;
-  ti.hwnd = hWndParent;
-  ti.uId = reinterpret_cast<UINT_PTR>(hWndControl);
+  ti.uFlags   = TTF_SUBCLASS | TTF_IDISHWND;
+  ti.hwnd     = hWndParent;
+  ti.uId      = reinterpret_cast<UINT_PTR>(hWndControl);
   ti.lpszText = const_cast<wchar_t*>(tooltipText);
 
   // Associate the tooltip with the control
   SendMessageW(hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
   // Tooltip must be topmost to appear above other windows
-  SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0,
-               SWP_NOMOVE | SWP_NOSIZE);
+  SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
   // Finally, activate it to show it.
-  //SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
+  // SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
 
   return hTooltip;
 }
@@ -613,9 +609,8 @@ void ClearConsole(HWND hWnd) {
 
   // Open CONOUT$ directly since GetStdHandle may return the original
   // (invalid) handle after freopen redirected the C runtime streams.
-  HANDLE hConsole = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE,
-                                FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
-                                0, nullptr);
+  HANDLE hConsole = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, nullptr,
+                                OPEN_EXISTING, 0, nullptr);
   if (hConsole == INVALID_HANDLE_VALUE) {
     MessageBoxW(nullptr, L"Failed to open CONOUT$", L"Clear Console Error", MB_OK | MB_ICONERROR);
     return;
@@ -631,7 +626,7 @@ void ClearConsole(HWND hWnd) {
   }
 
   // Calculate visible window size
-  SHORT windowWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  SHORT windowWidth  = csbi.srWindow.Right - csbi.srWindow.Left + 1;
   SHORT windowHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
   // Shrink buffer to window size - this clears scrollback history
@@ -640,7 +635,7 @@ void ClearConsole(HWND hWnd) {
 
   // Clear the visible area
   DWORD visibleSize = windowWidth * windowHeight;
-  COORD topLeft = {0, 0};
+  COORD topLeft     = {0, 0};
   DWORD charsWritten;
   FillConsoleOutputCharacterW(hConsole, L' ', visibleSize, topLeft, &charsWritten);
   FillConsoleOutputAttribute(hConsole, csbi.wAttributes, visibleSize, topLeft, &charsWritten);
@@ -663,11 +658,11 @@ bool ClearLogFile(HWND hWnd) {
 bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
   RECT winRect;
   RECT clientRect;
-  // Get rect size of window including titlebar, for setting other Window's positions relative to this window
+  // Get rects of Window including titlebar, for positioning other windows relative to it.
   if (!GetWindowRect(hMainWindow, &winRect)) {
     return false;
   }
-  // Get internal rects inside Window, excluding titlebar, for setting control positions inside Window
+  // Get rects inside Window, excluding titlebar, for positioning other windows relative to it.
   if (!GetClientRect(hWnd, &clientRect)) {
     return false;
   }
@@ -679,22 +674,21 @@ bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
 const RECT GetDesktopRect(HINSTANCE hInstance) {
   RECT desktopWinRect;
   if (!hInstance) {
-    desktopWinRect.left = 0;
-    desktopWinRect.top = 0;
-    desktopWinRect.right = 0;
+    desktopWinRect.left   = 0;
+    desktopWinRect.top    = 0;
+    desktopWinRect.right  = 0;
     desktopWinRect.bottom = 0;
   } else {
     BOOL gotWorkArea = SystemParametersInfoW(SPI_GETWORKAREA, 0, &desktopWinRect, 0);
     if (!gotWorkArea) {
-      desktopWinRect.left = 0;
-      desktopWinRect.top = 0;
-      desktopWinRect.right = 0;
+      desktopWinRect.left   = 0;
+      desktopWinRect.top    = 0;
+      desktopWinRect.right  = 0;
       desktopWinRect.bottom = 0;
     }
-    LOG(DEBUG) << L"Got desktop window rect: L" << desktopWinRect.left
-               << L" T" << desktopWinRect.top
-               << L" B" << desktopWinRect.bottom
-               << L" R" << desktopWinRect.right;
+    LOG(DEBUG) << L"Got desktop window rect: L" << desktopWinRect.left << L" T"
+               << desktopWinRect.top << L" B" << desktopWinRect.bottom << L" R"
+               << desktopWinRect.right;
   }
   return desktopWinRect;
 }
@@ -767,7 +761,7 @@ bool GetCustomSettings() {
   // Format: key=value (e.g., default_precision=4, debug_mode=1)
   std::istringstream stream(buffer);
   std::string line;
-  bool set_debug = false;
+  bool set_debug             = false;
   unsigned int set_precision = DEFAULT_PRECISION;
   while (std::getline(stream, line)) {
     // Skip empty lines and comments
@@ -781,7 +775,7 @@ bool GetCustomSettings() {
       continue;
     }
 
-    std::string key = line.substr(0, eq_pos);
+    std::string key   = line.substr(0, eq_pos);
     std::string value = line.substr(eq_pos + 1);
 
     // Trim whitespace from key and value
@@ -794,16 +788,16 @@ bool GetCustomSettings() {
 
     // Parse known settings
     bool precisionkey = (key == "precision");
-    bool debugkey = (key == "debug_mode");
+    bool debugkey     = (key == "debug_mode");
     if (precisionkey) {
       const int precision = std::atoi(value.c_str());
       if (precision >= static_cast<int>(MIN_PRECISION) &&
           precision <= static_cast<int>(MAX_PRECISION)) {
         const int prec_val = static_cast<unsigned int>(precision);
-        set_precision = prec_val;
+        set_precision      = prec_val;
       } else {
-        std::wcerr << L"INI: default_precision=" << precision
-                   << L" out of range (" << MIN_PRECISION << L"-" << MAX_PRECISION << L")!" << std::endl;
+        std::wcerr << L"INI: default_precision=" << precision << L" out of range (" << MIN_PRECISION
+                   << L"-" << MAX_PRECISION << L")!" << std::endl;
         set_precision = DEFAULT_PRECISION;
       }
     }
@@ -818,7 +812,7 @@ bool GetCustomSettings() {
       }
     }
   }
-  custom_settings.set_debug_mode = set_debug;
+  custom_settings.set_debug_mode    = set_debug;
   custom_settings.default_precision = set_precision;
 
   got_settings = true;
@@ -830,12 +824,12 @@ bool SetCustomSettings() {
     return false;
   }
   unsigned int want_prec = custom_settings.default_precision;
-  bool want_debug = custom_settings.set_debug_mode;
-  std::wcout << L"Got custom settings: " << L"Prec=" << want_prec
-             << L" Debug=" << static_cast<int>(want_debug) << std::endl;
-  custom_precision = want_prec;
+  bool want_debug        = custom_settings.set_debug_mode;
+  std::wcout << L"Got custom settings: " << L"Prec=" << want_prec << L" Debug="
+             << static_cast<int>(want_debug) << std::endl;
+  custom_precision  = want_prec;
   custom_debug_mode = want_debug;
-  set_settings = true;
+  set_settings      = true;
   return true;
 }
 
@@ -845,17 +839,15 @@ bool OpenIniFileForReading(const std::wstring ini_file) {
   }
 
   // Try to open the .ini file in read only mode.
-  g_ini_file = CreateFileW(
-      ini_file.c_str(),
-      GENERIC_READ, // Only allow reading
-      FILE_SHARE_READ | FILE_SHARE_WRITE,
-      nullptr,        // Default security
-      OPEN_EXISTING, // Only open if .ini file exists
-      FILE_ATTRIBUTE_NORMAL,
-      nullptr);
+  g_ini_file = CreateFileW(ini_file.c_str(),
+                           GENERIC_READ,  // Only allow reading
+                           FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr,       // Default security
+                           OPEN_EXISTING, // Only open if .ini file exists
+                           FILE_ATTRIBUTE_NORMAL, nullptr);
 
   if (g_ini_file == INVALID_HANDLE_VALUE) {
-    got_ini = false;
+    got_ini   = false;
     DWORD err = GetLastError();
     if (err == ERROR_FILE_NOT_FOUND) {
       LOG(WARN) << kIniFileName << " not found!";
@@ -882,9 +874,9 @@ const unsigned int GetDefaultPrecision() {
 // Returns true if debug_mode=1 in .ini file or DEBUG build
 const bool GetDefaultWantDebug() {
 #if defined(_DEBUG) || defined(DEBUG)
-    return true;
+  return true;
 #else
-    return set_settings ? custom_debug_mode : false;
+  return set_settings ? custom_debug_mode : false;
 #endif
 }
 
@@ -894,17 +886,19 @@ errno_t AllocateMemory(const size_t num_bytes) {
     MessageBoxW(nullptr, L"Failed to allocate memory", L"VirtualAlloc Error", MB_OK | MB_ICONERROR);
     return 12; // ENOMEM
   } else {
-    LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u) << " Megabytes memory allocated at address: " << std::showbase << std::hex << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
+    LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u)
+               << " Megabytes memory allocated at address: " << std::showbase << std::hex
+               << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
     return 0;
   }
 }
 
 const bool IsCommCtrlAtLeast(const DWORD to_compare) {
   const DWORD kCommCtrlVer = GetCommCtrlVersion();
-  LOG(DEBUG) << L"Target common controls version: " << std::showbase << std::hex
-             << to_compare << std::noshowbase << std::dec;
-  LOG(DEBUG) << L"Installed common controls version: " << std::showbase << std::hex
-             << kCommCtrlVer << std::noshowbase << std::dec;
+  LOG(DEBUG) << L"Target common controls version: " << std::showbase << std::hex << to_compare
+             << std::noshowbase << std::dec;
+  LOG(DEBUG) << L"Installed common controls version: " << std::showbase << std::hex << kCommCtrlVer
+             << std::noshowbase << std::dec;
   return kCommCtrlVer >= to_compare;
 }
 
@@ -919,21 +913,24 @@ DWORD GetCommCtrlVersion() {
     // Handle error or buffer too small
     LOG(ERROR) << "Failed to get system directory!";
   }
-  const std::wstring comctl32_path = kSystemDir + L"\\" + kComCtl32Dll; // Add \\ backslash before .dll file name
-  hComCtl32Dll = LoadLibraryW(comctl32_path.c_str()); // Explicity reference system installed version
+  const std::wstring comctl32_path =
+      kSystemDir + L"\\" + kComCtl32Dll;   // Add \\ backslash before .dll file name
+  hComCtl32Dll =
+      LoadLibraryW(comctl32_path.c_str()); // Explicity reference system installed version
   DLLGETVERSIONPROC pDllGetVersion;
   DLLVERSIONINFO dvi = {sizeof(dvi)};
-  DWORD dwVersion = 0;
+  DWORD dwVersion    = 0;
   DWORD error;
   if (!hComCtl32Dll || hComCtl32Dll == nullptr) {
     error = GetLastError();
     LOG(ERROR) << L"Failed to load " << kComCtl32Dll << ", hComCtl32Dll was null! Error: " << error;
     pDllGetVersion = nullptr;
   } else {
-    pDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hComCtl32Dll, "DllGetVersion"));
+    pDllGetVersion =
+        reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hComCtl32Dll, "DllGetVersion"));
     if (!pDllGetVersion) {
       error = GetLastError();
-      LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << error; 
+      LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << error;
     } else {
       HRESULT hr = pDllGetVersion(&dvi);
       if (hr == S_OK) {

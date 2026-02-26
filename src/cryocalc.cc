@@ -1,4 +1,5 @@
 #include "cryocalc.h"
+
 #include "utils.h"
 
 // Global instance
@@ -18,19 +19,21 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 HMODULE hOsInfoDll = nullptr; // Module handle to osinfo.dll
 
-static constexpr bool early_attach_console = true; // Set to true to early attach console before InitLogging
+// Set to true to early attach console before InitLogging
+static constexpr bool early_attach_console = true;
+
 static constexpr bool hold_console_for_testing = false; // Don't detach console even if non logging
 
 int APIENTRY wWinMain(HINSTANCE hInstance,
                       HINSTANCE hPrevInstance,
-                      LPWSTR    lpCmdLine,
-                      int       nCmdShow) {
+                      LPWSTR lpCmdLine,
+                      int nCmdShow) {
   UNREFERENCED_PARAMETER(hPrevInstance);
 
   // Initialize common controls
   INITCOMMONCONTROLSEX icex;
   icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-  icex.dwICC = ICC_STANDARD_CLASSES | ICC_WIN95_CLASSES | ICC_PROGRESS_CLASS;
+  icex.dwICC  = ICC_STANDARD_CLASSES | ICC_WIN95_CLASSES | ICC_PROGRESS_CLASS;
   InitCommonControlsEx(&icex);
 
   // Check that we can load osinfo.dll and run init function.
@@ -50,8 +53,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
     }
   }
 
-  int argc = 0;
-  LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+  int argc     = 0;
+  LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
   // Get our custom settings from .ini file (if any)
   GetCustomSettings();
@@ -80,10 +83,12 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   const bool init_logging = logging::InitLogging(hInstance, kLogSink, kLogFile);
   if (init_logging) {
     logging::SetIsDCheck(is_dcheck);
-    HandleDebugMode(debug_mode ? debug_mode : is_dcheck); // Handle setting debug mode and welcome message
-    LogOsInfo(); // Log Windows version info
+    HandleDebugMode(debug_mode ? debug_mode
+                               : is_dcheck); // Handle setting debug mode and welcome message
+    LogOsInfo();                             // Log Windows version info
   } else {
-    MessageBoxW(nullptr, L"InitLogging failed!", L"Logging Initialization Failure", MB_OK | MB_ICONERROR);
+    MessageBoxW(nullptr, L"InitLogging failed!", L"Logging Initialization Failure",
+                MB_OK | MB_ICONERROR);
     return 1;
   }
 
@@ -118,20 +123,21 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 ATOM RegisterWndClass(HINSTANCE hInstance) {
   // Declare and set size of this window class struct.
   WNDCLASSEXW wcex;
-  wcex.cbSize = sizeof(WNDCLASSEX);
+  wcex.cbSize                  = sizeof(WNDCLASSEX);
   static const HICON main_icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC));
-  // Set styles, icons, and window message handling function.  
-  wcex.style          = CS_HREDRAW | CS_VREDRAW; // Drawing style
-  wcex.lpfnWndProc    = WindowProc; // Window Procedure function
-  wcex.cbClsExtra     = 0; // Extra bytes to add to end of this window class
-  wcex.cbWndExtra     = 0; // Extra bytes to add to end hInstance
-  wcex.hInstance      = hInstance; // This instance
-  wcex.hIcon          = nullptr; // Load our main app icon
-  wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
-  wcex.hbrBackground  = reinterpret_cast<HBRUSH>(COLOR_WINDOW); // Choose window client area background color
-  wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
-  wcex.lpszClassName  = szWindowClass; // Use our unique window class name
-  wcex.hIconSm        = main_icon; // Load titlebar icon
+  // Set styles, icons, and window message handling function.
+  wcex.style       = CS_HREDRAW | CS_VREDRAW; // Drawing style
+  wcex.lpfnWndProc = WindowProc;              // Window Procedure function
+  wcex.cbClsExtra  = 0;                       // Extra bytes to add to end of this window class
+  wcex.cbWndExtra  = 0;                       // Extra bytes to add to end hInstance
+  wcex.hInstance   = hInstance;               // This instance
+  wcex.hIcon       = nullptr;                 // Load our main app icon
+  wcex.hCursor     = LoadCursor(nullptr, IDC_ARROW);   // Choose default cursor style to show
+  wcex.hbrBackground =
+      reinterpret_cast<HBRUSH>(COLOR_WINDOW);          // Choose window client area background color
+  wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
+  wcex.lpszClassName = szWindowClass;                  // Use our unique window class name
+  wcex.hIconSm       = main_icon;                      // Load titlebar icon
 
   // Returns a "class atom", a win32 specific data type.
   return RegisterClassExW(&wcex);
@@ -139,25 +145,19 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
 
 bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   bool success = false;
-  hInst = hInstance;
+  hInst        = hInstance;
 
   static const RECT kThisDesktop = GetDesktopRect(hInstance);
-  const unsigned int top_position = (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (MAINHEIGHT / 2u);
-  const unsigned int left_position = (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (MAINWIDTH / 2u);
+  const unsigned int top_position =
+      (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (MAINHEIGHT / 2u);
+  const unsigned int left_position =
+      (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (MAINWIDTH / 2u);
   const bool got_main_font = CreateMainFont();
   // Create the main window
-  hMainWindow = CreateWindowExW(WS_EX_WINDOWEDGE,
-                                szWindowClass,
-                                CAPTION_TITLE,
-                                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX,
-                                left_position,
-                                top_position,
-                                MAINWIDTH,
-                                MAINHEIGHT,
-                                nullptr,
-                                nullptr,
-                                hInstance,
-                                nullptr);
+  hMainWindow = CreateWindowExW(
+      WS_EX_WINDOWEDGE, szWindowClass, CAPTION_TITLE,
+      WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX, left_position,
+      top_position, MAINWIDTH, MAINHEIGHT, nullptr, nullptr, hInstance, nullptr);
 
   if (!hMainWindow || !got_main_font) {
     success = false;
@@ -174,7 +174,8 @@ bool LaunchHelp(HWND hWnd) {
   bool success = false;
   LOG(INFO) << L"Opening chm help";
   std::wstring help_file = GetExeDir() + kChmHelpFile;
-  HINSTANCE chm_result = ShellExecuteW(hWnd, L"open", help_file.c_str(), nullptr, nullptr, SW_NORMAL);
+  HINSTANCE chm_result =
+      ShellExecuteW(hWnd, L"open", help_file.c_str(), nullptr, nullptr, SW_NORMAL);
   std::wostringstream wostr;
   if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
     DWORD error = GetLastError();
@@ -184,8 +185,8 @@ bool LaunchHelp(HWND hWnd) {
       treat_as_error = false;
       wostr << kChmHelpFile << L" could not be found." << std::endl;
     } else {
-      wostr << L"Error = " << std::showbase << std::hex << error
-            << std::dec << std::defaultfloat << std::endl;
+      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat
+            << std::endl;
     }
     const std::wstring message = wostr.str();
     if (!treat_as_error) {
@@ -249,7 +250,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_SSE2_CHECKBOX: {
           BOOL isChecked = (BOOL)SendMessageW(hSSE2Checkbox, BM_GETCHECK, 0, 0);
           if (HIWORD(wParam) == BN_CLICKED) {
-            std::wstring msg = isChecked ? L"SSE2 checkbox was checked." : L"SSE2 checkbox was empty.";
+            std::wstring msg =
+                isChecked ? L"SSE2 checkbox was checked." : L"SSE2 checkbox was empty.";
             LOG(INFO) << msg.c_str();
           }
           set_use_sse2(isChecked);
@@ -344,40 +346,40 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     // Set Paint colors of child windows
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORSTATIC: {
-      HDC hdc = reinterpret_cast<HDC>(wParam);
+      HDC hdc               = reinterpret_cast<HDC>(wParam);
       HWND hThisEditControl = reinterpret_cast<HWND>(lParam);
       // Create brushes once and reuse them (static prevents GDI handle leaks)
       static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
-      static const HBRUSH hBrushDefault = CreateSolidBrush(bgColorDefault);
-      static HBRUSH hBrushRed = CreateSolidBrush(RGB_REDISH);
-      static HBRUSH hBrushGreen = CreateSolidBrush(RGB_GREENISH);
-      static HBRUSH hBrushCyan = CreateSolidBrush(RGB_CYAN);
+      static const HBRUSH hBrushDefault    = CreateSolidBrush(bgColorDefault);
+      static HBRUSH hBrushRed              = CreateSolidBrush(RGB_REDISH);
+      static HBRUSH hBrushGreen            = CreateSolidBrush(RGB_GREENISH);
+      static HBRUSH hBrushCyan             = CreateSolidBrush(RGB_CYAN);
       // Initially set to default color
-      COLORREF bgColor = bgColorDefault;
+      COLORREF bgColor   = bgColorDefault;
       HBRUSH hBrushToUse = hBrushDefault;
-      bool set_color = false;
+      bool set_color     = false;
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_LABEL_C:
         case IDC_LABEL_K:
         case IDC_LABEL_F:
         case IDC_LABEL_R:
-          bgColor = RGB_REDISH;
+          bgColor     = RGB_REDISH;
           hBrushToUse = hBrushRed;
-          set_color = true;
+          set_color   = true;
           break;
         case IDC_LABEL_INPUT:
         case IDC_LABEL_PREC:
         case IDC_LABEL_THREADS:
         case IDC_LABEL_CACHE:
-          bgColor = RGB_GREENISH;
+          bgColor     = RGB_GREENISH;
           hBrushToUse = hBrushGreen;
-          set_color = true;
+          set_color   = true;
           break;
         case IDC_INPUT:
         case IDC_THREADS:
-          bgColor = RGB_CYAN;
+          bgColor     = RGB_CYAN;
           hBrushToUse = hBrushCyan;
-          set_color = true;
+          set_color   = true;
           break;
         default:
           break;
@@ -391,7 +393,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     } break;
     // Handle resize events
     case WM_SIZE: {
-      current_width = LOWORD(lParam);
+      current_width  = LOWORD(lParam);
       current_height = HIWORD(lParam);
       SetClientRects(hWnd, paintHinst);
       HandleResize(hWnd);
@@ -399,7 +401,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     // Set/get min/max window size
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
-      LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
+      LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = 390;
       pMinMaxInfo->ptMinTrackSize.y = 320;
       pMinMaxInfo->ptMaxTrackSize.x = 800;
