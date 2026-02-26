@@ -10,6 +10,9 @@
 *.ts text eol=lf
 *.hpp text
 
+/assets/*.txt eol=crlf
+/cryocalc.iss eol=crlf
+
 # .chm files
 *.chm text eol=crlf
 *.htm text eol=crlf
