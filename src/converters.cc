@@ -32,7 +32,7 @@ long double celsius::fromFahrenheit(long double in_fahrenheit) {
 
 long double celsius::fromRankine(long double in_rankine) {
   long double kTempFahrenheit = fahrenheit::fromRankine(in_rankine);
-  long double retval = celsius::fromFahrenheit(kTempFahrenheit);
+  long double retval          = celsius::fromFahrenheit(kTempFahrenheit);
   return retval;
 }
 /* end Celsius functions */
@@ -45,7 +45,7 @@ long double fahrenheit::fromCelsius(long double in_celsius) {
 
 long double fahrenheit::fromKelvin(long double in_kelvin) {
   long double kTempCelsius = celsius::fromKelvin(in_kelvin);
-  long double retval = fahrenheit::fromCelsius(kTempCelsius);
+  long double retval       = fahrenheit::fromCelsius(kTempCelsius);
   return retval;
 }
 
@@ -58,7 +58,7 @@ long double fahrenheit::fromRankine(long double in_rankine) {
 /* functions that return Rankine */
 long double rankine::fromCelsius(long double in_celsius) {
   long double kTempKelvin = kelvin::fromCelsius(in_celsius);
-  long double retval = rankine::fromKelvin(kTempKelvin);
+  long double retval      = rankine::fromKelvin(kTempKelvin);
   return retval;
 }
 
