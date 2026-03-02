@@ -9,7 +9,7 @@
  - Write full scale Chromium style streaming logger.
  - Convert to std::vector and C++17 types where appropriate.
  - Reduce flickering by not redrawing some backgrounds and using DeferWindowPos
- - Fix hover tooltips not showing anymore after press, and not showing at all on Win2K.
+ - Fix topmost hover for tooltips
  - Fix max size for log cleanup.
  - Better colors for controls
  - Clang-format source
