@@ -1,6 +1,7 @@
 #ifndef CRYOCALC_CONTROLS_H_
 #define CRYOCALC_CONTROLS_H_
 
+#include "constants.h"
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
@@ -10,15 +11,6 @@
 #include "utils.h"
 
 extern bool _about_handled;
-
-enum Scale {
-  kScaleCelsius    = 0,
-  kScaleKelvin     = 1,
-  kScaleFahrenheit = 2,
-  kScaleRankine    = 3,
-  kScaleUnknown    = -1,
-  kMaxScale        = 4
-};
 
 Scale parseScale(const std::wstring& wscale);
 

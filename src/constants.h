@@ -95,4 +95,14 @@ inline constexpr DWORD dwComCtl32TargetVer =
 #define RGB_CYAN      RGB(192, 255, 255)
 #define RGB_DARKGREY  RGB(32, 32, 32)
 
+// Internal temp scale representation
+enum Scale {
+  kScaleCelsius    = 0,
+  kScaleKelvin     = 1,
+  kScaleFahrenheit = 2,
+  kScaleRankine    = 3,
+  kScaleUnknown    = -1,
+  kMaxScale        = 4
+};
+
 #endif // CRYOCALC_CONSTANTS_H_

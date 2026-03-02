@@ -126,7 +126,7 @@ bool HandleConvert(HWND hWnd) {
       MessageBoxW(hWnd, L"Invalid Input!", L"Error!", MB_OK | MB_ICONWARNING);
       success = false;
       ClearInput(hWnd);
-      return success; // Fail on invalid input.
+      return false; // Fail on invalid input.
     } else {
       input = ConvertInputToLD(input_buff.c_str());
       std::wostringstream wostr;
@@ -153,14 +153,23 @@ bool HandleConvert(HWND hWnd) {
     assert(((selected_scale >= kScaleCelsius && selected_scale < kMaxScale) ||
             (selected_scale == kScaleUnknown)) &&
            "Scale out of range");
+    const bool is_possible = CheckInputTempBounds(selected_scale, input);
+    if (!is_possible) {
+      const std::wstring impossible_msg =
+          L"Input temp lower than Absolute Zero, or higher than " + std::to_wstring(max_temp) + L".";
+      MessageBoxW(hWnd, impossible_msg.c_str(), L"Impossible Input Temperature!", MB_OK | MB_ICONWARNING);
+      success = false;
+      ClearInput(hWnd);
+      return false;
+    }
     switch (selected_scale) {
-      case kScaleCelsius: {
+      case kScaleCelsius:
         convCelsius    = input;
         convKelvin     = kelvin::fromCelsius(input);
         convFahrenheit = fahrenheit::fromCelsius(input);
         convRankine    = rankine::fromCelsius(input);
         kChosenScale   = L"Celsius";
-      } break;
+        break;
       case kScaleKelvin:
         convCelsius    = celsius::fromKelvin(input);
         convKelvin     = input;

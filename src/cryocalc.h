@@ -12,7 +12,7 @@
 #include "painting.h"
 #include "resource.h"
 
-// Creates the main window with CreateWindowW()
+// Creates the main window with CreateWindowExW()
 bool InitInstance(HINSTANCE hInstance, int nCmdShow);
 
 // Handles about button being clicked
@@ -26,5 +26,11 @@ bool LaunchHelpEx(HWND hWnd);
 
 // Registers the window class.
 ATOM RegisterWndClass(HINSTANCE hInstance);
+
+// Main function, entry point for any GUI Win32 App
+extern "C" int APIENTRY wWinMain(HINSTANCE hInstance,
+                                 HINSTANCE hPrevInstance,
+                                 LPWSTR lpCmdLine,
+                                 int nCmdShow);
 
 #endif // CRYOCALC_H_

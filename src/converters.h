@@ -1,7 +1,12 @@
 #ifndef CRYOCALC_CONVERTERS_H_
 #define CRYOCALC_CONVERTERS_H_
 
+#include <cfloat>
+
 #include "constants.h"
+
+// The max temp we can handle as input. Lower than Planck temp.
+static inline constexpr long long max_temp = LLONG_MAX;
 
 namespace kelvin {
   // Convert Celsius to Kelvin
@@ -46,5 +51,8 @@ namespace rankine {
   // Convert Fahrenheit to Rankine
   long double fromFahrenheit(long double in_fahrenheit);
 } // namespace rankine
+
+// Check that input temp is within real world physical bounds
+bool CheckInputTempBounds(Scale in_scale, long double in_temp);
 
 #endif // CRYOCALC_CONVERTERS_H_
