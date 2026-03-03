@@ -1,9 +1,6 @@
-#include "utils.h"
+#include "ui_utils.h"
 
-#include "constants.h"
-#include "globals.h"
 #include "resource.h"
-#include "strings.h"
 
 int ConfirmExit(HWND hWnd) {
   int user_response_code = MessageBoxW(hWnd, L"Are you sure you want to exit?", L"Confirm Exit",

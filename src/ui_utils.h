@@ -1,0 +1,10 @@
+#ifndef CRYOCALC_UI_UTILS_H_
+#define CRYOCALC_UI_UTILS_H_
+
+#include "utils.h"
+
+#include "constants.h"
+#include "globals.h"
+#include "strings.h"
+
+#endif // CRYOCALC_UI_UTILS_H_

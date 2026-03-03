@@ -37,6 +37,7 @@ executable("cryocalc") {
     "src/utils.cc",
     "src/utils.h",
     "src/ui_utils.cc",
+    "src/ui_utils.h",
     "src/version.h",
   ]
   deps = [
