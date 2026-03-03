@@ -244,9 +244,10 @@ void LogOsInfo() {
   pGetOsInfoDllVersionW GetOsInfoDllVersionW_t =
       reinterpret_cast<pGetOsInfoDllVersionW>(GetProcAddress(hOsInfoDll, "GetOsInfoDllVersionW"));
   std::wstring OsInfoDllVer;
+  DWORD error;
   if (GetOsInfoDllVersionW_t == nullptr) {
-    DWORD error = GetLastError();
-    LOG(ERROR) << L"Failed to get function address. Error: " << error;
+    error = GetLastError();
+    LOG(ERROR) << L"Failed to get GetOsInfoDllVersionW function address. Error: " << error;
   } else {
     OsInfoDllVer = GetOsInfoDllVersionW_t();
   }
@@ -257,6 +258,18 @@ void LogOsInfo() {
     LOG(DEBUG) << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = " << nt_ver
                << std::noshowbase << std::dec << std::defaultfloat;
     TestDllGetVersion();
+    pIsWoW64 IsWoW64_t =
+        reinterpret_cast<pIsWoW64>(GetProcAddress(hOsInfoDll, "IsWoW64"));
+    bool is_wow64;
+    if (IsWoW64_t == nullptr) {
+      error = GetLastError();
+      LOG(ERROR) << L"Failed to get IsWoW64 function address. Error: " << error;
+      is_wow64 = false;
+    } else {
+      is_wow64 = IsWoW64_t();
+    }
+    static std::wstring result = is_wow64 ? L"TRUE" : L"FALSE";
+    LOG(DEBUG) << L"Running under WoW64: " << result;
   }
 }
 
