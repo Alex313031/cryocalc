@@ -36,6 +36,7 @@ executable("cryocalc") {
     "src/stress/stress.cc",
     "src/utils.cc",
     "src/utils.h",
+    "src/ui_utils.cc",
     "src/version.h",
   ]
   deps = [

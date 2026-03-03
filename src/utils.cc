@@ -139,22 +139,6 @@ void CloseAllWindows(HWND hWnd) {
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window. Bad practice.
 }
 
-int ConfirmExit(HWND hWnd) {
-  int user_response_code = MessageBoxW(nullptr, L"Are you sure you want to exit?", L"Confirm Exit",
-                                       MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
-  switch (user_response_code) {
-    case IDNO:
-    case IDCANCEL:
-      break;
-    case IDYES:
-      CloseAllWindows(hWnd);
-      break;
-    default:
-      break;
-  }
-  return user_response_code;
-}
-
 bool ConfirmClearControls(HWND hWnd) {
   int user_response_code = MessageBoxW(nullptr, L"Clear All Temperature Output?", L"Confirm Clear",
                                        MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);

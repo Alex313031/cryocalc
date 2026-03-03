@@ -196,4 +196,11 @@ const bool IsCommCtrlAtLeast(const DWORD to_compare);
 // Gets the installed comctl32.dll version
 DWORD GetCommCtrlVersion();
 
+// Helper functions for MessageBoxW
+int InfoBox(HWND hWnd, const std::wstring title, const std::wstring message);
+
+int WarnBox(HWND hWnd, const std::wstring title, const std::wstring message);
+
+int ErrorBox(HWND hWnd, const std::wstring title, const std::wstring message);
+
 #endif // CRYOCALC_UTILS_H_
