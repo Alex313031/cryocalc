@@ -49,7 +49,7 @@ CFLAGS   := $(DEFINES) -Wall -Wunused-function -static-libgcc -municode -finput-
 
 # Compiler optimization and architecture flags
 ifeq ($(BUILDTYPE), Release)
-CFLAGS   += -O2 -g0 -s -MMD -MP -mfpmath=sse -mfxsr -msse -msse2 -DNDEBUG -D_NDEBUG -Wno-unused-function
+CFLAGS   += -O2 -g0 -s -MMD -MP -mfpmath=sse -mfxsr -msse -msse2 -DNDEBUG -D_NDEBUG
 endif
 ifeq ($(BUILDTYPE), Debug)
 CFLAGS   += -Og -g -MMD -MP -mfpmath=sse -mfxsr -msse -msse2 -DDEBUG -D_DEBUG
