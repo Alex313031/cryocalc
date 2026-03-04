@@ -68,29 +68,29 @@ bool ShowOsInfo(HWND hWnd) {
 void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   // Create text edit control
   hOsInfoTextOut   = CreateWindowExW(0, WC_EDIT, nullptr,
-                                     WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE |
-                                         ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_TABSTOP,
+                                     dwCHILD | WS_BORDER | ES_MULTILINE |
+                                         ES_AUTOVSCROLL | ES_AUTOHSCROLL,
                                      PADDING_X, PADDING_Y, OSINFO_WIDTH - END_PADDING,
                                      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - (END_PADDING * 2), hWnd,
                                      (HMENU)IDC_OSINFO_OUT, hInst, nullptr);
   hOsInfoStatusBar = CreateWindowExW(
-      0, STATUSCLASSNAME, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
+      0, STATUSCLASSNAME, nullptr, dwCHILD | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
       CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hWnd, nullptr, hInst, nullptr);
   hWinVerButton = CreateWindowExW(
-      0, WC_BUTTON, WINVER_BUTTON, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      0, WC_BUTTON, WINVER_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
       PADDING_X, GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING, kOsInfoButtonWidth,
       BUTTON_HEIGHT, hWnd, (HMENU)IDC_WINVER_BUTTON, hInst, nullptr);
   hMsInfoButton = CreateWindowExW(
-      0, WC_BUTTON, MSINFO_BUTTON, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      0, WC_BUTTON, MSINFO_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - END_PADDING, kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd,
       (HMENU)IDC_MSINFO_BUTTON, hInst, nullptr);
   hRunAppButton = CreateWindowExW(
-      0, WC_BUTTON, RUN_BUTTON, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      0, WC_BUTTON, RUN_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
       PADDING_X, GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
       kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd, (HMENU)IDC_RUNAPP_BUTTON, hInst, nullptr);
   hCloseOSInfoButton = CreateWindowExW(
-      0, WC_BUTTON, CLOSE_OI_BUTT, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_CENTER | SS_NOTIFY,
+      0, WC_BUTTON, CLOSE_OI_BUTT, dwCHILD | dwBUTTON | SS_NOTIFY,
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
       kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CLOSE_OSINFO_BUTTON, hInst, nullptr);
@@ -120,8 +120,8 @@ void HandleOsInfoResize(HWND hWnd) {
       static_cast<int>((kOsInfoButtonWidth * 2u) + (INTRA_PADDING * 2u) + PADDING_X);
   const bool is_compact           = this_width <= total_buttons_width;
   const unsigned int kButtonWidth = is_compact ? kOsInfoButtonWidth - 16u : kOsInfoButtonWidth;
-  const unsigned int kButtonLeft =
-      is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
+  const unsigned int kButtonLeft = is_compact ? PADDING_X
+                                              : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
   MoveWindow(hWinVerButton, kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
   MoveWindow(hRunAppButton, kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
   MoveWindow(hMsInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop, kButtonWidth,
