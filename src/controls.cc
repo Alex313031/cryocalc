@@ -155,9 +155,10 @@ bool HandleConvert(HWND hWnd) {
            "Scale out of range");
     const bool is_possible = CheckInputTempBounds(selected_scale, input);
     if (!is_possible) {
-      const std::wstring impossible_msg =
-          L"Input temp lower than Absolute Zero, or higher than " + std::to_wstring(max_temp) + L".";
-      MessageBoxW(hWnd, impossible_msg.c_str(), L"Impossible Input Temperature!", MB_OK | MB_ICONWARNING);
+      const std::wstring impossible_msg = L"Input temp lower than Absolute Zero, or higher than " +
+                                          std::to_wstring(max_temp) + L".";
+      MessageBoxW(hWnd, impossible_msg.c_str(), L"Impossible Input Temperature!",
+                  MB_OK | MB_ICONWARNING);
       success = false;
       ClearInput(hWnd);
       return false;
@@ -257,78 +258,74 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
   const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
-  hFrameOutline                      = CreateWindowExW(
-      0, WC_STATIC, nullptr, dwCHILD | SS_LEFT | SS_ETCHEDFRAME, PADDING_X, PADDING_Y,
-      kFrameWidth, kFrameBottom, hWnd, nullptr, hInst, nullptr);
+  hFrameOutline =
+      CreateWindowExW(0, WC_STATIC, nullptr, dwCHILD | SS_LEFT | SS_ETCHEDFRAME, PADDING_X,
+                      PADDING_Y, kFrameWidth, kFrameBottom, hWnd, nullptr, hInst, nullptr);
   // Static labels
-  hInputLabel      = CreateWindowExW(0,           // Optional window styles
-                                     WC_STATIC,   // Predefined class: Static
-                                     INPUT_LABEL, // Text
-                                     dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, // Styles
-                                     STATIC_LEFT,            // x position
-                                     STATIC_TOP,             // y position
-                                     LABEL_WIDTH,            // Width
-                                     STATICLABEL_HEIGHT,     // Height
-                                     hWnd,                   // Parent window
-                                     (HMENU)IDC_LABEL_INPUT, // No menu, but control ID
-                                     hInst,                  // This window instance
-                                     nullptr                 // Additional app data
-       );
-  hCelsiusLabel    = CreateWindowExW(0, WC_STATIC, L"Celsius:",
-                                     dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                     STATIC_LEFT, STATIC_TOP + kLabelYPad, LABEL_WIDTH,
-                                     STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_C, hInst, nullptr);
-  hKelvinLabel     = CreateWindowExW(0, WC_STATIC, L"Kelvin:",
-                                     dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                     STATIC_LEFT, STATIC_TOP + (kLabelYPad * 2u), LABEL_WIDTH,
-                                     STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_K, hInst, nullptr);
-  hFahrenheitLabel = CreateWindowExW(0, WC_STATIC, L"Fahrenheit:",
-                                     dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                     STATIC_LEFT, STATIC_TOP + (kLabelYPad * 3u), LABEL_WIDTH,
-      STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr);
-  hRankineLabel   = CreateWindowExW(0, WC_STATIC, L"Rankine:",
-                                    dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                    STATIC_LEFT, STATIC_TOP + (kLabelYPad * 4u), LABEL_WIDTH,
-                                    STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr);
-  hPrecisionLabel = CreateWindowExW(0, WC_STATIC, PREC_LABEL,
-                                    dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                    kButtonColLeft, kButtonRow2Top, LABEL_WIDTH, STATICLABEL_HEIGHT,
-                                    hWnd, (HMENU)IDC_LABEL_PREC, hInst, nullptr);
+  hInputLabel = CreateWindowExW(0,           // Optional window styles
+                                WC_STATIC,   // Predefined class: Static
+                                INPUT_LABEL, // Text
+                                dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, // Styles
+                                STATIC_LEFT,                               // x position
+                                STATIC_TOP,                                // y position
+                                LABEL_WIDTH,                               // Width
+                                STATICLABEL_HEIGHT,                        // Height
+                                hWnd,                                      // Parent window
+                                (HMENU)IDC_LABEL_INPUT, // No menu, but control ID
+                                hInst,                  // This window instance
+                                nullptr                 // Additional app data
+  );
+  hCelsiusLabel =
+      CreateWindowExW(0, WC_STATIC, L"Celsius:", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
+                      STATIC_LEFT, STATIC_TOP + kLabelYPad, LABEL_WIDTH, STATICLABEL_HEIGHT, hWnd,
+                      (HMENU)IDC_LABEL_C, hInst, nullptr);
+  hKelvinLabel =
+      CreateWindowExW(0, WC_STATIC, L"Kelvin:", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
+                      STATIC_LEFT, STATIC_TOP + (kLabelYPad * 2u), LABEL_WIDTH, STATICLABEL_HEIGHT,
+                      hWnd, (HMENU)IDC_LABEL_K, hInst, nullptr);
+  hFahrenheitLabel =
+      CreateWindowExW(0, WC_STATIC, L"Fahrenheit:", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
+                      STATIC_LEFT, STATIC_TOP + (kLabelYPad * 3u), LABEL_WIDTH, STATICLABEL_HEIGHT,
+                      hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr);
+  hRankineLabel =
+      CreateWindowExW(0, WC_STATIC, L"Rankine:", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
+                      STATIC_LEFT, STATIC_TOP + (kLabelYPad * 4u), LABEL_WIDTH, STATICLABEL_HEIGHT,
+                      hWnd, (HMENU)IDC_LABEL_F, hInst, nullptr);
+  hPrecisionLabel = CreateWindowExW(
+      0, WC_STATIC, PREC_LABEL, dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, kButtonColLeft,
+      kButtonRow2Top, LABEL_WIDTH, STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_PREC, hInst, nullptr);
 
   // Create the Edit controls
   // Temperature input
-  hInputEdit = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"77",
-                               dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
-                               STATIC_TOP, EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_INPUT,
-                               hInst, nullptr);
+  hInputEdit = CreateWindowExW(
+      WS_EX_CLIENTEDGE, WC_EDIT, L"77", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+      STATIC_TOP, EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_INPUT, hInst, nullptr);
   // Temperature scale Combobox
-  hTempSelectCombo = CreateWindowExW(0, WC_COMBOBOX, L"",
-                                     CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP,
-                                     kTempEditLeft + EDIT_WIDTH + INTRA_PADDING,
-                                     STATIC_TOP, COMBO_WIDTH, COMBO_HEIGHT,
-                                     hWnd, (HMENU)IDC_SCALE, hInst, nullptr);
+  hTempSelectCombo =
+      CreateWindowExW(0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP,
+                      kTempEditLeft + EDIT_WIDTH + INTRA_PADDING, STATIC_TOP, COMBO_WIDTH,
+                      COMBO_HEIGHT, hWnd, (HMENU)IDC_SCALE, hInst, nullptr);
 
-  hCelsiusEdit    = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
-                                    dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
-                                    STATIC_TOP + (kEditYPad), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
-                                    (HMENU)IDC_CELSIUS, hInst, nullptr);
-  hKelvinEdit     = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
-                                    dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
-                                    STATIC_TOP + (kEditYPad * 2), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
-                                    (HMENU)IDC_KELVIN, hInst, nullptr);
-  hFahrenheitEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
-      kTempEditLeft, STATIC_TOP + (kEditYPad * INTRA_PADDING), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
-      (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
-  hRankineEdit = CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"",
-                                 dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
-                                 STATIC_TOP + (kEditYPad * 4), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
-                                 (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
+  hCelsiusEdit =
+      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad), EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd,
+                      (HMENU)IDC_CELSIUS, hInst, nullptr);
+  hKelvinEdit =
+      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * 2), EDIT_WIDTH, EDITCONTROL_HEIGHT,
+                      hWnd, (HMENU)IDC_KELVIN, hInst, nullptr);
+  hFahrenheitEdit =
+      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * INTRA_PADDING), EDIT_WIDTH,
+                      EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
+  hRankineEdit =
+      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * 4), EDIT_WIDTH, EDITCONTROL_HEIGHT,
+                      hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
 
   // Create the "Convert" Button control
   hConvButton = CreateWindowExW(
-      0, WC_BUTTON, CONV_BUTTON,
-      dwCHILD | dwBUTTON | BS_DEFPUSHBUTTON | SS_NOTIFY, kButtonColLeft,
+      0, WC_BUTTON, CONV_BUTTON, dwCHILD | dwBUTTON | BS_DEFPUSHBUTTON | SS_NOTIFY, kButtonColLeft,
       kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr);
   // Create the "Precision" combobox
   hPrecisionCombo =
@@ -336,34 +333,30 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                       kButtonColLeft + LABEL_WIDTH + INTRA_PADDING, kButtonRow2Top, COMBO_WIDTH,
                       COMBO_HEIGHT, hWnd, (HMENU)IDC_PRECISION, hInst, nullptr);
   // Create the "Clear" Button control
-  hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON,
-                                 dwCHILD | dwBUTTON | SS_NOTIFY,
+  hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
                                  kButtonCol2Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_CLEAR_BUTTON, hInst, nullptr);
   // Create the "About" Button control
-  hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON,
-                                 dwCHILD | dwBUTTON | SS_NOTIFY,
+  hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
                                  kButtonCol2Left, kButtonRow2Top, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr);
   // Create the status bar
-  hStatusBar = CreateWindowExW(0, STATUSCLASSNAME, nullptr,
-                               dwCHILD | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
-                               CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hWnd, nullptr, hInst, nullptr);
+  hStatusBar =
+      CreateWindowExW(0, STATUSCLASSNAME, nullptr, dwCHILD | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
+                      CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hWnd, nullptr, hInst, nullptr);
 
-  hThreadsLabel = CreateWindowExW(0, WC_STATIC, THREADS_LABEL,
-                                  dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                  kButtonCol3Left, STATIC_TOP, LABEL_WIDTH, STATICLABEL_HEIGHT,
-                                  hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr);
+  hThreadsLabel = CreateWindowExW(
+      0, WC_STATIC, THREADS_LABEL, dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, kButtonCol3Left,
+      STATIC_TOP, LABEL_WIDTH, STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_THREADS, hInst, nullptr);
 
   const unsigned int default_threads = GetDefaultNumThreads();
   std::wstring ws                    = std::to_wstring(default_threads);
   const wchar_t* THREADS_DEFAULT     = ws.c_str();
   // Create the threads number input combobox.
-  hThreadsEdit =
-      CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT,
-                      dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
-                      kButtonCol3Left + LABEL_WIDTH + PADDING_X, STATIC_TOP, EDIT_WIDTH / 2u,
-                      EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_THREADS, hInst, nullptr);
+  hThreadsEdit = CreateWindowExW(
+      WS_EX_CLIENTEDGE, WC_EDIT, THREADS_DEFAULT, dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
+      kButtonCol3Left + LABEL_WIDTH + PADDING_X, STATIC_TOP, EDIT_WIDTH / 2u, EDITCONTROL_HEIGHT,
+      hWnd, (HMENU)IDC_THREADS, hInst, nullptr);
 
   const DWORD kProgressStyle = IsXP ? PBS_MARQUEE | SS_NOTIFY : SS_NOTIFY;
   // Create the CPU stressor progress bar.
@@ -372,39 +365,35 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                                  hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr);
 
   hCacheSizeLabel = CreateWindowEx(
-      0, WC_STATIC, CACHE_SIZEQ, dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-      kButtonCol3Left, kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y, LABEL_WIDTH - 16u,
-      STATICLABEL_HEIGHT, hWnd, (HMENU)IDC_LABEL_CACHE, hInst, nullptr);
+      0, WC_STATIC, CACHE_SIZEQ, dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, kButtonCol3Left,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y, LABEL_WIDTH - 16u, STATICLABEL_HEIGHT, hWnd,
+      (HMENU)IDC_LABEL_CACHE, hInst, nullptr);
   hCacheSizeCombo = CreateWindowEx(
       0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u, kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
       COMBO_WIDTH + 16u, COMBO_HEIGHT, hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr);
 
   hSSE2Checkbox = CreateWindowEx(
-      0, WC_BUTTON, USE_SSE2Q,
-      dwCHILD | BS_CHECKBOX | BS_AUTOCHECKBOX | dwBUTTON | SS_NOTIFY,
+      0, WC_BUTTON, USE_SSE2Q, dwCHILD | BS_CHECKBOX | BS_AUTOCHECKBOX | dwBUTTON | SS_NOTIFY,
       kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y, 100u,
       EDITCONTROL_HEIGHT - PADDING_Y, hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr);
   hAllocMemButton = CreateWindowExW(
-      0, WC_BUTTON, ALLOC_MEM, dwCHILD | dwBUTTON | SS_NOTIFY,
-      kButtonCol3Left,
+      0, WC_BUTTON, ALLOC_MEM, dwCHILD | dwBUTTON | SS_NOTIFY, kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y),
       PROGBAR_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_ALLOC_MEM, hInst, nullptr);
 
   // Create the "Start" CPU Stress Button control
-  hStartStresButton = CreateWindowExW(0, WC_BUTTON, START_BUTTON,
-                                      dwCHILD | dwBUTTON | SS_NOTIFY,
+  hStartStresButton = CreateWindowExW(0, WC_BUTTON, START_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
                                       kButtonCol3Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT,
                                       hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr);
   // Create the "Stop" CPU Stress Button control
-  hStopStresButton = CreateWindowExW(
-      0, WC_BUTTON, STOP_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-      kButtonCol3Left + BUTTON_WIDTH + PADDING_X, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
-      (HMENU)IDC_STOP_BUTTON, hInst, nullptr);
+  hStopStresButton =
+      CreateWindowExW(0, WC_BUTTON, STOP_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
+                      kButtonCol3Left + BUTTON_WIDTH + PADDING_X, kButtonRowTop, BUTTON_WIDTH,
+                      BUTTON_HEIGHT, hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr);
   // Create the "Show OS Info" Button control
-  hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON,
-                                  dwCHILD | dwBUTTON | SS_NOTIFY,
+  hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
                                   kButtonCol3Left, kButtonRow2Top, BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
                                   hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
 
