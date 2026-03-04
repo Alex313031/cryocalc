@@ -2,13 +2,14 @@
 * text=auto
 *.c text
 *.h text
+*.hpp text
 *.cc text eol=lf
+*.cxx text eol=lf
 *.cpp text eol=lf
 *.idl text eol=lf
 *.json text eol=lf
 *.js text eol=lf
 *.ts text eol=lf
-*.hpp text
 
 /assets/*.txt eol=crlf
 /cryocalc.iss eol=crlf
