@@ -258,8 +258,7 @@ void LogOsInfo() {
     LOG(DEBUG) << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = " << nt_ver
                << std::noshowbase << std::dec << std::defaultfloat;
     TestDllGetVersion();
-    pIsWoW64 IsWoW64_t =
-        reinterpret_cast<pIsWoW64>(GetProcAddress(hOsInfoDll, "IsWoW64"));
+    pIsWoW64 IsWoW64_t = reinterpret_cast<pIsWoW64>(GetProcAddress(hOsInfoDll, "IsWoW64"));
     bool is_wow64;
     if (IsWoW64_t == nullptr) {
       error = GetLastError();

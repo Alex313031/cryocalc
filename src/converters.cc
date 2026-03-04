@@ -1,9 +1,9 @@
 #include "converters.h"
 
-#include "framework.h"
-
 #include <check.h>
 #include <logging.h>
+
+#include "framework.h"
 
 /* functions that return Kelvin */
 long double kelvin::fromCelsius(long double in_celsius) {
@@ -84,8 +84,8 @@ bool CheckInputTempBounds(Scale in_scale, long double in_temp) {
     LOG(ERROR) << L"Input temp was higher than " << max_temp;
     return false;
   }
-  static constexpr long double min_c = -273.16L;
-  static constexpr long double min_f = -459.68L;
+  static constexpr long double min_c   = -273.16L;
+  static constexpr long double min_f   = -459.68L;
   static constexpr long double min_abs = 0;
   switch (in_scale) {
     case kScaleCelsius: {
