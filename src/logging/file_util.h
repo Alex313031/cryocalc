@@ -57,7 +57,9 @@ namespace logging {
   bool OpenFileForWriting(std::wstring logfile_path);
 
   // Same as above, but if permissions fail, fall back to GetAppDataDir
-  bool OpenFileForWritingAlt(std::wstring alt_logfile_path, bool should_truncate, bool& out_write_bom);
+  bool OpenFileForWritingAlt(std::wstring alt_logfile_path,
+                             bool should_truncate,
+                             bool& out_write_bom);
 
   // Closes file handles safely, and sets g_log_file back to INVALID_HANDLE_VALUE
   bool CloseFileHandle();

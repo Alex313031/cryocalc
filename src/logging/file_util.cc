@@ -1,7 +1,8 @@
 #include "file_util.h"
 
-#include "check.h"
 #include <shlobj.h>
+
+#include "check.h"
 
 namespace logging {
   HANDLE g_log_file       = INVALID_HANDLE_VALUE;
@@ -47,7 +48,7 @@ const std::wstring logging::GetAppDataDir() {
 
 bool logging::WriteUTF16BOM(HANDLE hFile) {
   static const WORD wBOM = 0xFEFF;
-  DWORD written = 0;
+  DWORD written          = 0;
   return WriteFile(hFile, &wBOM, static_cast<DWORD>(sizeof(WORD)), &written, nullptr);
 }
 
@@ -76,11 +77,12 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
     std::wstring msg = L"";
     if (err == ERROR_FILE_EXISTS) {
       const DWORD dwCreationFlag = should_truncate_file ? TRUNCATE_EXISTING : OPEN_EXISTING;
-      // File exists, truncate and then open it for appending. This also works if the file already exists in
-      // an admin owned dir like %PROGRAMFILES%. It won't work for a truly inaccessible directory, but works
-      // in our case when the program is installed in %PROGRAMFILES%.
-      g_log_file = CreateFileW(logfile_path.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                               nullptr, dwCreationFlag, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr);
+      // File exists, truncate and then open it for appending. This also works if the file already
+      // exists in an admin owned dir like %PROGRAMFILES%. It won't work for a truly inaccessible
+      // directory, but works in our case when the program is installed in %PROGRAMFILES%.
+      g_log_file = CreateFileW(logfile_path.c_str(), GENERIC_READ | GENERIC_WRITE,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, dwCreationFlag,
+                               FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr);
 
       if (g_log_file == INVALID_HANDLE_VALUE) {
         msg = L"Failed to open existing file. Error = " + std::to_wstring(GetLastError());
@@ -127,7 +129,9 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
 }
 
 // Handles writing logfile to alternate path, usually GetAppDataDir dir.
-bool logging::OpenFileForWritingAlt(std::wstring alt_logfile_path, bool should_truncate, bool& out_write_bom) {
+bool logging::OpenFileForWritingAlt(std::wstring alt_logfile_path,
+                                    bool should_truncate,
+                                    bool& out_write_bom) {
   out_write_bom = false;
   if (alt_logfile_path.length() >= MAX_PATH) {
     return false;
@@ -159,7 +163,8 @@ bool logging::OpenFileForWritingAlt(std::wstring alt_logfile_path, bool should_t
     }
   } else {
     if (GetIsConsoleAttached()) {
-      std::wcout << L"Note: Creating new log file with UTF-16 BOM: " << alt_logfile_path << std::endl;
+      std::wcout << L"Note: Creating new log file with UTF-16 BOM: " << alt_logfile_path
+                 << std::endl;
     }
     out_write_bom = true; // New file always needs BOM
   }
@@ -198,8 +203,8 @@ bool logging::AppendTextToFile(const std::wstring log_line) {
   // Write UTF-16 LE directly (matches the FF FE BOM written on file creation)
   const DWORD byte_count = static_cast<DWORD>(line_with_newline.length() * sizeof(wchar_t));
   DWORD bytes_written    = 0;
-  BOOL result = WriteFile(g_log_file, line_with_newline.c_str(), byte_count,
-                          &bytes_written, nullptr);
+  BOOL result =
+      WriteFile(g_log_file, line_with_newline.c_str(), byte_count, &bytes_written, nullptr);
 
   if (result && (bytes_written == byte_count)) {
     return FlushFileBuffers(g_log_file);
