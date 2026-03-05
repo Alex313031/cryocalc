@@ -430,7 +430,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   SendMessageW(hSSE2Checkbox, BM_SETCHECK, BST_CHECKED, 0);
   InitStatusBar(hWnd, hInst); // Set up status bar at bottom
   // Stuff to do after controls are initialized
-  SetFontAllControls(hWnd);    // Set initial font for all controls in main Window
+  SetFontAllControls(hWnd, kMainFont); // Set initial font for all controls in main Window
   AppendTooltips(hWnd, hInst); // Add hover tooltips to everything, lol
 }
 

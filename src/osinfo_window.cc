@@ -1,5 +1,7 @@
 #include "osinfo_window.h"
 
+#include "painting.h"
+
 static int this_width;
 static int this_height;
 
@@ -93,6 +95,7 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
       kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CLOSE_OSINFO_BUTTON, hInst, nullptr);
+  SetFontAllControls(hWnd, kMainFont);
   AddTooltip(hWnd, hOsInfoTextOut, hInst, L"Windows System Info Log");
   AddTooltip(hWnd, hWinVerButton, hInst, L"Open Windows Version shell dialog");
   AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");

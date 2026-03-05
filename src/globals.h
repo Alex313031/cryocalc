@@ -30,8 +30,11 @@ extern HWND hKelvinEdit;
 extern HWND hFahrenheitEdit;
 extern HWND hRankineEdit;
 
-// Window handle to Os Info Window
+// Window handle to OS Info Window
 extern HWND hOsInfoWin;
+
+// Static text edit control for logging os info.
+extern HWND hOsInfoTextOut;
 
 extern RECT kMainWinRect;
 extern RECT kMainClientRect;
@@ -78,14 +81,5 @@ extern HWND hStatusBar;
 extern HINSTANCE GetGlobalHinst();
 
 extern HANDLE g_ini_file;
-
-// Font handle for main CryoCalc UI
-extern HFONT hCryoFont;
-
-// Input control font
-extern HFONT hInputFont;
-
-// Logging window (Like OS Info Window) font
-extern HFONT hLogFont;
 
 #endif // CRYOCALC_GLOBALS_H_

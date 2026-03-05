@@ -152,14 +152,13 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
       (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (MAINHEIGHT / 2u);
   const unsigned int left_position =
       (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (MAINWIDTH / 2u);
-  const bool got_main_font = CreateMainFont();
   // Create the main window
   hMainWindow = CreateWindowExW(
       WS_EX_WINDOWEDGE, szWindowClass, CAPTION_TITLE,
       WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_SIZEBOX, left_position,
       top_position, MAINWIDTH, MAINHEIGHT, nullptr, nullptr, hInstance, nullptr);
 
-  if (!hMainWindow || !got_main_font) {
+  if (!hMainWindow) {
     success = false;
   } else {
     // Show the window

@@ -4,19 +4,16 @@
 #include "framework.h"
 #include "utils.h"
 
-// Creates global font hCryoFont
+// Creates main hCryoFont
 bool CreateMainFont();
 
-// Creates font for input controls
-bool CreateEditFont();
-
-// Creates font for logging windows (like the OS Info Window)
-bool CreateLogFont(const std::wstring& font);
+// Returns a font from a given font name string
+HFONT GetFont(const std::wstring in_font);
 
 // Sets font for a window/control
 bool SetFontForControl(HWND hWnd, const std::wstring font);
 
 // Sets a font for all child windows of a given parent Window HWND.
-bool SetFontAllControls(HWND hParentWnd);
+bool SetFontAllControls(HWND hParentWnd, const std::wstring font);
 
 #endif // CRYOCALC_PAINTING_H_
