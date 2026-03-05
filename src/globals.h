@@ -9,9 +9,6 @@
 
 /* Global Variables */
 
-// current instance
-extern HINSTANCE hInst;
-
 // Main Window handle
 extern HWND hMainWindow;
 

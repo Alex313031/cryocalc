@@ -12,6 +12,9 @@
 #include "painting.h"
 #include "resource.h"
 
+// Current instance
+extern HINSTANCE hInst;
+
 // Creates the main window with CreateWindowExW()
 bool InitInstance(HINSTANCE hInstance, int nCmdShow);
 
