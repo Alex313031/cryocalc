@@ -431,7 +431,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   InitStatusBar(hWnd, hInst); // Set up status bar at bottom
   // Stuff to do after controls are initialized
   SetFontAllControls(hWnd, kMainFont); // Set initial font for all controls in main Window
-  AppendTooltips(hWnd, hInst); // Add hover tooltips to everything, lol
+  AppendTooltips(hWnd, hInst);         // Add hover tooltips to everything, lol
 }
 
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {

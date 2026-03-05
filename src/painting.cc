@@ -62,7 +62,7 @@ static const BYTE GetFontAntiAliasQuality() {
   // May also use ANTIALIASED_QUALITY or PROOF_QUALITY
   const BYTE font_quality = use_antialiasing ? CLEARTYPE_QUALITY : DEFAULT_QUALITY;
   return font_quality;
-} 
+}
 
 static BOOL CALLBACK SetFontProc(HWND hChild, LPARAM lParam) {
   HFONT hFont = reinterpret_cast<HFONT>(lParam);
