@@ -538,46 +538,6 @@ const size_t GetCacheSize() {
   return cache_size;
 }
 
-HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText) {
-  if (!hWndParent || !hWndControl || !tooltipText) {
-    return nullptr;
-  }
-
-  // Create the tooltip window
-  HWND hTooltip = CreateWindowExW(
-      0, TOOLTIPS_CLASS, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
-      CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hWndParent, nullptr, hInst, nullptr);
-
-  if (!hTooltip) {
-    return nullptr;
-  }
-
-  static const bool can_use_582_controls = IsCommCtrlAtLeast(dwComCtl32TargetVer);
-  // Set up the TOOLINFO structure
-  TOOLINFOW ti = {0};
-  if (can_use_582_controls) {
-    ti.cbSize = sizeof(ti);
-  } else {
-    // MinGW's TOOLINFOW always includes lpReserved, but Windows 2000's
-    // comctl32 v5.81 only supports up to V2 (through lParam). Using
-    // sizeof(ti) gives V3 size which Win2000's TTM_ADDTOOLW rejects.
-    ti.cbSize = TTTOOLINFOW_V2_SIZE;
-  }
-  ti.uFlags   = TTF_SUBCLASS | TTF_IDISHWND;
-  ti.hwnd     = hWndParent;
-  ti.uId      = reinterpret_cast<UINT_PTR>(hWndControl);
-  ti.lpszText = const_cast<wchar_t*>(tooltipText);
-
-  // Associate the tooltip with the control
-  SendMessageW(hTooltip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
-  // Tooltip must be topmost to appear above other windows
-  SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-  // Finally, activate it to show it.
-  // SendMessageW(hTooltip, TTM_ACTIVATE, TRUE, 0);
-
-  return hTooltip;
-}
-
 bool AttachConsole() {
   return logging::AttachConsoleImpl();
 }
@@ -675,36 +635,6 @@ const RECT GetDesktopRect(HINSTANCE hInstance) {
                << desktopWinRect.right;
   }
   return desktopWinRect;
-}
-
-void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
-  // Default position if we can't get the main window rect
-  const int kDefaultX = 512;
-  const int kDefaultY = 512;
-
-  if (!outX || !outY) {
-    return;
-  }
-
-  if (!hWnd) {
-    *outX = kDefaultX;
-    *outY = kDefaultY;
-    return;
-  }
-
-  RECT thisRect;
-  if (GetWindowRect(hWnd, &thisRect)) {
-    // Position at the right edge of the main window, aligned with its top
-    *outX = thisRect.right;
-    *outY = thisRect.top;
-    LOG(DEBUG) << L"thisRect.right = " << thisRect.right << L" \n"
-               << L"thisRect.top = " << thisRect.top << L" ";
-    LOG(DEBUG) << L"kMainWinRect.right = " << kMainWinRect.right << L" \n"
-               << L"kMainWinRect.top = " << kMainWinRect.top << L" ";
-  } else {
-    *outX = kDefaultX;
-    *outY = kDefaultY;
-  }
 }
 
 bool GetCustomSettings() {
