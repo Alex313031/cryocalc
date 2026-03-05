@@ -105,7 +105,18 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
 }
 
 void HandleOsInfoResize(HWND hWnd) {
+  // Status bar self-sizes via WM_SIZE, always keep it in sync.
   SendMessageW(hOsInfoStatusBar, WM_SIZE, 0, 0);
+
+  // Skip layout computation if dimensions haven't actually changed.
+  static int last_width  = -1;
+  static int last_height = -1;
+  if (this_width == last_width && this_height == last_height) {
+    return;
+  }
+  last_width  = this_width;
+  last_height = this_height;
+
   RECT hStatusRect;
   unsigned int status_height = 0;
   if (GetWindowRect(hOsInfoStatusBar, &hStatusRect)) {
@@ -117,19 +128,43 @@ void HandleOsInfoResize(HWND hWnd) {
       GetYOffset(this_height, 0, 0.75f) - status_height - END_PADDING;
   const unsigned int kButtonTop  = kOsOutputHeight + (PADDING_Y * 2u);
   const unsigned int kButton2Top = kButtonTop + BUTTON_HEIGHT + INTRA_PADDING;
-  MoveWindow(hOsInfoTextOut, PADDING_X, PADDING_Y, kOsOutputWidth, kOsOutputHeight, TRUE);
   const int total_buttons_width =
       static_cast<int>((kOsInfoButtonWidth * 2u) + (INTRA_PADDING * 2u) + PADDING_X);
   const bool is_compact           = this_width <= total_buttons_width;
   const unsigned int kButtonWidth = is_compact ? kOsInfoButtonWidth - 16u : kOsInfoButtonWidth;
   const unsigned int kButtonLeft =
       is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
-  MoveWindow(hWinVerButton, kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hRunAppButton, kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hMsInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop, kButtonWidth,
-             BUTTON_HEIGHT, TRUE);
-  MoveWindow(hCloseOSInfoButton, kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top,
-             kButtonWidth, BUTTON_HEIGHT, TRUE);
+
+  // Move all controls atomically to avoid intermediate redraws between each move.
+  HDWP hdwp = BeginDeferWindowPos(5);
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hOsInfoTextOut, nullptr,
+                          PADDING_X, PADDING_Y, kOsOutputWidth, kOsOutputHeight,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hWinVerButton, nullptr,
+                          kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hRunAppButton, nullptr,
+                          kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hMsInfoButton, nullptr,
+                          kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop,
+                          kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hCloseOSInfoButton, nullptr,
+                          kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top,
+                          kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    EndDeferWindowPos(hdwp);
+  }
 }
 
 LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
