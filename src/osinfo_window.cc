@@ -105,10 +105,10 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
 }
 
 void HandleOsInfoResize(HWND hWnd) {
-  // Status bar self-sizes via WM_SIZE, always keep it in sync.
+  // Always send status bar WM_SIZE to keep it in sync.
   SendMessageW(hOsInfoStatusBar, WM_SIZE, 0, 0);
 
-  // Skip layout computation if dimensions haven't actually changed.
+  // Skip layout computation if rects haven't actually changed.
   static int last_width  = -1;
   static int last_height = -1;
   if (this_width == last_width && this_height == last_height) {
@@ -135,7 +135,7 @@ void HandleOsInfoResize(HWND hWnd) {
   const unsigned int kButtonLeft =
       is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
 
-  // Move all controls atomically to avoid intermediate redraws between each move.
+  // Move all controls together
   HDWP hdwp = BeginDeferWindowPos(5);
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hOsInfoTextOut, nullptr,

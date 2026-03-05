@@ -473,10 +473,25 @@ void HandleResize(HWND hWnd) {
     return;
   }
 
+  // Status bar self-sizes via WM_SIZE, always keep it in sync.
+  if (hStatusBar) {
+    SendMessageW(hStatusBar, WM_SIZE, 0, 0);
+    const int kStatusSplit    = static_cast<int>(current_width) - LABEL_WIDTH;
+    const int kStatusParts[2] = {kStatusSplit, -1}; // -1 means extend to right edge
+    SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
+  }
+
+  // Skip layout computation if dimensions haven't actually changed.
+  static unsigned int last_width  = UINT_MAX;
+  static unsigned int last_height = UINT_MAX;
+  if (current_width == last_width && current_height == last_height) {
+    return;
+  }
+  last_width  = current_width;
+  last_height = current_height;
   // TODO, move copy of this to InitControls with MAINWIDTH/MAINHEIGHT
   const unsigned int width              = current_width;
   const unsigned int height             = current_height;
-  const int kStatusSplit                = width - LABEL_WIDTH;
   const int frame_bottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
   const int button_top                  = frame_bottom + (INTRA_PADDING * 3u);
   const int button2_top                 = button_top + BUTTON_HEIGHT + PADDING_Y;
@@ -486,21 +501,55 @@ void HandleResize(HWND hWnd) {
   const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u) + PADDING_X;
   const unsigned int kFrameWidth        = width - END_PADDING;
 
-  MoveWindow(hFrameOutline, PADDING_X, PADDING_Y, kFrameWidth, frame_bottom, TRUE);
-  MoveWindow(hConvButton, PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hPrecisionLabel, PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT, TRUE);
-  MoveWindow(hPrecisionCombo, PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top, COMBO_WIDTH,
-             COMBO_HEIGHT, TRUE);
-  MoveWindow(hClearButton, kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hAboutButton, kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hStartStresButton, kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hStopStresButton, kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT, TRUE);
-  MoveWindow(hOsInfoButton, kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT, TRUE);
-
-  if (hStatusBar) {
-    SendMessageW(hStatusBar, WM_SIZE, 0, 0);
-    const int kStatusParts[2] = {kStatusSplit, -1}; // -1 means extend to right edge
-    SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
+  // Move all controls atomically to avoid intermediate redraws between each move.
+  HDWP hdwp = BeginDeferWindowPos(9);
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
+                          PADDING_X, PADDING_Y, kFrameWidth, frame_bottom,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hConvButton, nullptr,
+                          PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hPrecisionLabel, nullptr,
+                          PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hPrecisionCombo, nullptr,
+                          PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top,
+                          COMBO_WIDTH, COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hClearButton, nullptr,
+                          kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hAboutButton, nullptr,
+                          kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hStartStresButton, nullptr,
+                          kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hStopStresButton, nullptr,
+                          kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    hdwp = DeferWindowPos(hdwp, hOsInfoButton, nullptr,
+                          kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    EndDeferWindowPos(hdwp);
   }
 }
 
