@@ -3,6 +3,8 @@
 namespace logging {
   volatile bool dcheck_log_ = false;
   bool logging_initialized  = false;
+  std::wstring kProgName    = L"";
+  std::wstring kLogFileName = L"";
 }
 
 logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console)
@@ -158,15 +160,17 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
   dcheck_log_ = set_is_dcheck;
 }
 
-bool logging::InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name) {
+bool logging::InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name, const std::wstring app_name) {
   bool success = false;
   DCHECK(!logging_initialized);
   if (!hInstance || log_sink >= MAX_LOG_DEST) {
     logging_initialized = false;
     return false;
   }
+  kProgName = app_name;
+  kLogFileName = logfile_name;
   const bool is_console_attached = GetIsConsoleAttached();
-  const std::wstring logfile     = GetCurrentRelDir() + logfile_name;
+  const std::wstring logfile     = GetCurrentRelDir() + kLogFileName;
   switch (log_sink) {
     case LOG_NONE:
       logging_initialized = false;

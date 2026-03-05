@@ -80,7 +80,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   // Set up our logging using mini_logger library.
   const logging::LogDest kLogSink = enable_logging ? logging::LOG_TO_ALL : logging::LOG_NONE;
   const std::wstring kLogFile(kLogFileName);
-  const bool init_logging = logging::InitLogging(hInstance, kLogSink, kLogFile);
+  const bool init_logging = logging::InitLogging(hInstance, kLogSink, kLogFile, kAppName);
   if (init_logging) {
     logging::SetIsDCheck(is_dcheck);
     HandleDebugMode(debug_mode ? debug_mode

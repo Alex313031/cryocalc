@@ -77,7 +77,7 @@ namespace logging {
   extern volatile bool dcheck_log_;
 
   // Initialize logging for this program
-  bool InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name);
+  bool InitLogging(HINSTANCE hInstance, LogDest log_sink, const std::wstring logfile_name, const std::wstring app_name);
 
   // Call to clean up logging stream and any file handles
   bool DeInitLogging(HINSTANCE hInstance);

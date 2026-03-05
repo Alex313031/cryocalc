@@ -10,6 +10,9 @@ namespace logging {
 
   extern volatile bool file_open;
 
+  extern std::wstring kProgName;
+  extern std::wstring kLogFileName;
+
   // Where to output logging to
   enum LogDest {
     LOG_NONE      = 0,
@@ -40,9 +43,21 @@ namespace logging {
   // Retrieves the current dir of the .exe calling this process
   const std::wstring GetCurrentRelDir();
 
-  // Opens a file or creates one if it doesn't exist, and opens it for writing without a process
-  // lock
+  // Gets where to put log dir if using current directory fails (i.e. in Admin owned dir)
+  // Usually %LOCALAPPDATA%
+  const std::wstring GetAppDataDir();
+
+  // Writes a UTF16 BOM so Notepad can handle Unicode
+  bool WriteUTF16BOM(HANDLE hFile);
+
+  // Whether the log file should be cleared before writing
+  const bool ShouldTruncateLogFile();
+
+  // Creates new or opens existing logfile, and opens it for writing without a process lock
   bool OpenFileForWriting(std::wstring logfile_path);
+
+  // Same as above, but if permissions fail, fall back to GetAppDataDir
+  bool OpenFileForWritingAlt(std::wstring alt_logfile_path, bool should_truncate, bool& out_write_bom);
 
   // Closes file handles safely, and sets g_log_file back to INVALID_HANDLE_VALUE
   bool CloseFileHandle();
