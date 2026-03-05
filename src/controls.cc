@@ -685,7 +685,8 @@ bool GetThreadsInput(HWND hWnd) {
   const bool is_empty  = (BOOL)(dwThrInputSize == 0);
   bool is_invalid      = is_empty;
   if (is_empty) {
-    MessageBoxW(hWnd, L"No threads entered!", L"Empty Threads Input", MB_OK | MB_ICONWARNING);
+    StopAnimating();
+    WarnBox(hWnd, L"Empty Threads Input!", L"No threads entered.");
     return false;
   }
   std::wstring in_buff(dwThrInputSize + 1, L'\0');
@@ -696,14 +697,10 @@ bool GetThreadsInput(HWND hWnd) {
   unsigned int get_threads;
   const unsigned int num_logical_cpus = static_cast<unsigned int>(GetLogicalProcessorCount());
   if (is_invalid) {
-    if (IsXP) {
-      SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-    } else {
-      SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
-    }
+    StopAnimating();
     const std::wstring valid_msg =
-        L"Invalid Threads Input! \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
-    MessageBoxW(hWnd, valid_msg.c_str(), L"Error.", MB_OK | MB_ICONWARNING);
+        L"Invalid Threads Input: \nValid values are 1 - " + std::to_wstring(MAX_THREADS);
+    WarnBox(hWnd, L"Invalid Threads Input!", valid_msg);
     return false;
   } else {
     std::wstring threads_input(in_buff.c_str());
@@ -736,26 +733,14 @@ bool GetThreadsInput(HWND hWnd) {
   return num_threads_ >= MIN_THREADS && num_threads_ <= MAX_THREADS;
 }
 
-DWORD WINAPI AnimateProg() {
-  while (animating) {
-    SendMessageW(hProgressBar, PBM_STEPIT, 0, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
-  return 0;
-}
-
 // Get number of threads and launch them.
 void OnStartButtonClick(HWND hWnd) {
   if (!GetIsRunning()) {
     std::vector<std::thread> ProgBarThread;
     ProgBarThread.reserve(1u);
     // Start animating the progress bar marquee
-    if (IsXP) {
-      SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
-    } else {
-      animating = true;
-      ProgBarThread.emplace_back(AnimateProg);
-    }
+    animating = true;
+    ProgBarThread.emplace_back(AnimateProg);
     if (GetThreadsInput(hWnd)) {
       for (auto& animate_thread : ProgBarThread) {
         animate_thread.detach();
@@ -771,11 +756,7 @@ void OnStartButtonClick(HWND hWnd) {
       }
       LOG(ERROR) << __FUNC__ << L"() failed!";
       // Stop animating if we failed for some reason.
-      if (IsXP) {
-        SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
-      } else {
-        SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
-      }
+      StopAnimating();
     }
   } else {
     MessageBoxW(
@@ -787,11 +768,36 @@ void OnStartButtonClick(HWND hWnd) {
 
 // Stop all threads. Called when "Stop" button pressed and when closing app/shutting down windows.
 void OnStopButtonClick(HWND hWnd) {
-  animating = false;
+  if (!hWnd) {
+    return;
+  }
   // Stop animating the progress bar and reset to empty state
-  SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
+  StopAnimating();
+  StopAllThreads();
+}
+
+// Start animating progress bar.
+// Uses PBM_STEPIT on Windows 2000, otherwise PBM_SETMARQUEE
+DWORD WINAPI AnimateProg() {
+  if (IsXP) {
+    if (animating) {
+      SendMessageW(hProgressBar, PBM_SETMARQUEE, TRUE, 100);
+    }
+  } else {
+    while (animating) {
+      SendMessageW(hProgressBar, PBM_STEPIT, 0, 0);
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+  }
+  return 0;
+}
+
+// Sets animating to false and stops animating progress bar
+void StopAnimating() {
+  animating = false;
   if (IsXP) {
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
+  } else {
+    SendMessageW(hProgressBar, PBM_SETPOS, 0, 0);
   }
-  StopAllThreads();
 }

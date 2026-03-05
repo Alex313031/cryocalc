@@ -43,7 +43,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   hOsInfoDll = LoadLibraryW(kOsInfoDll);
 #endif
   if (!hOsInfoDll || hOsInfoDll == nullptr) {
-    MessageBoxW(nullptr, L"osinfo.dll init failed!", L"Error loading DLL", MB_OK | MB_ICONERROR);
+    ErrorBox(nullptr, L"Error loading DLL", L"osinfo.dll init failed!");
     return -1;
   }
 
@@ -87,8 +87,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
                                : is_dcheck); // Handle setting debug mode and welcome message
     LogOsInfo();                             // Log Windows version info
   } else {
-    MessageBoxW(nullptr, L"InitLogging failed!", L"Logging Initialization Failure",
-                MB_OK | MB_ICONERROR);
+    ErrorBox(nullptr, L"Logging Initialization Failure", L"InitLogging failed!");
     return 1;
   }
 
@@ -193,7 +192,7 @@ bool LaunchHelp(HWND hWnd) {
     } else {
       LOG(ERROR) << message;
     }
-    MessageBoxW(hWnd, message.c_str(), L"Help Error", MB_OK | MB_ICONERROR);
+    ErrorBox(hWnd, L"Help Error", message);
     success = false;
   } else {
     success = true;
