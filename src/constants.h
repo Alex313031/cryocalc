@@ -21,8 +21,8 @@ inline const wchar_t* kWinVerExe   = L"winver.exe";
 inline const wchar_t* kMsInfo32Exe = L"msinfo32.exe";
 
 // Font and GDI constants
-inline const wchar_t* kMainFont  = L"Tahoma"; // Font to use for all controls by default
-inline const wchar_t* kInputFont = L"Arial";  // Font to use for input controls
+inline const wchar_t* kMainFont  = L"MS Shell Dlg 2"; // Font to use for all controls by default
+constexpr bool use_antialiasing  = false; // Whether to use ClearType and antialiasing
 
 // Min/Max decimal precision for output.
 constexpr unsigned int MIN_PRECISION = 0u;
