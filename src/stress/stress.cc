@@ -12,6 +12,9 @@
 volatile bool running  = false;
 static bool is_running = false;
 
+volatile long double sse2_result = 0;
+volatile long double vec_result  = 0;
+
 bool use_sse2_simd = false;
 static volatile unsigned int rand_seed;
 
@@ -95,7 +98,8 @@ void StressCPUVec(const size_t cache_size) {
     }
   }
 
-  size_t iteration = 0;
+  size_t iteration   = 0;
+  long double result = 0;
   while (running) {
     // Perform computationally expensive operations
     for (size_t v = 0; v < NUM_VECTORS; ++v) {
@@ -114,6 +118,8 @@ void StressCPUVec(const size_t cache_size) {
         // More integer operations
         size_t idx = static_cast<size_t>(std::abs(val)) % VECTOR_SIZE;
         vec[i]     = val + vec[idx] * 0.5;
+        if (!std::isfinite(vec[i]))
+          vec[i] = dis(gen);
       }
     }
 
@@ -123,14 +129,15 @@ void StressCPUVec(const size_t cache_size) {
       for (size_t v = 0; v < NUM_VECTORS; ++v) {
         sum += data[v][i];
       }
-      data[0][i] = sum;
+      data[0][i] = std::isfinite(sum) ? sum : dis(gen);
     }
 
     // Matrix-like operations
     for (size_t v1 = 0; v1 < NUM_VECTORS - 1; ++v1) {
       for (size_t v2 = v1 + 1; v2 < NUM_VECTORS; ++v2) {
         for (size_t i = 0; i < VECTOR_SIZE; i += 128u) {
-          data[v1][i] = data[v1][i] * data[v2][i] + std::sin(data[v1][i]) * std::cos(data[v2][i]);
+          double mval = data[v1][i] * data[v2][i] + std::sin(data[v1][i]) * std::cos(data[v2][i]);
+          data[v1][i] = std::isfinite(mval) ? mval : dis(gen);
         }
       }
     }
@@ -139,9 +146,11 @@ void StressCPUVec(const size_t cache_size) {
     if (iteration % 10 == 0) {
       std::sort(data[iteration % NUM_VECTORS].begin(), data[iteration % NUM_VECTORS].end());
     }
+    result = static_cast<long double>(data[0].front());
 
     iteration++;
   }
+  vec_result = result;
 }
 
 // Version with inline SSE2 assembly for x86-64 (optional) NOTE: Written by Claude AI!
@@ -155,7 +164,7 @@ void StressCPUSSE2(const size_t cache_size) {
   for (size_t i = 0; i < VECTOR_SIZE; ++i) {
     data[i] = dis(gen);
   }
-
+  long double result = 0;
   while (running) {
     for (size_t i = 0; i < VECTOR_SIZE - 4; i += 2) {
       // Use SSE2 intrinsics (128-bit operations, 2 doubles at a time)
@@ -174,9 +183,22 @@ void StressCPUSSE2(const size_t cache_size) {
       }
       _mm_storeu_pd(&data[i], a);
       _mm_storeu_pd(&data[i + 2], b);
+      for (int k = 0; k < 4; ++k)
+        if (!std::isfinite(data[i + k]))
+          data[i + k] = dis(gen);
       // clang-format on
     }
+    result = static_cast<long double>(data.front());
   }
+  sse2_result = result;
+}
+
+long double GetSSE2Result() {
+  return sse2_result;
+}
+
+long double GetVecResult() {
+  return vec_result;
 }
 
 // Launches a vector of specified number of CreateThread
@@ -233,5 +255,10 @@ void StopAllThreads() {
   set_run_state(false);
   if (post_msg) {
     LOG(INFO) << L"Stopped all stressor threads.";
+    if (use_sse2_simd) {
+      LOG(INFO) << L"SSE2 result = " << GetSSE2Result();
+    } else {
+      LOG(INFO) << L"Vector result = " << GetVecResult();
+    }
   }
 }
