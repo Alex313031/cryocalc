@@ -43,7 +43,7 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH          = 404u; // Width of main window
+constexpr unsigned int MAINWIDTH          = 480u; // Width of main window
 constexpr unsigned int MAINHEIGHT         = 320u; // Height of main window
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 constexpr unsigned int EDITCONTROL_HEIGHT = STATICLABEL_HEIGHT; // Height of edit controls
