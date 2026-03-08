@@ -425,8 +425,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       FreeLibrary(hOsInfoDll);
       PostQuitMessage(0);
       break;
+    // "After destroy" message.
     case WM_NCDESTROY:
-      hMainWindow = nullptr;
+      hMainWindow = nullptr; // Should already be nullptr, but make sure it is.
       break;
     default:
       return DefWindowProc(hWnd, uMsg, wParam, lParam);

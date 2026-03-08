@@ -13,7 +13,7 @@ NAME     := cryocalc
 TARGET   := cryocalc.exe
 
 # Build type: choose Debug or Release
-# Default is Release
+# Default is Debug
 BUILDTYPE ?= Debug
 
 # Directories
