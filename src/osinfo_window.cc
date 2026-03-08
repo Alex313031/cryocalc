@@ -37,7 +37,7 @@ bool ShowOsInfo(HWND hWnd) {
   wcex.cbClsExtra    = 0;
   wcex.cbWndExtra    = 0;
   wcex.hInstance     = this_hinst;
-  wcex.hIcon         = LoadIcon(this_hinst, MAKEINTRESOURCE(IDI_SMALL));
+  wcex.hIcon         = LoadIcon(this_hinst, MAKEINTRESOURCE(IDI_CRYOCALC));
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW);
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
   wcex.lpszMenuName  = nullptr;
@@ -62,6 +62,15 @@ bool ShowOsInfo(HWND hWnd) {
   } else {
     ShowWindow(hOsInfoWin, SW_NORMAL);
     success = UpdateWindow(hOsInfoWin);
+    /* if (success) {
+      MSG msg;
+      while (GetMessage(&msg, nullptr, 0, 0)) {
+        if (!IsDialogMessage(hOsInfoWin, &msg)) {
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
+        }
+      }
+    } */
   }
 
   return success;
@@ -183,9 +192,11 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           OpenRunDialog(hWnd);
           break;
         case IDC_CLOSE_OSINFO:
+          PostMessageW(hWnd, WM_CLOSE, 0, 0); // Will be picked up on next WndProc loop
+          break;
         case IDC_CLOSE_OSINFO_BUTTON:
-          CloseWindow(hWnd);
-          DestroyWindow(hWnd);
+          CloseWindow(hWnd); // Animate window close when done from button.
+          PostMessageW(hWnd, WM_CLOSE, 0, 0);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -234,9 +245,12 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       pMinMaxInfo->ptMaxTrackSize.x = 640;
       pMinMaxInfo->ptMaxTrackSize.y = 480;
     } break;
-    case WM_CLOSE:
+    case WM_CLOSE: {
+      if (!ResetFocus(hMainWindow, nullptr)) {
+        LOG(ERROR) << L"ResetFocus failed!";
+      }
       DestroyWindow(hWnd);
-      break;
+    } break;
     case WM_DESTROY: {
       if (UnregisterClassW(szOSInfoWindowClass, this_hinst)) {
         hOsInfoWin = nullptr;

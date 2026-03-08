@@ -196,6 +196,9 @@ const bool IsCommCtrlAtLeast(const DWORD to_compare);
 // Gets the installed comctl32.dll version
 DWORD GetCommCtrlVersion();
 
+// Brings window to foreground, and optional second param sets keyboard focus
+bool ResetFocus(HWND foreground, HWND keyb_focus);
+
 // Helper functions for MessageBoxW
 int InfoBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 

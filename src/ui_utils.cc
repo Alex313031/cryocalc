@@ -84,6 +84,26 @@ int ConfirmExit(HWND hWnd) {
   return user_response_code;
 }
 
+// Restore parent window to foreground, optional child window HWND to set keyboard focus
+bool ResetFocus(HWND foreground, HWND keyb_focus) {
+  bool success = false;
+  bool set_foreground = false;
+  if (foreground == nullptr) {
+    return false;
+  } else {
+    set_foreground = SetForegroundWindow(foreground);
+  }
+  if (keyb_focus == nullptr) {
+    success = set_foreground; // Requested to not set keyb focus
+  } else {
+    HWND prev_focus = nullptr;
+    // Set keyboard focus to specified child window
+    prev_focus = SetFocus(keyb_focus); // Returns previously focused window
+    success = set_foreground && prev_focus != nullptr;
+  }
+  return success;
+}
+
 int InfoBox(HWND hWnd, const std::wstring& title, const std::wstring& message) {
   HWND hWndTmp;
   if (hWnd == nullptr && hMainWindow != nullptr) {
