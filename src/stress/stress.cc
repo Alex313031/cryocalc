@@ -8,8 +8,8 @@
 
 #include "../utils.h"
 
-// Maybe use std::atomic instead?
-volatile bool running  = false;
+std::atomic<bool> running{false};
+
 static bool is_running = false;
 
 volatile long double sse2_result = 0;
@@ -31,11 +31,7 @@ bool GetIsRunning() {
 }
 
 void set_use_sse2(bool on) {
-  if (on) {
-    use_sse2_simd = true;
-  } else {
-    use_sse2_simd = false;
-  }
+  use_sse2_simd = on;
 }
 
 static unsigned int GetSeed() {
@@ -190,6 +186,7 @@ void StressCPUSSE2(const size_t cache_size) {
     }
     result = static_cast<long double>(data.front());
   }
+  // Return last fully calculated result.
   sse2_result = result;
 }
 
@@ -239,6 +236,12 @@ bool LaunchThreads(const unsigned int num_threads) {
       for (auto& thread : threads) {
         thread.join();
       }
+      // All threads have exited and written their results: safe to read now
+      if (use_sse2_simd) {
+        CLOG(INFO) << L"SSE2 result = " << GetSSE2Result();
+      } else {
+        CLOG(INFO) << L"Vector result = " << GetVecResult();
+      }
       return true;
     }
   }
@@ -255,10 +258,5 @@ void StopAllThreads() {
   set_run_state(false);
   if (post_msg) {
     LOG(INFO) << L"Stopped all stressor threads.";
-    if (use_sse2_simd) {
-      LOG(INFO) << L"SSE2 result = " << GetSSE2Result();
-    } else {
-      LOG(INFO) << L"Vector result = " << GetVecResult();
-    }
   }
 }

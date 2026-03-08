@@ -1,10 +1,12 @@
 #ifndef CRYOCALC_STRESS_H_
 #define CRYOCALC_STRESS_H_
 
+#include <atomic>
+
 #include "../framework.h"
 
-// Volatile variables to be used by stress threads
-extern volatile bool running; // For controlling thread activation state
+// Atomic flag for controlling thread activation state
+extern std::atomic<bool> running;
 
 extern volatile long double sse2_result;
 extern volatile long double vec_result;
