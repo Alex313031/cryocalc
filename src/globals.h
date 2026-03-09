@@ -33,9 +33,6 @@ extern HWND hOsInfoWin;
 // Static text edit control for logging os info.
 extern HWND hOsInfoTextOut;
 
-extern RECT kMainWinRect;
-extern RECT kMainClientRect;
-
 // Convert button handle
 extern HWND hConvButton;
 

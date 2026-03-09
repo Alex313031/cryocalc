@@ -2,6 +2,10 @@
 
 #include "resource.h"
 
+// Declare rects to use for all future window layout
+RECT kMainClientRect;
+RECT kMainWinRect;
+
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText) {
   if (!hWndParent || !hWndControl || !tooltipText) {
     return nullptr;
@@ -38,6 +42,52 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
   return hTooltip;
 }
 
+bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
+  RECT winRect;
+  RECT clientRect;
+  // Get rects of Window including titlebar, for positioning other windows relative to it.
+  if (!GetWindowRect(hWnd, &winRect)) {
+    return false;
+  }
+  // Get rects inside Window, excluding titlebar, for positioning other windows relative to it.
+  if (!GetClientRect(hWnd, &clientRect)) {
+    return false;
+  }
+  kMainWinRect = winRect;
+  kMainClientRect = clientRect;
+  return true;
+}
+
+const RECT GetMainWinRect() {
+  return kMainWinRect;
+}
+
+const RECT GetMainClientRect() {
+  return kMainClientRect;
+}
+
+const RECT GetDesktopRect(HINSTANCE hInstance) {
+  RECT desktopWinRect;
+  if (!hInstance) {
+    desktopWinRect.left   = 0;
+    desktopWinRect.top    = 0;
+    desktopWinRect.right  = 0;
+    desktopWinRect.bottom = 0;
+  } else {
+    BOOL gotWorkArea = SystemParametersInfoW(SPI_GETWORKAREA, 0, &desktopWinRect, 0);
+    if (!gotWorkArea) {
+      desktopWinRect.left   = 0;
+      desktopWinRect.top    = 0;
+      desktopWinRect.right  = 0;
+      desktopWinRect.bottom = 0;
+    }
+    LOG(DEBUG) << L"Got desktop window rect: L" << desktopWinRect.left << L" T"
+               << desktopWinRect.top << L" B" << desktopWinRect.bottom << L" R"
+               << desktopWinRect.right;
+  }
+  return desktopWinRect;
+}
+
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   // Default position if we can't get the main window rect
   const int kDefaultX = 512;
@@ -60,8 +110,6 @@ void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
     *outY = thisRect.top;
     LOG(DEBUG) << L"thisRect.right = " << thisRect.right << L" \n"
                << L"thisRect.top = " << thisRect.top << L" ";
-    LOG(DEBUG) << L"kMainWinRect.right = " << kMainWinRect.right << L" \n"
-               << L"kMainWinRect.top = " << kMainWinRect.top << L" ";
   } else {
     *outX = kDefaultX;
     *outY = kDefaultY;

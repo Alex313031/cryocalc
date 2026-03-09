@@ -23,9 +23,6 @@ bool set_settings = false;
 
 // Handle to our .ini file
 HANDLE g_ini_file;
-// Declare rects to use for all future window layout
-RECT kMainClientRect;
-RECT kMainWinRect;
 
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
@@ -597,44 +594,6 @@ bool ClearLogFile(HWND hWnd) {
   } else {
     return true;
   }
-}
-
-bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
-  RECT winRect;
-  RECT clientRect;
-  // Get rects of Window including titlebar, for positioning other windows relative to it.
-  if (!GetWindowRect(hMainWindow, &winRect)) {
-    return false;
-  }
-  // Get rects inside Window, excluding titlebar, for positioning other windows relative to it.
-  if (!GetClientRect(hWnd, &clientRect)) {
-    return false;
-  }
-  kMainClientRect = winRect;
-  kMainClientRect = clientRect;
-  return true;
-}
-
-const RECT GetDesktopRect(HINSTANCE hInstance) {
-  RECT desktopWinRect;
-  if (!hInstance) {
-    desktopWinRect.left   = 0;
-    desktopWinRect.top    = 0;
-    desktopWinRect.right  = 0;
-    desktopWinRect.bottom = 0;
-  } else {
-    BOOL gotWorkArea = SystemParametersInfoW(SPI_GETWORKAREA, 0, &desktopWinRect, 0);
-    if (!gotWorkArea) {
-      desktopWinRect.left   = 0;
-      desktopWinRect.top    = 0;
-      desktopWinRect.right  = 0;
-      desktopWinRect.bottom = 0;
-    }
-    LOG(DEBUG) << L"Got desktop window rect: L" << desktopWinRect.left << L" T"
-               << desktopWinRect.top << L" B" << desktopWinRect.bottom << L" R"
-               << desktopWinRect.right;
-  }
-  return desktopWinRect;
 }
 
 bool GetCustomSettings() {

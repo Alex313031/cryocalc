@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "painting.h"
+#include "ui_utils.h"
 
 // Static labels
 static HWND hInputLabel;
@@ -11,6 +12,7 @@ static HWND hKelvinLabel;
 static HWND hFahrenheitLabel;
 static HWND hRankineLabel;
 static HWND hFrameOutline;
+static HWND hSysMonitorFrame;
 static HWND hPrecisionLabel;
 static HWND hThreadsLabel;
 static HWND hCacheSizeLabel;
@@ -247,20 +249,23 @@ static const UINT kTempEditLeft         = STATIC_LEFT + LABEL_WIDTH + INTRA_PADD
 static const UINT kButtonCol2Left       = kTempEditLeft + EDIT_WIDTH + INTRA_PADDING;
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
-  IsXP                    = IsAtLeast(kWinXP);
-  // Create staic box outline frame for all controls
-  int padding           = PADDING_X * 2;          // Padding on left and right
-  const int x_padding   = -(PADDING_X + padding); // Padding already applied to left side + padding
-  const int kFrameWidth = GetXOffset(MAINWIDTH, x_padding, 1.0f);
+  IsXP                   = IsAtLeast(kWinXP);
+  static RECT clientRect = GetMainClientRect();
+  const UINT this_width  = clientRect.right;
+  const UINT this_height = clientRect.bottom;
+  int padding            = PADDING_X * 2;          // Padding on left and right
+  const int x_padding    = -(PADDING_X + padding); // Padding already applied to left side + padding
+  const unsigned int kFrameWidth  = GetXOffset(this_width, x_padding, 1.0f);
+  const unsigned int kFrameBottom = GetYOffset(this_height, 0, 0.6f) - STATIC_BOTTOM;
   const unsigned int kLabelYPad =
       STATICLABEL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
   const unsigned int kEditYPad =
       EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
-  const unsigned int kFrameBottom    = STATIC_TOP + EDITCONTROL_HEIGHT + (kEditYPad * 4);
   unsigned int kButtonColLeft        = PADDING_X;
   const unsigned int kButtonCol3Left = kButtonCol2Left + kSmallButtonWidth + PADDING_X;
-  const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 2u);
-  const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
+  const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 3u);
+  const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + PADDING_Y;
+  // Create staic box outline frame for all controls
   hFrameOutline =
       CreateWindowExW(0, WC_STATIC, nullptr, dwCHILD | SS_LEFT | SS_ETCHEDFRAME, PADDING_X,
                       PADDING_Y, kFrameWidth, kFrameBottom, hWnd, nullptr, hInst, nullptr);
@@ -399,7 +404,10 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
                                   kButtonCol3Left, kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT,
                                   hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
-  const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + INTRA_PADDING;
+  const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
+  hSysMonitorFrame =
+      CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_NOTIFY,
+                      sys_monitor_left, STATIC_TOP, PROGBAR_WIDTH, kFrameBottom, hWnd, nullptr, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -469,6 +477,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hOsInfoButton, hInst, L"Open OS Information window + utilities");
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
+  AddTooltip(hWnd, hSysMonitorFrame, hInst, L"Monitor CPU/Memory Usage");
   // AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
 }
 
@@ -496,8 +505,8 @@ void HandleResize(HWND hWnd) {
   // TODO, move copy of this to InitControls with MAINWIDTH/MAINHEIGHT
   const unsigned int width              = current_width;
   const unsigned int height             = current_height;
-  const int frame_bottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
-  const int button_top                  = frame_bottom + (INTRA_PADDING * 3u);
+  const int kFrameBottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+  const int button_top                  = kFrameBottom + (PADDING_Y * 3u);
   const int button2_top                 = button_top + BUTTON_HEIGHT + PADDING_Y;
   unsigned int toadd                    = 0;
   if (width > MAINWIDTH) {
@@ -508,10 +517,10 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(16);
+  HDWP hdwp = BeginDeferWindowPos(17);
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
-                          PADDING_X, PADDING_Y, kFrameWidth, frame_bottom,
+                          PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hConvButton, nullptr,
                           PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
@@ -540,6 +549,7 @@ void HandleResize(HWND hWnd) {
   }
   if (hdwp) {
     unsigned int top = STATIC_TOP;
+    const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
     hdwp = DeferWindowPos(hdwp, hThreadsLabel, nullptr,
                           kButtonCol3Left, top, LABEL_WIDTH, STATICLABEL_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
@@ -566,6 +576,9 @@ void HandleResize(HWND hWnd) {
     top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y);
     hdwp = DeferWindowPos(hdwp, hAllocMemButton, nullptr,
                           kButtonCol3Left, top, PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
+                          sys_monitor_left, STATIC_TOP, PROGBAR_WIDTH, kFrameBottom,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {

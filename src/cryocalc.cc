@@ -210,7 +210,6 @@ bool LaunchHelpEx(HWND hWnd) {
 
 // Window procedure for handling messages
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-  const HINSTANCE paintHinst = GetGlobalHinst();
   switch (uMsg) {
     case WM_COMMAND: {
       int wmId = LOWORD(wParam);
@@ -320,6 +319,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     } break;
     // When window is shown
     case WM_CREATE:
+      SetClientRects(hWnd, hInst);
       InitControls(hWnd, hInst);
       break;
     // Start painting
@@ -394,7 +394,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_SIZE: {
       current_width  = LOWORD(lParam);
       current_height = HIWORD(lParam);
-      SetClientRects(hWnd, paintHinst);
+      SetClientRects(hWnd, hInst);
       HandleResize(hWnd);
     } break;
     // Set/get min/max window size
