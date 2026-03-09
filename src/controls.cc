@@ -240,11 +240,14 @@ bool HandleConvert(HWND hWnd) {
   return success;
 }
 
-static const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
+static const UINT kProgressBarTop       = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
+static const UINT kOsInfoButtonWidth    = PROGBAR_WIDTH;
+static const UINT kSmallButtonWidth     = (kOsInfoButtonWidth / 2u) - (PADDING_X / 2u);
+static const UINT kTempEditLeft         = STATIC_LEFT + LABEL_WIDTH + INTRA_PADDING;
+static const UINT kButtonCol2Left       = kTempEditLeft + EDIT_WIDTH + INTRA_PADDING;
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
   IsXP                    = IsAtLeast(kWinXP);
-  const int kTempEditLeft = GetXOffset(STATIC_LEFT, LABEL_WIDTH + INTRA_PADDING, 1.0f);
   // Create staic box outline frame for all controls
   int padding           = PADDING_X * 2;          // Padding on left and right
   const int x_padding   = -(PADDING_X + padding); // Padding already applied to left side + padding
@@ -255,8 +258,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       EDITCONTROL_HEIGHT + INTRA_PADDING; // Static label height plus 3 pixels between items.
   const unsigned int kFrameBottom    = STATIC_TOP + EDITCONTROL_HEIGHT + (kEditYPad * 4);
   unsigned int kButtonColLeft        = PADDING_X;
-  const unsigned int kButtonCol2Left = (MAINWIDTH / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
-  const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
+  const unsigned int kButtonCol3Left = kButtonCol2Left + kSmallButtonWidth + PADDING_X;
   const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
   hFrameOutline =
@@ -335,11 +337,11 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                       COMBO_HEIGHT, hWnd, (HMENU)IDC_PRECISION, hInst, nullptr);
   // Create the "Clear" Button control
   hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-                                 kButtonCol2Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+                                 kButtonCol2Left, kButtonRowTop, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_CLEAR_BUTTON, hInst, nullptr);
   // Create the "About" Button control
   hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-                                 kButtonCol2Left, kButtonRow2Top, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+                                 kButtonCol2Left, kButtonRow2Top, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr);
   // Create the status bar
   hStatusBar =
@@ -386,17 +388,18 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(0, WC_BUTTON, START_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-                                      kButtonCol3Left, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT,
+                                      kButtonCol3Left, kButtonRowTop, kSmallButtonWidth, BUTTON_HEIGHT,
                                       hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr);
   // Create the "Stop" CPU Stress Button control
   hStopStresButton =
       CreateWindowExW(0, WC_BUTTON, STOP_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-                      kButtonCol3Left + BUTTON_WIDTH + PADDING_X, kButtonRowTop, BUTTON_WIDTH,
+                      kButtonCol3Left + kSmallButtonWidth + PADDING_X, kButtonRowTop, kSmallButtonWidth,
                       BUTTON_HEIGHT, hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr);
   // Create the "Show OS Info" Button control
   hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON, dwCHILD | dwBUTTON | SS_NOTIFY,
-                                  kButtonCol3Left, kButtonRow2Top, BUTTON_WIDTH * 2u, BUTTON_HEIGHT,
+                                  kButtonCol3Left, kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT,
                                   hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
+  const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + INTRA_PADDING;
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -496,10 +499,12 @@ void HandleResize(HWND hWnd) {
   const int frame_bottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
   const int button_top                  = frame_bottom + (INTRA_PADDING * 3u);
   const int button2_top                 = button_top + BUTTON_HEIGHT + PADDING_Y;
-  const int kButtonCol2Left             = (width / 2) - (BUTTON_WIDTH / 2u) - PADDING_X;
-  const int kButtonCol3Left             = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
-  const int kButtonCol4Left             = kButtonCol3Left + BUTTON_WIDTH + PADDING_X;
-  const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u) + PADDING_X;
+  unsigned int toadd                    = 0;
+  if (width > MAINWIDTH) {
+    toadd = width - MAINWIDTH;
+  }
+  const unsigned int kCol3Candidate     = kButtonCol2Left + kSmallButtonWidth + PADDING_X + toadd;
+  const unsigned int kButtonCol3Left    = std::clamp(kCol3Candidate, 1u, (MINWIDTH - kSmallButtonWidth));
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
@@ -518,16 +523,16 @@ void HandleResize(HWND hWnd) {
                           PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top,
                           COMBO_WIDTH, COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hClearButton, nullptr,
-                          kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          kButtonCol2Left, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hAboutButton, nullptr,
-                          kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          kButtonCol2Left, button2_top, kSmallButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hStartStresButton, nullptr,
-                          kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          kButtonCol3Left, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hStopStresButton, nullptr,
-                          kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
+                          kButtonCol3Left + kSmallButtonWidth + PADDING_X, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hOsInfoButton, nullptr,
                           kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT,

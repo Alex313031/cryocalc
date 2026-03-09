@@ -43,19 +43,27 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH          = 480u; // Width of main window
-constexpr unsigned int MAINHEIGHT         = 320u; // Height of main window
+constexpr unsigned int MINWIDTH           = 420u; // Min. width of main window
+constexpr unsigned int MAXWIDTH           = 840u; // Max. width of main window
+constexpr unsigned int MAINWIDTH          = 480u; // Default width of main window
+
+constexpr unsigned int MINHEIGHT          = 320u; // Min. height of main window
+constexpr unsigned int MAXHEIGHT          = 640u; // Max. height of main window
+constexpr unsigned int MAINHEIGHT         = 360u; // Default height of main window
+
+
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 constexpr unsigned int EDITCONTROL_HEIGHT = STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
-constexpr UINT PADDING_X    = 4u;             // Min. pixels to pad all content on the left and right
-constexpr UINT PADDING_Y    = 4u;             // Min. pixels to pad all content on the top and bottom
-constexpr UINT END_PADDING  = PADDING_Y * 2u; // Min. pixels to pad all content at end diagonally
-constexpr INT STATIC_TOP    = 12;             // Min. pixels to pad all content from top
-constexpr INT STATIC_LEFT   = 8;              // How many pixels to pad left side before labels
-constexpr INT STATIC_RIGHT  = 8;              // How many pixels to pad right side after labels
-constexpr INT STATIC_BOTTOM = 12;             // How many pixels to pad bottom
+constexpr UINT PADDING_X     = 4u;             // Min. pixels to pad all content on the left and right
+constexpr UINT PADDING_Y     = 4u;             // Min. pixels to pad all content on the top and bottom
+constexpr UINT INTRA_PADDING = 4u;             // Value in pixels of intra-item padding
+constexpr UINT END_PADDING   = PADDING_Y * 2u; // Min. pixels to pad all content at end diagonally
+constexpr INT STATIC_TOP     = 12;             // Min. pixels to pad all content from top
+constexpr INT STATIC_LEFT    = 8;              // How many pixels to pad left side before labels
+constexpr INT STATIC_RIGHT   = 8;              // How many pixels to pad right side after labels
+constexpr INT STATIC_BOTTOM  = 12;             // How many pixels to pad bottom
 
 // Control layout metrics
 constexpr UINT LABEL_WIDTH   = 80u;             // Width in pixels of a static label
@@ -65,7 +73,6 @@ constexpr UINT BUTTON_WIDTH  = 75u;             // Width in pixels buttons
 constexpr UINT BUTTON_HEIGHT = 30u;             // Height in pixels of buttons
 constexpr UINT COMBO_WIDTH   = 40u;             // Width in pixels of comboboxes
 constexpr UINT COMBO_HEIGHT  = 200u;            // Combobox height (must be > edit height for Win2K)
-constexpr UINT INTRA_PADDING = 3u;              // Value in pixels of intra-item padding
 constexpr UINT BOTTOM_AREA   = MAINHEIGHT / 3u; // Minimum height of bottom buttom controls area
 // Progress bar metrics
 constexpr UINT PROGBAR_WIDTH = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;

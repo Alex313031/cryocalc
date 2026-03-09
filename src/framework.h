@@ -33,12 +33,13 @@
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
 
 // C++ STL Headers
-#include <iomanip>  // std::setprecision
-#include <iostream> // std::cout/std::wcout
-#include <sstream>  // std::ostringstream/std::wostringstream
-#include <string>   // std::string/std::wstring
-#include <thread>   // For threading support
-#include <vector>   // std::vector
+#include <algorithm> // std::clamp
+#include <iomanip>   // std::setprecision
+#include <iostream>  // std::cout/std::wcout
+#include <sstream>   // std::ostringstream/std::wostringstream
+#include <string>    // std::string/std::wstring
+#include <thread>    // For threading support
+#include <vector>    // std::vector
 
 inline constexpr bool is_dcheck =
 #ifdef DCHECK
