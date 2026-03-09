@@ -29,12 +29,6 @@ extern bool show_help;
 #define RFD_WOW_APP         0x00000010
 #define RFD_NOSEPMEMORY_BOX 0x00000020
 typedef void(WINAPI* GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
-typedef int(WINAPI* RUN_FILE_DLG_)(HWND hwndParent,
-                                   HICON hIcon,
-                                   LPCTSTR lpszWorkingDir,
-                                   LPCTSTR lpszTitle,
-                                   LPCTSTR lpszPrompt,
-                                   DWORD dwFlags);
 
 struct CustomSettings {
   bool set_debug_mode;
@@ -132,14 +126,8 @@ HINSTANCE GetInstanceFromHwnd(HWND hWnd);
 // Returns path to the main .exe, for finding files side by side with it.
 const std::wstring GetExeDir();
 
-// Opens the "Run" applet
-void OpenRunDialog(HWND hWnd);
-
 // Opens log file
 bool OpenLogFile(HWND hWnd, const std::wstring& file_path);
-
-// Launcher function to open shell applets
-bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 
 // Get default cache multiplier to use, from hCacheSizeCombo
 const size_t GetCacheSize();

@@ -3,6 +3,13 @@
 
 #include "utils.h"
 
+typedef int(WINAPI* RUN_FILE_DLG_)(HWND hwndParent,
+                                   HICON hIcon,
+                                   LPCTSTR lpszWorkingDir,
+                                   LPCTSTR lpszTitle,
+                                   LPCTSTR lpszPrompt,
+                                   DWORD dwFlags);
+
 // Adds a tooltip to a control.
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText);
 
@@ -28,6 +35,12 @@ bool ConfirmClearControls(HWND hWnd);
 
 // Brings window to foreground, and optional second param sets keyboard focus
 bool ResetFocus(HWND foreground, HWND keyb_focus);
+
+// Opens the "Run" applet
+void OpenRunDialog(HWND hWnd);
+
+// Launcher function to open shell applets
+bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 
 // Helper functions for MessageBoxW
 int InfoBox(HWND hWnd, const std::wstring& title, const std::wstring& message);

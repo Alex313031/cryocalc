@@ -8,8 +8,6 @@ unsigned int g_precision_;
 
 static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
 
-static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
-
 // Declare custom_settings here, to be set later, for all of cryocalc to use
 CustomSettings custom_settings;
 // To be set if we read .ini file correctly
@@ -430,30 +428,6 @@ const std::wstring GetExeDir() {
   return retval;
 }
 
-// Opens the "Run" shell dialog from shell32.dll
-void OpenRunDialog(HWND hWnd) {
-  static HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hWnd), MAKEINTRESOURCE(IDI_WINFLAG));
-  if (kSmallIcon) {
-    wchar_t szCurDir[MAX_PATH];
-    GetCurrentDirectoryW(MAX_PATH, szCurDir);
-    // Open "Run"
-    HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
-    if (hShell32Dll) {
-      pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
-      if (pfnRunFileDlg) {
-        LOG(INFO) << L"Opening RunFileDlg";
-        pfnRunFileDlg(hWnd, kSmallIcon, (LPWSTR)szCurDir, RUN_TITLE, RUN_PROMPT,
-                      RFD_USEFULLPATHDIR | RFD_WOW_APP);
-      } else {
-        LOG(ERROR) << L"Failed to open run dialog.";
-      }
-    } else {
-      LOG(ERROR) << L"Failed to get shell32.dll handle.";
-    }
-    DestroyIcon(kSmallIcon); // Cleanup icon
-  }
-}
-
 // Opens log file with default .txt handler
 bool OpenLogFile(HWND hWnd, const std::wstring& file_path) {
   bool success        = false;
@@ -477,38 +451,6 @@ bool OpenLogFile(HWND hWnd, const std::wstring& file_path) {
     } else {
       LOG(ERROR) << message;
     }
-    success = false;
-  } else {
-    success = true;
-  }
-  wostr.str(L"");
-  wostr.clear();
-  return success;
-}
-
-// Run any shell app
-bool RunShellApplet(HWND hWnd, const wchar_t* executable) {
-  bool success = false;
-  LOG(INFO) << L"Running " << executable;
-  HINSTANCE result = ShellExecuteW(hWnd, L"open", executable, nullptr, nullptr, SW_NORMAL);
-  std::wostringstream wostr;
-  if (reinterpret_cast<INT_PTR>(result) <= 32) {
-    DWORD error = GetLastError();
-    wostr << L"Opening " << executable << " failed! \n";
-    bool treat_as_error = true;
-    if (error == ERROR_FILE_NOT_FOUND) {
-      wostr << executable << L" could not be found.";
-      treat_as_error = false;
-    } else {
-      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat;
-    }
-    const std::wstring message = wostr.str();
-    if (!treat_as_error) {
-      LOG(WARN) << message;
-    } else {
-      LOG(ERROR) << message;
-    }
-    MessageBoxW(hWnd, message.c_str(), treat_as_error ? L"Error" : L"Warning", MB_OK | MB_ICONSTOP);
     success = false;
   } else {
     success = true;
