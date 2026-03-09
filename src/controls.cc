@@ -240,6 +240,8 @@ bool HandleConvert(HWND hWnd) {
   return success;
 }
 
+static const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
+
 void InitControls(HWND hWnd, HINSTANCE hInst) {
   IsXP                    = IsAtLeast(kWinXP);
   const int kTempEditLeft = GetXOffset(STATIC_LEFT, LABEL_WIDTH + INTRA_PADDING, 1.0f);
@@ -257,7 +259,6 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int kButtonCol3Left = kButtonCol2Left + BUTTON_WIDTH + PADDING_X;
   const unsigned int kButtonRowTop   = kFrameBottom + (PADDING_Y * 2u);
   const unsigned int kButtonRow2Top  = kButtonRowTop + BUTTON_HEIGHT + (PADDING_Y * 2u);
-  const unsigned int kProgressBarTop = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
   hFrameOutline =
       CreateWindowExW(0, WC_STATIC, nullptr, dwCHILD | SS_LEFT | SS_ETCHEDFRAME, PADDING_X,
                       PADDING_Y, kFrameWidth, kFrameBottom, hWnd, nullptr, hInst, nullptr);
@@ -374,9 +375,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       COMBO_WIDTH + 16u, COMBO_HEIGHT, hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr);
 
   hSSE2Checkbox = CreateWindowEx(
-      0, WC_BUTTON, USE_SSE2Q, dwCHILD | BS_CHECKBOX | BS_AUTOCHECKBOX | dwBUTTON | SS_NOTIFY,
+      0, WC_BUTTON, USE_SSE2Q, dwCHILD | dwCHECKBOX | BS_LEFTTEXT | WS_TABSTOP | SS_NOTIFY,
       kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y, 100u,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y, PROGBAR_WIDTH - PADDING_X,
       EDITCONTROL_HEIGHT - PADDING_Y, hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr);
   hAllocMemButton = CreateWindowExW(
       0, WC_BUTTON, ALLOC_MEM, dwCHILD | dwBUTTON | SS_NOTIFY, kButtonCol3Left,
@@ -502,50 +503,64 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(9);
+  HDWP hdwp = BeginDeferWindowPos(16);
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, frame_bottom,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hConvButton, nullptr,
                           PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hPrecisionLabel, nullptr,
                           PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hPrecisionCombo, nullptr,
                           PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top,
                           COMBO_WIDTH, COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hClearButton, nullptr,
                           kButtonCol2Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hAboutButton, nullptr,
                           kButtonCol2Left, button2_top, BUTTON_WIDTH, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hStartStresButton, nullptr,
                           kButtonCol3Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hStopStresButton, nullptr,
                           kButtonCol4Left, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hOsInfoButton, nullptr,
                           kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+  }
+  if (hdwp) {
+    unsigned int top = STATIC_TOP;
+    hdwp = DeferWindowPos(hdwp, hThreadsLabel, nullptr,
+                          kButtonCol3Left, top, LABEL_WIDTH, STATICLABEL_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hThreadsEdit, nullptr,
+                          kButtonCol3Left + LABEL_WIDTH + PADDING_X,
+                          top, EDIT_WIDTH / 2u, EDITCONTROL_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    top = kProgressBarTop;
+    hdwp = DeferWindowPos(hdwp, hProgressBar, nullptr,
+                          kButtonCol3Left, top, PROGBAR_WIDTH, PROGBAR_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y;
+    hdwp = DeferWindowPos(hdwp, hCacheSizeLabel, nullptr,
+                          kButtonCol3Left, top, LABEL_WIDTH - 16u, STATICLABEL_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCacheSizeCombo, nullptr,
+                          kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
+                          top, COMBO_WIDTH + 16u, COMBO_HEIGHT,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y;
+    hdwp = DeferWindowPos(hdwp, hSSE2Checkbox, nullptr,
+                          kButtonCol3Left, top, PROGBAR_WIDTH - PADDING_X, EDITCONTROL_HEIGHT - PADDING_Y,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y);
+    hdwp = DeferWindowPos(hdwp, hAllocMemButton, nullptr,
+                          kButtonCol3Left, top, PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
