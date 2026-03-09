@@ -1,6 +1,6 @@
 #include "cryocalc.h"
 
-#include "utils.h"
+#include "ui_utils.h"
 
 // Global instance
 HINSTANCE hInst;

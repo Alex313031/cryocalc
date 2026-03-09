@@ -1,6 +1,7 @@
 #include "osinfo_window.h"
 
 #include "painting.h"
+#include "ui_utils.h"
 
 static int this_width;
 static int this_height;

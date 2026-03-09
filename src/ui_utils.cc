@@ -1,6 +1,7 @@
 #include "ui_utils.h"
 
 #include "resource.h"
+#include "strings.h"
 
 // Declare rects to use for all future window layout
 RECT kMainClientRect;
@@ -116,20 +117,18 @@ void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   }
 }
 
-int ConfirmExit(HWND hWnd) {
-  int user_response_code = MessageBoxW(hWnd, L"Are you sure you want to exit?", L"Confirm Exit",
-                                       MB_YESNO | MB_ICONASTERISK | MB_DEFBUTTON1);
+bool ConfirmClearControls(HWND hWnd) {
+  int user_response_code = MessageBoxW(nullptr, L"Clear All Temperature Output?", L"Confirm Clear",
+                                       MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2);
   switch (user_response_code) {
     case IDNO:
     case IDCANCEL:
-      break;
-    case IDYES:
-      CloseAllWindows(hWnd);
-      break;
+      return false;
+    case IDOK:
+      return true;
     default:
-      break;
+      return false;
   }
-  return user_response_code;
 }
 
 // Restore parent window to foreground, optional child window HWND to set keyboard focus

@@ -77,9 +77,6 @@ void CloseAllWindows(HWND hWnd);
 // Confirms whether the user wants to exit.
 int ConfirmExit(HWND hWnd);
 
-// Confirms the user wants to clear the controls, doesn't actually clear them.
-bool ConfirmClearControls(HWND hWnd);
-
 // Confirms whether to clear the log file, and clears it if "Yes" is selected.
 bool ConfirmAndClearLog(HWND hWnd);
 
@@ -147,9 +144,6 @@ bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 // Get default cache multiplier to use, from hCacheSizeCombo
 const size_t GetCacheSize();
 
-// Adds a tooltip to a control.
-HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText);
-
 // Attaches console to window, only one allowed per process.
 bool AttachConsole();
 
@@ -161,15 +155,6 @@ void ClearConsole(HWND hWnd);
 
 // Clears log file, if any.
 bool ClearLogFile(HWND hWnd);
-
-// Gets the size of the desktop window (usually the screen), to position app in the middle of it
-const RECT GetDesktopRect(HINSTANCE hInstance);
-
-// Set client rects for future resizing of a Window
-bool SetClientRects(HWND hWnd, HINSTANCE hInst);
-
-// Gets the position to place a window to the right of another window
-void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
 
 // Gets, and verifies custom settings from a user created .ini file
 bool GetCustomSettings();
@@ -195,15 +180,5 @@ const bool IsCommCtrlAtLeast(const DWORD to_compare);
 
 // Gets the installed comctl32.dll version
 DWORD GetCommCtrlVersion();
-
-// Brings window to foreground, and optional second param sets keyboard focus
-bool ResetFocus(HWND foreground, HWND keyb_focus);
-
-// Helper functions for MessageBoxW
-int InfoBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
-
-int WarnBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
-
-int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
 #endif // CRYOCALC_UTILS_H_
