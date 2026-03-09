@@ -249,6 +249,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       if (!ResetFocus(hMainWindow, nullptr)) {
         LOG(ERROR) << L"ResetFocus failed!";
       }
+      LOG(DEBUG) << L"Closed OS Info Window";
       DestroyWindow(hWnd);
     } break;
     case WM_DESTROY: {
