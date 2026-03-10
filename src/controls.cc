@@ -321,11 +321,11 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                       (HMENU)IDC_CELSIUS, hInst, nullptr);
   hKelvinEdit =
       CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
-                      kTempEditLeft, STATIC_TOP + (kEditYPad * 2), EDIT_WIDTH, EDITCONTROL_HEIGHT,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * 2u), EDIT_WIDTH, EDITCONTROL_HEIGHT,
                       hWnd, (HMENU)IDC_KELVIN, hInst, nullptr);
   hFahrenheitEdit =
       CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
-                      kTempEditLeft, STATIC_TOP + (kEditYPad * INTRA_PADDING), EDIT_WIDTH,
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * 3u), EDIT_WIDTH,
                       EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
   hRankineEdit =
       CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
