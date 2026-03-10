@@ -75,8 +75,9 @@ constexpr UINT COMBO_WIDTH   = 40u;             // Width in pixels of comboboxes
 constexpr UINT COMBO_HEIGHT  = 200u;            // Combobox height (must be > edit height for Win2K)
 constexpr UINT BOTTOM_AREA   = MAINHEIGHT / 3u; // Minimum height of bottom buttom controls area
 // Progress bar metrics
-constexpr UINT PROGBAR_WIDTH = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
+constexpr UINT PROGBAR_WIDTH  = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
 constexpr UINT PROGBAR_HEIGHT = STATICLABEL_HEIGHT;
+constexpr UINT CPUBAR_WIDTH   = PROGBAR_HEIGHT - PADDING_X;
 // clang-format on
 
 // Minimum/Maximum number of threads for the CPU stressor.

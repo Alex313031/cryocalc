@@ -34,6 +34,7 @@ HWND hStatusBar;
 // For CPU Stressor
 HWND hThreadsEdit;
 HWND hProgressBar;
+HWND hCPUBar;
 HWND hSSE2Checkbox;
 HWND hCacheSizeCombo;
 HWND hAllocMemButton;
@@ -405,9 +406,16 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                                   kButtonCol3Left, kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT,
                                   hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
   const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
+  const unsigned int sys_monitor_height = kFrameBottom - (STATIC_BOTTOM * 2);
+  const unsigned int sys_monitor_width = this_width - sys_monitor_left - (PADDING_X * 3u);
   hSysMonitorFrame =
       CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_NOTIFY,
-                      sys_monitor_left, STATIC_TOP, PROGBAR_WIDTH, kFrameBottom, hWnd, nullptr, hInst, nullptr);
+                      sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
+  const unsigned int cpubar_left = sys_monitor_left + (sys_monitor_width / 2u) - CPUBAR_WIDTH;
+  const unsigned int cpubar_top  = STATIC_TOP + (PADDING_Y * 4u);
+  hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
+                            cpubar_left, cpubar_top, CPUBAR_WIDTH, PROGBAR_WIDTH,
+                            hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -477,7 +485,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hOsInfoButton, hInst, L"Open OS Information window + utilities");
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
-  AddTooltip(hWnd, hSysMonitorFrame, hInst, L"Monitor CPU/Memory Usage");
+  AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
   // AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
 }
 
@@ -517,7 +525,7 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(17);
+  HDWP hdwp = BeginDeferWindowPos(18);
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
@@ -549,7 +557,6 @@ void HandleResize(HWND hWnd) {
   }
   if (hdwp) {
     unsigned int top = STATIC_TOP;
-    const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
     hdwp = DeferWindowPos(hdwp, hThreadsLabel, nullptr,
                           kButtonCol3Left, top, LABEL_WIDTH, STATICLABEL_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
@@ -577,8 +584,19 @@ void HandleResize(HWND hWnd) {
     hdwp = DeferWindowPos(hdwp, hAllocMemButton, nullptr,
                           kButtonCol3Left, top, PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
+    RECT frameRect;
+    GetClientRect(hFrameOutline, &frameRect);
+    const UINT frame_height = frameRect.bottom;
+    const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
+    const unsigned int sys_monitor_height = frame_height - (STATIC_BOTTOM * 2);
+    const unsigned int sys_monitor_width = width - sys_monitor_left - (PADDING_X * 3u);
     hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
-                          sys_monitor_left, STATIC_TOP, PROGBAR_WIDTH, kFrameBottom,
+                          sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const unsigned int cpubar_left = sys_monitor_left + (sys_monitor_width / 2u) - CPUBAR_WIDTH;
+    const unsigned int cpubar_top  = STATIC_TOP + (PADDING_Y * 4u);
+    hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
+                          cpubar_left, cpubar_top, CPUBAR_WIDTH, PROGBAR_WIDTH,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
