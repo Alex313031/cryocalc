@@ -20,11 +20,7 @@ static bool is_running = false;
 static volatile unsigned int rand_seed;
 
 void set_run_state(bool on) {
-  if (on) {
-    running = true;
-  } else {
-    running = false;
-  }
+  running = on;
 }
 
 bool GetIsRunning() {

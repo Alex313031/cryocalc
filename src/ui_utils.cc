@@ -1,5 +1,7 @@
 #include "ui_utils.h"
 
+#include <cmath> // For std::round
+
 #include "resource.h"
 #include "strings.h"
 
@@ -237,4 +239,17 @@ int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message) 
     hWndTmp = hWnd;
   }
   return MessageBoxW(hWndTmp, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+}
+
+void SetCPUBarPos(float cpu_percent) {
+  if (cpu_percent < 0.0f || cpu_percent > 100.0f) {
+    LOG(ERROR) << __FUNC__ << L" cpu_percent out of bounds! " << cpu_percent;
+    return;
+  }
+  DCHECK(hCPUBar);
+  const int position = static_cast<int>(std::round(cpu_percent));
+  LOG(DEBUG) << L"Setting CPU Bar position to " << position;
+  LRESULT res = SendMessageW(hCPUBar, PBM_SETPOS, static_cast<WPARAM>(position), 0);
+  const int prev_position = static_cast<int>(res);
+  LOG(DEBUG) << L"Prev. CPU Bar position: " << prev_position;
 }

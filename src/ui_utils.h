@@ -49,4 +49,6 @@ int WarnBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
 int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
+void SetCPUBarPos(float cpu_percent);
+
 #endif // CRYOCALC_UI_UTILS_H_
