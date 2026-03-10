@@ -11,13 +11,15 @@ static HWND hCelsiusLabel;
 static HWND hKelvinLabel;
 static HWND hFahrenheitLabel;
 static HWND hRankineLabel;
-static HWND hFrameOutline;
-static HWND hSysMonitorFrame;
 static HWND hPrecisionLabel;
 static HWND hThreadsLabel;
 static HWND hCacheSizeLabel;
 
-// Controls/buttons forward decl
+// Frame outlines
+static HWND hFrameOutline;
+static HWND hSysMonitorFrame;
+
+// Controls/buttons
 HWND hInputEdit;
 HWND hTempSelectCombo;
 HWND hPrecisionCombo;
@@ -28,18 +30,18 @@ HWND hRankineEdit;
 HWND hConvButton;
 HWND hClearButton;
 HWND hAboutButton;
+HWND hStartStresButton;
+HWND hStopStresButton;
 HWND hOsInfoButton;
 HWND hStatusBar;
 
 // For CPU Stressor
 HWND hThreadsEdit;
 HWND hProgressBar;
-HWND hCPUBar;
-HWND hSSE2Checkbox;
 HWND hCacheSizeCombo;
+HWND hSSE2Checkbox;
 HWND hAllocMemButton;
-HWND hStartStresButton;
-HWND hStopStresButton;
+HWND hCPUBar;
 
 // Temp select titles
 static const wchar_t* kBlank          = L"";
@@ -409,7 +411,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const unsigned int sys_monitor_height = kFrameBottom - (STATIC_BOTTOM * 2);
   const unsigned int sys_monitor_width = this_width - sys_monitor_left - (PADDING_X * 3u);
   hSysMonitorFrame =
-      CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_NOTIFY,
+      CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME | SS_NOTIFY,
                       sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
   const unsigned int cpubar_left = sys_monitor_left + (sys_monitor_width / 2u) - CPUBAR_WIDTH;
   const unsigned int cpubar_top  = STATIC_TOP + (PADDING_Y * 4u);

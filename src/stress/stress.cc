@@ -10,12 +10,13 @@
 
 std::atomic<bool> running{false};
 
-static bool is_running = false;
+bool use_sse2_simd = false;
 
 volatile long double sse2_result = 0;
 volatile long double vec_result  = 0;
 
-bool use_sse2_simd = false;
+static bool is_running = false;
+
 static volatile unsigned int rand_seed;
 
 void set_run_state(bool on) {

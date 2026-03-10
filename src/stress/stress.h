@@ -8,10 +8,11 @@
 // Atomic flag for controlling thread activation state
 extern std::atomic<bool> running;
 
+extern bool use_sse2_simd; // For controlling which stress function to use.
+
+// Storing results each time a thread fully completes
 extern volatile long double sse2_result;
 extern volatile long double vec_result;
-
-extern bool use_sse2_simd;    // For controlling which stress function to use.
 
 // Call this before launching threads. Set to false to stop threads
 void set_run_state(bool on);
