@@ -49,7 +49,10 @@
 #define IDC_MSINFO_BUTTON           308
 #define IDC_RUNAPP_BUTTON           309
 #define IDC_ALLOC_MEM               310
-#define IDC_CLOSE_OSINFO_BUTTON     311
+#define IDC_CLOSE_OSINFO            311
+#define IDC_CLOSE_OSINFO_BUTTON     312
+#define IDC_PROGRESS                313
+#define IDC_CPUBAR                  314
 
 // User input controls
 #define IDC_INPUT                   320
@@ -77,12 +80,8 @@
 #define IDC_FAHRENHEIT              342
 #define IDC_RANKINE                 343
 
-// Progress bar
-#define IDC_PROGRESS                350
-// Command to close Os Info Window gracefully when parent window is closing
-#define IDC_CLOSE_OSINFO            351
 // Os Info Logging Output Window
-#define IDC_OSINFO_OUT              352
+#define IDC_OSINFO_OUT              350
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC

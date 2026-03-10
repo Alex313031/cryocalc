@@ -45,6 +45,9 @@ extern HWND hThreadsEdit;
 // Progress bar for CPU stressor
 extern HWND hProgressBar;
 
+// Vertical progress bar for CPU usage
+extern HWND hCPUBar;
+
 // Combobox to select L2/L3 Cache multiplier
 extern HWND hCacheSizeCombo;
 
