@@ -3,6 +3,8 @@
 
 #include <atomic>
 
+#include "cpu.h"
+
 #include "../framework.h"
 
 // Atomic flag for controlling thread activation state
@@ -37,5 +39,8 @@ bool LaunchThreads(const unsigned int num_threads);
 
 // Stops all stressor threads
 void StopAllThreads();
+
+// Helper function to stop CPU Monitoring
+void StopCPUMon();
 
 #endif // CRYOCALC_STRESS_H_

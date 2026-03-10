@@ -257,3 +257,8 @@ void StopAllThreads() {
     LOG(INFO) << L"Stopped all stressor threads.";
   }
 }
+
+void StopCPUMon() {
+  SetCPUMonitorState(false);
+  SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
+}

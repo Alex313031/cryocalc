@@ -440,6 +440,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   if (IsXP) {
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   }
+  SendMessageW(hCPUBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+  SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -851,6 +853,10 @@ void OnStartButtonClick(HWND hWnd) {
       set_run_state(true);
       std::thread StressorLaunchThread(LaunchThreads, num_threads_);
       StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
+      SetCPUMonitorState(true);
+      SetDelay(500L); // Set delay for CPU monitoring intervals
+      std::thread CPUMonitorThread(MonitorCPU);
+      CPUMonitorThread.detach();
     } else {
       animating = false;
       for (auto& animate_thread : ProgBarThread) {
@@ -876,6 +882,7 @@ void OnStopButtonClick(HWND hWnd) {
   // Stop animating the progress bar and reset to empty state
   StopAnimating();
   StopAllThreads();
+  StopCPUMon();
 }
 
 // Start animating progress bar.

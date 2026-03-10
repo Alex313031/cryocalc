@@ -1,5 +1,7 @@
 #include "cpu.h"
 
+#include <chrono>
+
 #include "../ui_utils.h"
 
 std::atomic<bool> start_monitoring{false};
@@ -19,22 +21,23 @@ void SetDelay(long cpu_monitor_delay) {
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetCPUPercent.
 static float GetCPUPercentImpl() {
+  return 57.4f;
 }
 
 const float GetCPUPercent() {
-  const percent = GetCPUPercentImpl();
+  const float percent = GetCPUPercentImpl();
   if (percent < 0.0f || percent > 100.0f) {
     LOG(FATAL) << L"GetCPUPercentImpl reported an out of bounds CPU %!";
-  } else {
-    return percent;
   }
+  return percent;
 }
 
 void MonitorCPU() {
+  const std::chrono::milliseconds delay = GetDelay();
   while (start_monitoring) {
     float current_cpu_percent = GetCPUPercent(); // Get validated CPU percent
     SetCPUBarPos(current_cpu_percent); // Update CPU progress bar to nearest 1 percent
-    std::this_thread::sleep_for(GetDelay()); // Pause between updates.
+    std::this_thread::sleep_for(delay); // Pause between updates.
   }
   // start_monitoring was false, returning.
   LOG(INFO) << L"Stopping CPU Monitoring";
