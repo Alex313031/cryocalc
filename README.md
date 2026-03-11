@@ -3,13 +3,16 @@
 ![screenshot](./assets/screenshot.png?raw=true "Screenshot")
 
 A small Windows 2000+ compatible program that converts between temperature units, for cryogenic work and LN2 overclocking.  
-It also has a CPU stresser/burner feature similar to cpuburner.exe from [Furmark](https://geeks3d.com/public/jegx/2017q2/furmark-1-19-geforce-gtx1070-stress-test.jpg).
+It also has a CPU stresser/burner feature similar to cpuburner.exe from [Furmark](https://geeks3d.com/public/jegx/2017q2/furmark-1-19-geforce-gtx1070-stress-test.jpg).  
+Also recently added a CPU usage monitoring function.
 
 ## Motivation
 
 The app is written in raw Win32 API, using C++.
 I wanted it to be an exercise in C++ and Win32, to make a "complete" app with menus, buttons, status bar, an installer, etc.
-It is compiled using a custom MinGW toolchain to support Windows 2000/XP, and is written to support these old OSes.
+It is compiled using a custom MinGW toolchain to support Windows 2000/XP, and is written to support these old OSes.  
+Despite being written for legacy Windows NT, it uses modern C++17. The reason it does not use newer standards is due to bugs
+in both MSVC and MinGW in the STL, and indeed the v141_xp toolset in Visual Studio will not even let you target C++20 or higher.
 
 ## Building
 
