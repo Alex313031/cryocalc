@@ -310,7 +310,6 @@ void LogOsInfo() {
   if (debug_mode) {
     LOG(DEBUG) << std::fixed << std::showbase << std::hex << L"GetRawNTVer result = " << nt_ver
                << std::noshowbase << std::dec << std::defaultfloat;
-    TestDllGetVersion();
     pIsWoW64 IsWoW64_t = reinterpret_cast<pIsWoW64>(GetProcAddress(hOsInfoDll, "IsWoW64"));
     bool is_wow64;
     if (IsWoW64_t == nullptr) {
@@ -322,6 +321,9 @@ void LogOsInfo() {
     }
     static std::wstring result = is_wow64 ? L"TRUE" : L"FALSE";
     LOG(DEBUG) << L"Running under WoW64: " << result;
+  }
+  if (is_debug) {
+    TestDllGetVersion();
   }
 }
 

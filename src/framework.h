@@ -5,22 +5,8 @@
 #ifndef CRYOCALC_FRAMEWORK_H_
 #define CRYOCALC_FRAMEWORK_H_
 
-#ifdef __cplusplus
- #if __cplusplus < 201103L
-  #error CryoCalc only supports C++11 and above
- #endif
-#endif
-
 // Defines target Windows version and app version constants
 #include "./version.h"
-
-#if defined(__clang__) && defined(_UNICODE)
- #pragma code_page(65001) // UTF-8
-#endif
-
-#ifndef __FUNC__
- #define __FUNC__ __func__
-#endif
 
 // Windows Header Files
 
@@ -29,11 +15,11 @@
 // definitions so <ntstatus.h> can own them without redefinition errors.
 // MinGW handles this automatically, so the guard is MSVC-only.
 #ifdef _MSC_VER
-# define WIN32_NO_STATUS
+ #define WIN32_NO_STATUS
 #endif
 #include <windows.h>  // Main Windows header
 #ifdef _MSC_VER
-# undef WIN32_NO_STATUS
+ #undef WIN32_NO_STATUS
 #endif
 #include <ntstatus.h> // Full NTSTATUS codes (e.g. STATUS_SUCCESS)
 
@@ -53,11 +39,24 @@
 #include <thread>    // For threading support
 #include <vector>    // std::vector
 
+/* Defines handling */
+
+#ifndef __FUNC__
+ #define __FUNC__ __func__
+#endif
+
 inline constexpr bool is_dcheck =
 #ifdef DCHECK
     true;
 #else
     false;
 #endif // DCHECK
+
+inline constexpr bool is_debug =
+#if defined(DEBUG) || defined(_DEBUG)
+    true;
+#else
+    false;
+#endif // defined(DEBUG) || defined(_DEBUG)
 
 #endif // CRYOCALC_FRAMEWORK_H_

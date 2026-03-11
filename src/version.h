@@ -4,6 +4,12 @@
 // This file is for specifying the target windows version, as well as application
 // version constants.
 
+#ifdef __cplusplus
+ #if __cplusplus < 201103L
+  #error CryoCalc only supports C++11 and above
+ #endif
+#endif
+
 // We need to define _UNICODE and UNICODE for TCHAR
 #ifndef UNICODE
  #define UNICODE
@@ -13,7 +19,7 @@
  #define _UNICODE
 #endif
 
-#ifdef __clang__
+#if defined(__clang__) && defined(_UNICODE)
  #pragma code_page(65001) // UTF-8
 #endif
 
