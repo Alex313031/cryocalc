@@ -5,6 +5,9 @@ namespace logging {
   bool logging_initialized  = false;
   std::wstring kProgName    = L"";
   std::wstring kLogFileName = L"";
+  static bool show_func_sigs = false;
+  static bool show_line_numbers = true;
+  static bool show_time = false;
 } // namespace logging
 
 logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console)
@@ -161,11 +164,15 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
 }
 
 bool logging::InitLogging(HINSTANCE hInstance,
-                          LogDest log_sink,
-                          const std::wstring logfile_name,
-                          const std::wstring app_name) {
-  bool success = false;
+                          LogInitSettings InitSettings) {
   DCHECK(!logging_initialized);
+  bool success = false;
+  LogDest log_sink = InitSettings.log_sink;
+  const std::wstring logfile_name = InitSettings.logfile_name;
+  const std::wstring app_name = InitSettings.app_name;
+  show_func_sigs = InitSettings.show_func_sigs;
+  show_line_numbers = InitSettings.show_line_numbers;
+  show_time = InitSettings.show_time;
   if (!hInstance || log_sink >= MAX_LOG_DEST) {
     logging_initialized = false;
     return false;

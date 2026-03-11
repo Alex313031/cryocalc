@@ -19,6 +19,15 @@ static constexpr bool test_fatal = false;
 
 namespace logging {
 
+  typedef struct {
+    LogDest log_sink;
+    std::wstring logfile_name;
+    std::wstring app_name;
+    bool show_func_sigs;
+    bool show_line_numbers;
+    bool show_time;
+  } LogInitSettings;
+
   class LogMessage {
    public:
     explicit LogMessage(LogLevel level,
@@ -78,9 +87,7 @@ namespace logging {
 
   // Initialize logging for this program
   bool InitLogging(HINSTANCE hInstance,
-                   LogDest log_sink,
-                   const std::wstring logfile_name,
-                   const std::wstring app_name);
+                   LogInitSettings InitSettings);
 
   // Call to clean up logging stream and any file handles
   bool DeInitLogging(HINSTANCE hInstance);
