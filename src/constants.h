@@ -64,6 +64,7 @@ constexpr INT STATIC_TOP     = 12;             // Min. pixels to pad all content
 constexpr INT STATIC_LEFT    = 8;              // How many pixels to pad left side before labels
 constexpr INT STATIC_RIGHT   = 8;              // How many pixels to pad right side after labels
 constexpr INT STATIC_BOTTOM  = 12;             // How many pixels to pad bottom
+constexpr INT ADJ_WINDOW_PADDING = 2;          // How many pixels to pad between adjacent parent windows
 
 // Control layout metrics
 constexpr UINT LABEL_WIDTH   = 80u;             // Width in pixels of a static label

@@ -50,8 +50,8 @@ bool ShowOsInfo(HWND hWnd) {
   // Position OS Info window to the right of the main window
   int osInfoX, osInfoY;
   GetRightOfWindow(hMainWindow, &osInfoX, &osInfoY);
-  osInfoX = osInfoX + 2; // 2 pixels padding between windows
-  osInfoY = osInfoY + 2; // 2 pixels lower than top of main window
+  osInfoX = osInfoX + ADJ_WINDOW_PADDING; // 2 pixels padding between windows
+  //osInfoY = osInfoY + ADJ_WINDOW_PADDING; // 2 pixels lower than top of main window
 
   hOsInfoWin = CreateWindowExW(
       WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW, szOSInfoWindowClass, OSINFO_TITLE,
