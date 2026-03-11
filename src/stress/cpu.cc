@@ -49,12 +49,12 @@ static float GetCPUPercentImpl() {
 
   // Log the chosen backend function only once on the first call.
   static bool backend_logged = false;
-  if (!backend_logged) {
+  if (!backend_logged && debug_mode) {
     backend_logged = true;
     if (pfnGetSystemTimes) {
-      LOG(INFO) << L"CPU monitoring: using GetSystemTimes (Windows XP+).";
+      LOG(DEBUG) << L"CPU monitoring: using GetSystemTimes (Windows XP+).";
     } else {
-      LOG(INFO) << L"CPU monitoring: using NtQuerySystemInformation (Windows 2000 fallback).";
+      LOG(DEBUG) << L"CPU monitoring: using NtQuerySystemInformation (Windows 2000 fallback).";
     }
   }
 

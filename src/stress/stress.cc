@@ -38,12 +38,16 @@ static unsigned int GetSeed() {
 
   static constexpr bool force_rand_s = true;
   if (isXP || force_rand_s) {
-    LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
+    if (is_debug) {
+      LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
+    }
     // Causes rand_s() crash on Windows 2000 because it uses RtlGenRandom internally. Bug in MinGW.
     std::random_device randd;
     seed = static_cast<unsigned int>(randd());
   } else if (is2K) {
-    LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
+    if (is_debug) {
+      LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
+    }
     HCRYPTPROV hProvider    = 0;
     unsigned int win2k_seed = 0;
 
