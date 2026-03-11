@@ -297,8 +297,7 @@ unsigned int GetDefaultNumThreads() {
 
 long double ConvertInputToLD(const wchar_t* input) {
   wchar_t* endPtr;
-  long double retval;
-  retval = std::wcstold(input, &endPtr);
+  long double retval = std::wcstold(input, &endPtr);
   return retval;
 }
 

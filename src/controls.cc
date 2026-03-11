@@ -534,7 +534,7 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(18);
+  HDWP hdwp = BeginDeferWindowPos(18); // Must equal number of windows to redraw
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,

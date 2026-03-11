@@ -145,34 +145,26 @@ void HandleOsInfoResize(HWND hWnd) {
   const unsigned int kButtonLeft =
       is_compact ? PADDING_X : GetXOffset(this_width, 0, 0.50f) - kButtonWidth;
 
-  // Move all controls together
-  HDWP hdwp = BeginDeferWindowPos(5);
+  HDWP hdwp = BeginDeferWindowPos(5); // Number of child windows to redraw
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hOsInfoTextOut, nullptr,
                           PADDING_X, PADDING_Y, kOsOutputWidth, kOsOutputHeight,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hWinVerButton, nullptr,
                           kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hRunAppButton, nullptr,
                           kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hMsInfoButton, nullptr,
                           kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop,
                           kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
-  }
-  if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hCloseOSInfoButton, nullptr,
                           kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top,
                           kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
+    // Move all controls together
     EndDeferWindowPos(hdwp);
   }
 }
