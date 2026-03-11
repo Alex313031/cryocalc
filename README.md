@@ -1,4 +1,4 @@
-# CryoCalc
+# CryoCalc &nbsp;<img src="./assets/icon_256.png" width="38">
 
 ![screenshot](./assets/screenshot.png?raw=true "Screenshot")
 
