@@ -32,7 +32,9 @@ namespace logging {
    public:
     explicit LogMessage(LogLevel level,
                         bool log_to_file,
-                        bool log_to_console); // Explicit constructor
+                        bool log_to_console,
+                        const char* func_sig,
+                        int line_number); // Explicit constructor
     ~LogMessage(); // Actual logging happens on destruction, simple lazy logger
 
     LogMessage(const LogMessage&)            = delete;
@@ -79,6 +81,10 @@ namespace logging {
     bool log_to_file_;
     // Whether to send stream to stdout/stderr
     bool log_to_console_;
+    // Function name of the call site (from __func__)
+    const char* func_sig_;
+    // Source line number of the call site (from __LINE__)
+    int line_number_;
     // The stream itself
     std::wostringstream stream_;
   };
@@ -101,15 +107,15 @@ namespace logging {
 } // namespace logging
 
 // Regular logging
-#define LOG(level) logging::LogMessage(LOG_##level, true, true)
+#define LOG(level) logging::LogMessage(LOG_##level, true, true, __func__, __LINE__)
 
 // Log only to console
-#define CLOG(level) logging::LogMessage(LOG_##level, false, true)
+#define CLOG(level) logging::LogMessage(LOG_##level, false, true, __func__, __LINE__)
 
 // Log only to file
-#define FLOG(level) logging::LogMessage(LOG_##level, true, false)
+#define FLOG(level) logging::LogMessage(LOG_##level, true, false, __func__, __LINE__)
 
 // Debug logging
-#define DLOG() logging::LogMessage(LOG_DEBUG, true, true)
+#define DLOG() logging::LogMessage(LOG_DEBUG, true, true, __func__, __LINE__)
 
 #endif // MINI_LOGGER_LOGGING_H_

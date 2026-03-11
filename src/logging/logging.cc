@@ -10,8 +10,10 @@ namespace logging {
   static bool show_time = false;
 } // namespace logging
 
-logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console)
-    : level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console) {
+logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console,
+                                const char* func_sig, int line_number)
+    : level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console),
+      func_sig_(func_sig), line_number_(line_number) {
 }
 
 logging::LogMessage::~LogMessage() {
@@ -20,25 +22,25 @@ logging::LogMessage::~LogMessage() {
     return;
   }
 
-  const wchar_t* prefix;
+  const wchar_t* level_prefix;
   if (level_ == MAX_LOGLEVEL) {
     std::wcerr << L"MAX_LOGLEVEL reached!" << std::endl;
   }
   switch (level_) {
     case LOG_INFO:
-      prefix = L"[INFO] ";
+      level_prefix = L"[INFO] ";
       break;
     case LOG_WARN:
-      prefix = L"[WARN] ";
+      level_prefix = L"[WARN] ";
       break;
     case LOG_ERROR:
-      prefix = L"[ERROR] ";
+      level_prefix = L"[ERROR] ";
       break;
     case LOG_DEBUG:
-      prefix = IsDCheck() ? L"[DCHECK] " : L"[DEBUG] ";
+      level_prefix = IsDCheck() ? L"[DCHECK] " : L"[DEBUG] ";
       break;
     case LOG_FATAL:
-      prefix = L"[FATAL] ";
+      level_prefix = L"[FATAL] ";
       break;
     case MAX_LOGLEVEL:
     default:
@@ -47,20 +49,52 @@ logging::LogMessage::~LogMessage() {
       return;
   }
 
+  std::wstring full_prefix;
+  if (show_time) {
+    SYSTEMTIME st;
+    GetSystemTime(&st);
+    std::wostringstream ts;
+    ts << std::setfill(L'0')
+       << std::setw(4) << st.wYear  << L'-'
+       << std::setw(2) << st.wMonth << L'-'
+       << std::setw(2) << st.wDay   << L'T'
+       << std::setw(2) << st.wHour  << L':'
+       << std::setw(2) << st.wMinute << L':'
+       << std::setw(2) << st.wSecond << L'Z';
+    full_prefix += ts.str();
+    full_prefix += L" ";
+  }
+  if (show_func_sigs && func_sig_) {
+    const std::wstring func_str = ToWide(func_sig_);
+    full_prefix += func_str;
+    if (func_str.empty() || func_str.back() != L')') {
+      full_prefix += L"()";
+    }
+    if (show_line_numbers) {
+      full_prefix += L":";
+      full_prefix += std::to_wstring(line_number_);
+    }
+    full_prefix += L" ";
+  } else if (show_line_numbers) {
+    full_prefix += std::to_wstring(line_number_);
+    full_prefix += L" ";
+  }
+  full_prefix += level_prefix;
+
   if (log_to_console_) {
     // Levels higher than INFO level go to stderr
     if (level_ > LOG_INFO) {
-      std::wcerr << prefix << stream_.str() << std::endl;
+      std::wcerr << full_prefix << stream_.str() << std::endl;
       if (level_ == LOG_FATAL) {
         __debugbreak(); // Catch for debugger on FATAL
         return;
       }
     } else {
-      std::wcout << prefix << stream_.str() << std::endl;
+      std::wcout << full_prefix << stream_.str() << std::endl;
     }
   }
   if (log_to_file_) {
-    AppendTextToFile(std::wstring(prefix) + stream_.str());
+    AppendTextToFile(full_prefix + stream_.str());
   }
 }
 
