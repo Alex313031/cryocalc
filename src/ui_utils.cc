@@ -248,8 +248,5 @@ void SetCPUBarPos(float cpu_percent) {
   }
   DCHECK(hCPUBar);
   const int position = static_cast<int>(std::round(cpu_percent));
-  LOG(DEBUG) << L"Setting CPU Bar position to " << position;
-  LRESULT res = SendMessageW(hCPUBar, PBM_SETPOS, static_cast<WPARAM>(position), 0);
-  const int prev_position = static_cast<int>(res);
-  LOG(DEBUG) << L"Prev. CPU Bar position: " << prev_position;
+  SendMessageW(hCPUBar, PBM_SETPOS, static_cast<WPARAM>(position), 0);
 }

@@ -490,7 +490,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
   AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
-  // AddTooltip(hWnd, hStatusBar, hInst, L"Status Bar");
+  StartCPUMon(500L); // Start CPU Monitoring at end of controls initialization
 }
 
 void HandleResize(HWND hWnd) {
@@ -853,10 +853,6 @@ void OnStartButtonClick(HWND hWnd) {
       set_run_state(true);
       std::thread StressorLaunchThread(LaunchThreads, num_threads_);
       StressorLaunchThread.detach(); // Make sure to join the stress thread before exiting
-      SetCPUMonitorState(true);
-      SetDelay(500L); // Set delay for CPU monitoring intervals
-      std::thread CPUMonitorThread(MonitorCPU);
-      CPUMonitorThread.detach();
     } else {
       animating = false;
       for (auto& animate_thread : ProgBarThread) {
@@ -882,7 +878,6 @@ void OnStopButtonClick(HWND hWnd) {
   // Stop animating the progress bar and reset to empty state
   StopAnimating();
   StopAllThreads();
-  StopCPUMon();
 }
 
 // Start animating progress bar.

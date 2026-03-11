@@ -277,23 +277,21 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           CloseAllWindows(hWnd);
           break;
         case IDM_CEXIT:
-          // Confirm before exiting
-          ConfirmExit(hWnd);
+          ConfirmExit(hWnd); // Confirm before exiting
           break;
         case IDM_RUN:
-          // Open run dialog
-          OpenRunDialog(hWnd);
+          OpenRunDialog(hWnd); // Open run dialog
           break;
         case IDM_ATTACH_CON: {
           // Atach new console
           if (!AttachConsole()) {
-            return 1;
+            ErrorBox(hWnd, L"Console Error", L"Failed to attach console");
           }
         } break;
         case IDM_DETACH_CON: {
           // Detach console
           if (!DetachConsole()) {
-            return 1;
+            ErrorBox(hWnd, L"Console Error", L"Failed to detach console");
           }
         } break;
         case IDM_CLEAR_CON: {
@@ -397,7 +395,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       SetClientRects(hWnd, hInst);
       HandleResize(hWnd);
     } break;
-    // Set/get min/max window size
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
       LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);
@@ -418,11 +415,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     // When close button is pressed
     case WM_CLOSE:
       CloseAllWindows(hWnd);
-      FreeLibrary(hOsInfoDll);
       break;
     // Handle destroy message
     case WM_DESTROY:
-      FreeLibrary(hOsInfoDll);
+      FreeLibrary(hOsInfoDll); // Release osinfo.dll
       PostQuitMessage(0);
       break;
     // "After destroy" message.

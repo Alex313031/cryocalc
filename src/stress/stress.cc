@@ -258,7 +258,18 @@ void StopAllThreads() {
   }
 }
 
+void StartCPUMon(long initial_interval) {
+  SetCPUMonitorState(true); // Should be called before running any further functions in cpu.cc
+  SetDelay(initial_interval); // Set delay for CPU monitoring intervals
+  std::thread CPUMonitorThread(MonitorCPU); // Start CPU Monitor thread
+  CPUMonitorThread.detach(); // Make sure to join with SetCPUMonitorState(false) before exiting
+}
+
 void StopCPUMon() {
+  SetCPUMonitorState(false); // Tells MonitorCPU to return, acting like CPUMonitorThread.join()
+  SendMessageW(hCPUBar, PBM_SETPOS, 0, 0); // Reset position to 0
+}
+
+void PauseCPUMon() {
   SetCPUMonitorState(false);
-  SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
 }
