@@ -23,7 +23,19 @@
 #endif
 
 // Windows Header Files
+
+// On MSVC, <windows.h> defines a small subset of NTSTATUS codes, which then
+// conflict with the full set in <ntstatus.h>. WIN32_NO_STATUS suppresses those
+// definitions so <ntstatus.h> can own them without redefinition errors.
+// MinGW handles this automatically, so the guard is MSVC-only.
+#ifdef _MSC_VER
+# define WIN32_NO_STATUS
+#endif
 #include <windows.h>  // Main Windows header
+#ifdef _MSC_VER
+# undef WIN32_NO_STATUS
+#endif
+#include <ntstatus.h> // Full NTSTATUS codes (e.g. STATUS_SUCCESS)
 
 #include <commctrl.h> // Common controls header
 #include <mmsystem.h> // For playing sounds

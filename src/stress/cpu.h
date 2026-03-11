@@ -5,6 +5,15 @@
 
 #include "../framework.h"
 
+typedef LONG (WINAPI* NtQuerySystemInformation_t)(UINT SystemInformationClass,
+                                                  PVOID SystemInformation,
+                                                  ULONG SystemInformationLength,
+                                                  PULONG ReturnLength);
+
+typedef BOOL (WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
+                                        LPFILETIME lpKernelTime,
+                                        LPFILETIME lpUserTime);
+
 extern std::atomic<bool> start_monitoring;
 
 // Runs GetCPUPercentImpl, and verifies that it is between 0 and 100
