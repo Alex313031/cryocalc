@@ -90,9 +90,6 @@ bool IsValidNumericInput(const wchar_t* text);
 // Verifies that threads input is valid.
 bool IsValidThreadsInput(const wchar_t* text);
 
-// Gets the number of logical CPU threads of the host system.
-DWORD GetLogicalProcessorCount();
-
 // Gets the default number of threads to use for stressor: the number of logical CPUs within bounds
 // of MIN_THREADS and MAX_THREADS.
 unsigned int GetDefaultNumThreads();

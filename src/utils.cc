@@ -249,41 +249,6 @@ bool IsValidThreadsInput(const wchar_t* text) {
   return (value >= static_cast<long>(MIN_THREADS) && value <= static_cast<long>(MAX_THREADS));
 }
 
-DWORD GetLogicalProcessorCount() {
-  SYSTEM_INFO sysInfo;
-  std::wstring whichfunc;
-#if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
-  whichfunc = L"GetNativeSystemInfo";
-  GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
-  pfnGetNativeSystemInfo = nullptr;
-#else
-  // Note: Do not call FreeLibrary() on GetModuleHandle() results
-  HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
-  if (!hKernel32) {
-    // Fallback if kernel32.dll handle couldn't be obtained
-    whichfunc = L"GetSystemInfo";
-    GetSystemInfo(&sysInfo);
-  } else {
-    // Dynamically get GetNativeSystemInfo
-    pfnGetNativeSystemInfo =
-        reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
-    // Windows 2000 won't have this function, use GetSystemInfo instead
-    if (pfnGetNativeSystemInfo) {
-      whichfunc = L"pfnGetNativeSystemInfo";
-      pfnGetNativeSystemInfo(&sysInfo);
-    } else {
-      whichfunc = L"GetSystemInfo";
-      GetSystemInfo(&sysInfo);
-    }
-  }
-  if (debug_mode) {
-    LOG(DEBUG) << L"Using " << whichfunc << " for " << __FUNC__;
-  }
-#endif
-  const DWORD num_cpus = sysInfo.dwNumberOfProcessors;
-  return num_cpus;
-}
-
 unsigned int GetDefaultNumThreads() {
   unsigned int def_threads = 0;
   def_threads              = static_cast<unsigned int>(GetLogicalProcessorCount());

@@ -28,4 +28,7 @@ void MonitorCPU();
 // Turns MonitorCPU thread ON/OFF
 void SetCPUMonitorState(bool on);
 
+// Gets the number of logical CPU threads of the host system.
+DWORD GetLogicalProcessorCount();
+
 #endif // CRYOCALC_CPU_H_
