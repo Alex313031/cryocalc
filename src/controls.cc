@@ -413,10 +413,15 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hSysMonitorFrame =
       CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME | SS_NOTIFY,
                       sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
-  const unsigned int cpubar_left = sys_monitor_left + (sys_monitor_width / 2u) - CPUBAR_WIDTH;
-  const unsigned int cpubar_top  = STATIC_TOP + (PADDING_Y * 4u);
+  const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
+                            static_cast<int>(CPUBAR_WIDTH) / 2;
+  const int cpubar_top    = std::max(STATIC_TOP,
+                                     STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+                                     static_cast<int>(PROGBAR_WIDTH) / 2);
+  const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
+                                       0, static_cast<int>(PROGBAR_WIDTH));
   hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
-                            cpubar_left, cpubar_top, CPUBAR_WIDTH, PROGBAR_WIDTH,
+                            cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
@@ -597,10 +602,15 @@ void HandleResize(HWND hWnd) {
     hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
                           sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-    const unsigned int cpubar_left = sys_monitor_left + (sys_monitor_width / 2u) - CPUBAR_WIDTH;
-    const unsigned int cpubar_top  = STATIC_TOP + (PADDING_Y * 4u);
+    const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
+                              static_cast<int>(CPUBAR_WIDTH) / 2;
+    const int cpubar_top    = std::max(STATIC_TOP,
+                                       STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+                                       static_cast<int>(PROGBAR_WIDTH) / 2);
+    const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
+                                         0, static_cast<int>(PROGBAR_WIDTH));
     hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
-                          cpubar_left, cpubar_top, CPUBAR_WIDTH, PROGBAR_WIDTH,
+                          cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
