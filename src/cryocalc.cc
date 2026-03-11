@@ -85,9 +85,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   LoggingSettings.log_sink = kLogSink;
   LoggingSettings.logfile_name = kLogFile;
   LoggingSettings.app_name = kAppName;
-  LoggingSettings.show_func_sigs = true;
-  LoggingSettings.show_line_numbers = true;
-  LoggingSettings.show_time = true;
+  LoggingSettings.show_func_sigs = false;
+  LoggingSettings.show_line_numbers = false;
+  LoggingSettings.show_time = false;
+  LoggingSettings.full_prefix_level = LOG_ERROR;
   const bool init_logging = logging::InitLogging(hInstance, LoggingSettings);
   if (init_logging) {
     logging::SetIsDCheck(is_dcheck);

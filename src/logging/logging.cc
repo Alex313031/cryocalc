@@ -8,6 +8,9 @@ namespace logging {
   static bool show_func_sigs = false;
   static bool show_line_numbers = true;
   static bool show_time = false;
+  // What minimum log level to show all prefixes,
+  // for example FATAL to help diagnose errors.
+  LogLevel full_prefix_level = LOG_FATAL;
 } // namespace logging
 
 logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console,
@@ -22,13 +25,14 @@ logging::LogMessage::~LogMessage() {
     return;
   }
 
+  const bool show_full_prefix = (level_ >= full_prefix_level) || (level_ == LOG_VERBOSE);
   const wchar_t* level_prefix;
-  if (level_ == MAX_LOGLEVEL) {
-    std::wcerr << L"MAX_LOGLEVEL reached!" << std::endl;
-  }
   switch (level_) {
     case LOG_INFO:
       level_prefix = L"[INFO] ";
+      break;
+    case LOG_DEBUG:
+      level_prefix = IsDCheck() ? L"[DCHECK] " : L"[DEBUG] ";
       break;
     case LOG_WARN:
       level_prefix = L"[WARN] ";
@@ -36,13 +40,16 @@ logging::LogMessage::~LogMessage() {
     case LOG_ERROR:
       level_prefix = L"[ERROR] ";
       break;
-    case LOG_DEBUG:
-      level_prefix = IsDCheck() ? L"[DCHECK] " : L"[DEBUG] ";
-      break;
     case LOG_FATAL:
       level_prefix = L"[FATAL] ";
       break;
+    case LOG_VERBOSE:
+      level_prefix = L"[VERBOSE] ";
+      break;
     case MAX_LOGLEVEL:
+      std::wcerr << ToWide(__func__) << L"MAX LOGLEVEL" << std::endl;
+      SetLastErrorEx(ERROR_MAX_LOGLEVEL, SLE_ERROR);
+      return;
     default:
       std::wcerr << ToWide(__func__) << L"INVALID LOG LEVEL" << std::endl;
       NOTREACHED();
@@ -50,27 +57,26 @@ logging::LogMessage::~LogMessage() {
   }
 
   std::wstring full_prefix;
-  if (show_time) {
-    SYSTEMTIME st;
-    GetSystemTime(&st);
+  if (show_time || show_full_prefix) {
+    SYSTEMTIME systime;
+    GetSystemTime(&systime);
     std::wostringstream ts;
-    ts << std::setfill(L'0')
-       << std::setw(4) << st.wYear  << L'-'
-       << std::setw(2) << st.wMonth << L'-'
-       << std::setw(2) << st.wDay   << L'T'
-       << std::setw(2) << st.wHour  << L':'
-       << std::setw(2) << st.wMinute << L':'
-       << std::setw(2) << st.wSecond << L'Z';
+    ts << std::setfill(L'0') << L'T'
+    /* << std::setw(4) << systime.wYear  << L'-'
+       << std::setw(2) << systime.wMonth << L'-'
+       << std::setw(2) << systime.wDay   << L'|' */
+       << std::setw(2) << systime.wHour  << L':'
+       << std::setw(2) << systime.wMinute << L':'
+       << std::setw(2) << systime.wSecond << L' ';
     full_prefix += ts.str();
-    full_prefix += L" ";
   }
-  if (show_func_sigs && func_sig_) {
+  if ((show_func_sigs && func_sig_) || show_full_prefix) {
     const std::wstring func_str = ToWide(func_sig_);
     full_prefix += func_str;
     if (func_str.empty() || func_str.back() != L')') {
       full_prefix += L"()";
     }
-    if (show_line_numbers) {
+    if (show_line_numbers || show_full_prefix) {
       full_prefix += L":";
       full_prefix += std::to_wstring(line_number_);
     }
@@ -207,6 +213,7 @@ bool logging::InitLogging(HINSTANCE hInstance,
   show_func_sigs = InitSettings.show_func_sigs;
   show_line_numbers = InitSettings.show_line_numbers;
   show_time = InitSettings.show_time;
+  full_prefix_level = InitSettings.full_prefix_level;
   if (!hInstance || log_sink >= MAX_LOG_DEST) {
     logging_initialized = false;
     return false;

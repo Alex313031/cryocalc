@@ -7,25 +7,31 @@
 
 enum LogLevel {
   LOG_INFO     = 0,
-  LOG_WARN     = 1,
-  LOG_ERROR    = 2,
-  LOG_DEBUG    = 3,
+  LOG_DEBUG    = 1,
+  LOG_WARN     = 2,
+  LOG_ERROR    = 3,
   LOG_FATAL    = 4,
-  MAX_LOGLEVEL = 5
+  LOG_VERBOSE  = 5,
+  MAX_LOGLEVEL = 6
 };
+
+// Must have 0x2 to set bit 29 for custom user error codes.
+static const DWORD ERROR_MAX_LOGLEVEL = 0x20000006;
 
 // Toggle to test LOG(FATAL) which will crash the app
 static constexpr bool test_fatal = false;
 
 namespace logging {
 
+  // Stores logging settings to be used for initialization
   typedef struct {
-    LogDest log_sink;
-    std::wstring logfile_name;
-    std::wstring app_name;
-    bool show_func_sigs;
-    bool show_line_numbers;
-    bool show_time;
+    LogDest log_sink;           // Where to log to
+    std::wstring logfile_name;  // Name of log file
+    std::wstring app_name;      // Name of app using this library
+    bool show_func_sigs;        // Whether to prepend the function name to log lines
+    bool show_line_numbers;     // Whether to prepend line numbers
+    bool show_time;             // Whether to prepend the UTC time
+    LogLevel full_prefix_level; // What log level to show all prefixes
   } LogInitSettings;
 
   class LogMessage {
@@ -117,5 +123,8 @@ namespace logging {
 
 // Debug logging
 #define DLOG() logging::LogMessage(LOG_DEBUG, true, true, __func__, __LINE__)
+
+// Verbose logging
+#define VLOG() logging::LogMessage(LOG_VERBOSE, true, true, __func__, __LINE__)
 
 #endif // MINI_LOGGER_LOGGING_H_
