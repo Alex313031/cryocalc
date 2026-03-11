@@ -21,14 +21,13 @@ extern bool enable_logging;
 extern bool show_version;
 extern bool show_help;
 
-// Typedefs for accessing system .dll functions through GetProcAddress()
+// For Run file dialog
 #define RFD_NOBROWSE        0x00000001
 #define RFD_NODEFFILE       0x00000002
 #define RFD_USEFULLPATHDIR  0x00000004
 #define RFD_NOSHOWOPEN      0x00000008
 #define RFD_WOW_APP         0x00000010
 #define RFD_NOSEPMEMORY_BOX 0x00000020
-typedef void(WINAPI* GET_NATIVE_SYSTEM_INFO_)(SYSTEM_INFO* lpSystemInfo);
 
 struct CustomSettings {
   bool set_debug_mode;

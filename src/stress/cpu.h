@@ -1,14 +1,20 @@
 #ifndef CRYOCALC_CPU_H_
 #define CRYOCALC_CPU_H_
 
+#include <winternl.h>
+
 #include <atomic>
 
 #include "../framework.h"
 
-typedef LONG (WINAPI* NtQuerySystemInformation_t)(UINT SystemInformationClass,
-                                                  PVOID SystemInformation,
-                                                  ULONG SystemInformationLength,
-                                                  PULONG ReturnLength);
+/* Typedefs for accessing system .dll functions through GetProcAddress() */
+
+typedef void (WINAPI* GetNativeSystemInfo_t)(SYSTEM_INFO* lpSystemInfo);
+
+typedef NTSTATUS (WINAPI* NtQuerySystemInformation_t)(SYSTEM_INFORMATION_CLASS SystemInformationClass,
+                                                      PVOID SystemInformation,
+                                                      ULONG SystemInformationLength,
+                                                      PULONG ReturnLength);
 
 typedef BOOL (WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
                                         LPFILETIME lpKernelTime,

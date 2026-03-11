@@ -13,6 +13,8 @@ struct SysProcPerfInfo {
   ULONG         InterruptCount;
 };
 
+static GetNativeSystemInfo_t pfnGetNativeSystemInfo = nullptr;
+
 std::atomic<bool> start_monitoring{false};
 
 long kCPUMonDelay = 1000L; // Default to 1 second
@@ -49,19 +51,15 @@ static float GetCPUPercentImpl() {
 
   // Log the chosen backend function only once on the first call.
   static bool backend_logged = false;
-  if (!backend_logged && debug_mode) {
-    backend_logged = true;
-    if (pfnGetSystemTimes) {
-      LOG(DEBUG) << L"CPU monitoring: using GetSystemTimes (Windows XP+).";
-    } else {
-      LOG(DEBUG) << L"CPU monitoring: using NtQuerySystemInformation (Windows 2000 fallback).";
-    }
-  }
-
-  if (pfnGetSystemTimes) {
+  static const bool legacy_fallback = IsWinOlderThan(kWinXP);
+  if (pfnGetSystemTimes && !legacy_fallback) {
     FILETIME idle_ft, kernel_ft, user_ft;
     if (!pfnGetSystemTimes(&idle_ft, &kernel_ft, &user_ft)) {
       return 0.0f;
+    }
+    if (!backend_logged && debug_mode) {
+      backend_logged = true;
+      LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
     }
     const ULONGLONG idle   = FileTimeToULL(idle_ft);
     const ULONGLONG kernel = FileTimeToULL(kernel_ft); // includes idle
@@ -99,6 +97,10 @@ static float GetCPUPercentImpl() {
     if (!pfnNtQuery) {
       return 0.0f; // Should never happen
     }
+    if (!backend_logged && debug_mode) {
+      backend_logged = true;
+      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
+    }
 
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
@@ -111,8 +113,9 @@ static float GetCPUPercentImpl() {
     const ULONG num_cpus = static_cast<ULONG>(nCPUs * sizeof(SysProcPerfInfo));
     // SystemProcessorPerformanceInformation (class 0x08) returns one entry
     // per logical CPU.
-    const LONG status = pfnNtQuery(0x08, info.data(),
-                                   num_cpus, &retLen);
+    SYSTEM_INFORMATION_CLASS query = SystemProcessorPerformanceInformation;
+    const NTSTATUS status = pfnNtQuery(query, info.data(),
+                                       num_cpus, &retLen);
     if (status != STATUS_SUCCESS) {
       return 0.0f;
     }
@@ -191,7 +194,7 @@ DWORD GetLogicalProcessorCount() {
   } else {
     // Dynamically get GetNativeSystemInfo
     pfnGetNativeSystemInfo =
-        reinterpret_cast<GET_NATIVE_SYSTEM_INFO_>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
+        reinterpret_cast<GetNativeSystemInfo_t>(GetProcAddress(hKernel32, "GetNativeSystemInfo"));
     // Windows 2000 won't have this function, use GetSystemInfo instead
     if (pfnGetNativeSystemInfo) {
       whichfunc = L"pfnGetNativeSystemInfo";

@@ -6,8 +6,6 @@
 
 unsigned int g_precision_;
 
-static GET_NATIVE_SYSTEM_INFO_ pfnGetNativeSystemInfo = nullptr;
-
 // Declare custom_settings here, to be set later, for all of cryocalc to use
 CustomSettings custom_settings;
 // To be set if we read .ini file correctly

@@ -19,6 +19,9 @@ static bool is_running = false;
 
 static volatile unsigned int rand_seed;
 
+// Whether to force using std::random
+static constexpr bool force_rand_s = false;
+
 void set_run_state(bool on) {
   running = on;
 }
@@ -34,9 +37,8 @@ void set_use_sse2(bool on) {
 static unsigned int GetSeed() {
   unsigned int seed      = 0;
   static const bool isXP = IsAtLeast(kWinXP);
-  static const bool is2K = IsAtLeast(kWin2000);
+  static const bool is2K = IsAtMost(kWin2000);
 
-  static constexpr bool force_rand_s = true;
   if (isXP || force_rand_s) {
     if (is_debug) {
       LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
