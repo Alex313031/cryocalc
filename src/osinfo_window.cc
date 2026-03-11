@@ -51,7 +51,7 @@ bool ShowOsInfo(HWND hWnd) {
   int osInfoX, osInfoY;
   GetRightOfWindow(hMainWindow, &osInfoX, &osInfoY);
   osInfoX = osInfoX + 2; // 2 pixels padding between windows
-  osInfoY = osInfoY + 2;
+  osInfoY = osInfoY + 2; // 2 pixels lower than top of main window
 
   hOsInfoWin = CreateWindowExW(
       WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW, szOSInfoWindowClass, OSINFO_TITLE,
@@ -244,7 +244,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       pMinMaxInfo->ptMinTrackSize.x = 320;
       pMinMaxInfo->ptMinTrackSize.y = 280;
       pMinMaxInfo->ptMaxTrackSize.x = 640;
-      pMinMaxInfo->ptMaxTrackSize.y = 480;
+      pMinMaxInfo->ptMaxTrackSize.y = MAXHEIGHT;
     } break;
     case WM_CLOSE: {
       if (!ResetFocus(hMainWindow, nullptr)) {
