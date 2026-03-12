@@ -106,4 +106,5 @@ void StopMemMon() {
 void PauseMonitoring() {
   SetCPUMonitorState(false);
   SetMemMonitorState(false);
+  // TODO: Progress bar states
 }

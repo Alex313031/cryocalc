@@ -3,6 +3,8 @@
 
 #include "../framework.h"
 
+typedef BOOL (WINAPI* GlobalMemoryStatusEx_t)(MEMORYSTATUSEX*);
+
 // Get total system memory usage
 const float GetMemPercent();
 

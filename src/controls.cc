@@ -416,7 +416,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME | SS_NOTIFY,
                       sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
   const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
-                            static_cast<int>(CPUBAR_WIDTH) / 2;
+                            static_cast<int>(2 * CPUBAR_WIDTH + INTRA_PADDING) / 2;
   const int cpubar_top    = std::max(STATIC_TOP,
                                      STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
                                      static_cast<int>(PROGBAR_WIDTH) / 2);
@@ -427,7 +427,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                             hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + INTRA_PADDING;
   hMEMBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
-                            membar_left + CPUBAR_WIDTH + INTRA_PADDING, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                            membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
@@ -612,7 +612,7 @@ void HandleResize(HWND hWnd) {
                           sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
-                              static_cast<int>(CPUBAR_WIDTH) / 2;
+                              static_cast<int>(2 * CPUBAR_WIDTH + INTRA_PADDING) / 2;
     const int cpubar_top    = std::max(STATIC_TOP,
                                        STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
                                        static_cast<int>(PROGBAR_WIDTH) / 2);
