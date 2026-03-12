@@ -38,17 +38,30 @@ Uses i686-w64-mingw32 toolchain for 32-bit Windows binaries.
 
 ### Main Application (`src/`)
 - **cryocalc.cc/h** - Entry point (`wWinMain`), window registration, main message loop
-- **controls.cc/h** - UI control creation, event handling, dialog management
+- **controls.cc/h** - UI control creation, event handling, dialog management; dispatches to `osinfo_window.cc` for OS Info window
 - **converters.cc/h** - Temperature conversion algorithms in namespaces: `kelvin::`, `celsius::`, `fahrenheit::`, `rankine::`
 - **utils.cc/h** - Command line parsing, numeric validation, precision handling, .ini settings handling
-- **globals.h** - Extern declarations for window handles and global state
+- **ui_utils.cc/h** - UI utility functions: tooltips, window rect helpers (`GetMainWinRect`, `GetDesktopRect`, `GetRightOfWindow`), `GetCacheSize()`, `SetCPUBarPos()`, MessageBox wrappers (`InfoBox`, `WarnBox`, `ErrorBox`), shell applet launcher
+- **painting.cc/h** - Font creation and management (`CreateMainFont`, `GetFont`, `SetFontForControl`, `SetFontAllControls`)
+- **osinfo_window.cc/h** - OS Info child window: window proc (`OsInfoWndProc`), controls init (`InitOsInfoControls`), resize handling (`HandleOsInfoResize`), OS version text output
+- **strings.h** - Localized UI string constants; supports English (`AFX_TARG_ENU`), Filipino (`AFX_TARG_PH`), Russian (`AFX_TARG_RU`), Spanish (`AFX_TARG_ES`), with English fallback
+- **globals.h** - Extern declarations for window handles and global state, including CPU/memory monitor bars (`hCPUBar`, `hMEMBar`), stressor controls (`hProgressBar`, `hThreadsEdit`, `hSSE2Checkbox`, `hCacheSizeCombo`, `hAllocMemButton`)
 - **framework.h** - Precompiled header with Windows and STL includes
 - **constants.h** - Physical constants for conversions, and UI layout metric constants
 - **resource.h/rc** - Windows resources (icons, menus, dialogs, strings), and VERSIONINFO resource, using constants from version.h
 - **version.h** - Version constants, and defines `_WIN32_WINNT=0x0500` to target Windows 2000 at a minimum
 
+### CPU Stressor (`src/stress/`)
+A subsystem for CPU and memory stress testing:
+- **stress.cc/h** - Two stressor modes: `StressCPUVec()` (matrix/vector math targeting L2/L3 cache) and `StressCPUSSE2()` (inline SSE2 SIMD assembly); thread management (`LaunchThreads`, `StopAllThreads`); CPU monitor helpers (`StartCPUMon`, `StopCPUMon`, `PauseCPUMon`)
+- **cpu.cc/h** - CPU usage monitoring via `NtQuerySystemInformation`; `GetCPUPercent()`, `MonitorCPU()`, `GetLogicalProcessorCount()`; uses `GetSystemTimes` on XP+ via `GetProcAddress`
+
 ### Logging Library (`src/logging`)
 A static library that aims to make a small, self contained portable Win32 implementation of Chromium style LOG() macros and functions.
+- **logging.cc/h** - Core `LogMessage` class (lazy: logs on destruction); `LOG()`, `CLOG()` (console only), `FLOG()` (file only), `DLOG()`, `VLOG()` macros; `InitLogging()`/`DeInitLogging()`; log levels: INFO, DEBUG, WARN, ERROR, FATAL, VERBOSE
+- **logging_base.h** - `LogDest` enum and base types; minimal Windows/STL includes
+- **console.cc/h** - Console window support for debug output
+- **file_util.cc/h** - Log file creation and write utilities
 - **check.cc/h** - Provides CHECK() and DCHECK() macros for asserting conditions, and intentionally crashing with a log message if failed
 
 ### OS Info DLL (`osinfo/`)
@@ -61,20 +74,25 @@ A separate DLL providing Windows NT version detection functions (Windows NT 4.0 
 - **version.h** - Version constants for the resource.rc and `DllGetVersion()` in os_info.cc
 
 ### Control Flow
-1. `wWinMain` initializes common controls and loads `osinfo.dll`
+1. `wWinMain` initializes common controls, calls `InitLogging()`, and loads `osinfo.dll`
 2. Command line parsed via `ParseCommandLine()`
 3. Window class registered, main window created
-4. `InitControls()` creates UI elements
-5. `HandleResize()` and `HandleOsInfoResize()` handles resizing of controls
-5. `WindowProc()` handles messages, dispatches to control handlers
-6. Temperature conversions use namespaced functions (e.g., `kelvin::fromCelsius()`)
+4. `InitControls()` creates UI elements (temperature inputs, stressor controls, CPU/mem bars)
+5. `HandleResize()` handles resizing of main window controls
+6. `WindowProc()` handles messages, dispatches to control handlers
+7. OS Info child window has its own `OsInfoWndProc()` and `HandleOsInfoResize()` in `osinfo_window.cc`
+8. Temperature conversions use namespaced functions (e.g., `kelvin::fromCelsius()`)
+9. CPU stressor threads launched via `LaunchThreads()`; `MonitorCPU()` runs on its own thread updating `hCPUBar`
 
 ## Key Patterns
 
 - Unicode throughout (WCHAR, std::wstring, -municode)
 - Windows subsystem version set to 5.00 (Windows 2000 minimum)
 - When needed, functions from osinfo.dll are used to run the correct Win32 function
-  depending on if the host system is Windows 2000, XP, or higher. For example using `IsAtLeast()` in src/controls.cc 
+  depending on if the host system is Windows 2000, XP, or higher. For example using `IsAtLeast()` in src/controls.cc
+- API functions that don't exist on Windows 2000 (e.g. `GetSystemTimes`, `GetNativeSystemInfo`) are loaded at runtime via `GetProcAddress()` with nullptr checks for graceful fallback
 - C++17 standard
 - Global handles declared extern in `globals.h`, defined in respective .cc files
 - Conversion precision configurable via `SetCryoCalcPrecision()`
+- UI strings are compile-time localized via `AFX_TARG_*` preprocessor defines in `strings.h`
+- Logging initialized with `InitLogging()` at startup; use `LOG(INFO)`, `LOG(WARN)`, etc. throughout
