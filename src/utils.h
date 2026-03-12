@@ -2,7 +2,6 @@
 #define CRYOCALC_UTILS_H_
 
 #include <logging.h>
-#include <os_info_dll.h>
 
 #include <cassert>
 
@@ -124,9 +123,6 @@ const std::wstring GetExeDir();
 
 // Opens log file
 bool OpenLogFile(HWND hWnd, const std::wstring& file_path);
-
-// Get default cache multiplier to use, from hCacheSizeCombo
-const size_t GetCacheSize();
 
 // Attaches console to window, only one allowed per process.
 bool AttachConsole();

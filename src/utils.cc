@@ -423,25 +423,6 @@ bool OpenLogFile(HWND hWnd, const std::wstring& file_path) {
   return success;
 }
 
-const size_t GetCacheSize() {
-  size_t cache_size      = 1024u;
-  DWORD dwCacheComboSize = GetWindowTextLength(hCacheSizeCombo);
-  std::wstring cachesz_buff(dwCacheComboSize + 1, L'\0');
-  GetWindowTextW(hCacheSizeCombo, &cachesz_buff[0], dwCacheComboSize + 1);
-  if ((wcscmp(cachesz_buff.c_str(), L"1MB") == 0)) {
-    cache_size = 1024u;
-  } else if ((wcscmp(cachesz_buff.c_str(), L"2MB") == 0)) {
-    cache_size = 2048u;
-  } else if ((wcscmp(cachesz_buff.c_str(), L"3MB") == 0)) {
-    cache_size = 3072u;
-  } else if ((wcscmp(cachesz_buff.c_str(), L"4MB") == 0)) {
-    cache_size = 4096u;
-  } else {
-    LOG(ERROR) << L"Default cache size was used!" << cache_size;
-  }
-  return cache_size;
-}
-
 bool AttachConsole() {
   return logging::AttachConsoleImpl();
 }

@@ -1,5 +1,7 @@
 #include "controls.h"
 
+#include <os_info_dll.h>
+
 #include <chrono>
 
 #include "painting.h"

@@ -2,11 +2,14 @@
 
 #include <emmintrin.h>
 
+#include <logging.h>
+#include <os_info_dll.h>
+
 #include <algorithm>
 #include <cmath>
 #include <random>
 
-#include "../utils.h"
+#include "../ui_utils.h"
 
 std::atomic<bool> running{false};
 

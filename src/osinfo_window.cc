@@ -1,5 +1,7 @@
 #include "osinfo_window.h"
 
+#include <os_info_dll.h>
+
 #include "painting.h"
 #include "ui_utils.h"
 

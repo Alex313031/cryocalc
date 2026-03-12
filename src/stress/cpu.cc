@@ -1,5 +1,7 @@
 #include "cpu.h"
 
+#include <os_info_dll.h>
+
 #include <chrono>
 
 #include "../ui_utils.h"

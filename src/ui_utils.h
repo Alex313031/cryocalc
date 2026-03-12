@@ -42,6 +42,9 @@ void OpenRunDialog(HWND hWnd);
 // Launcher function to open shell applets
 bool RunShellApplet(HWND hWnd, const wchar_t* executable);
 
+// Get default cache multiplier to use, from hCacheSizeCombo
+const size_t GetCacheSize();
+
 // Helper functions for MessageBoxW
 int InfoBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
