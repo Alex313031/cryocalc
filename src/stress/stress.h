@@ -1,5 +1,5 @@
-#ifndef CRYOCALC_STRESS_H_
-#define CRYOCALC_STRESS_H_
+#ifndef CRYOCALC_STRESS_STRESS_H_
+#define CRYOCALC_STRESS_STRESS_H_
 
 #include <atomic>
 
@@ -49,4 +49,4 @@ void StopCPUMon();
 // Helper function to stop CPU Monitoring, but keep CPUBar current position
 void PauseCPUMon();
 
-#endif // CRYOCALC_STRESS_H_
+#endif // CRYOCALC_STRESS_STRESS_H_

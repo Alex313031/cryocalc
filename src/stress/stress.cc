@@ -9,7 +9,7 @@
 #include <cmath>
 #include <random>
 
-#include "../ui_utils.h"
+#include "reporting.h"
 
 std::atomic<bool> running{false};
 
