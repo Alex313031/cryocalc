@@ -2,9 +2,8 @@
 
 #include <os_info_dll.h>
 
-#include <chrono>
-
 #include "painting.h"
+#include "stress/reporting.h"
 #include "ui_utils.h"
 
 // Static labels
@@ -505,7 +504,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
   AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
   AddTooltip(hWnd, hMEMBar, hInst, L"Total RAM Usage");
-  StartCPUMon(500L); // Start CPU Monitoring at end of controls initialization
+  StartMonitoring(500L); // Start system Monitoring at end of controls initialization
 }
 
 void HandleResize(HWND hWnd) {

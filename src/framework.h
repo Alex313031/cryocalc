@@ -31,6 +31,7 @@
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
 
 // C++ STL Headers
+#include <cmath>     // std::round
 #include <algorithm> // std::clamp
 #include <iomanip>   // std::setprecision
 #include <iostream>  // std::cout/std::wcout

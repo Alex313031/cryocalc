@@ -2,8 +2,6 @@
 
 #include <os_info_dll.h>
 
-#include <chrono>
-
 #include "reporting.h"
 
 struct SysProcPerfInfo {

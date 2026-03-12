@@ -4,6 +4,8 @@
 #include <atomic>
 
 #include "cpu.h"
+#include "mem.h"
+#include "reporting.h"
 
 #include "../framework.h"
 
@@ -39,14 +41,5 @@ bool LaunchThreads(const unsigned int num_threads);
 
 // Stops all stressor threads
 void StopAllThreads();
-
-// Helper function to start CPU Monitoring thread
-void StartCPUMon(long initial_interval);
-
-// Helper function to stop CPU Monitoring and CPUBar animation
-void StopCPUMon();
-
-// Helper function to stop CPU Monitoring, but keep CPUBar current position
-void PauseCPUMon();
 
 #endif // CRYOCALC_STRESS_STRESS_H_

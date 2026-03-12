@@ -3,8 +3,6 @@
 
 #include <winternl.h>
 
-#include <atomic>
-
 #include "../framework.h"
 
 /* Typedefs for accessing system .dll functions through GetProcAddress() */
