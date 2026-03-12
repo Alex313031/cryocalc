@@ -44,6 +44,7 @@ HWND hCacheSizeCombo;
 HWND hSSE2Checkbox;
 HWND hAllocMemButton;
 HWND hCPUBar;
+HWND hMEMBar;
 
 // Temp select titles
 static const wchar_t* kBlank          = L"";
@@ -425,6 +426,10 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
                             cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
+  const int membar_left = cpubar_left + CPUBAR_WIDTH + INTRA_PADDING;
+  hMEMBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
+                            membar_left + CPUBAR_WIDTH + INTRA_PADDING, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                            hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -448,7 +453,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   }
   SendMessageW(hCPUBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+  SendMessageW(hMEMBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hMEMBar, PBM_SETPOS, 0, 0);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -497,6 +504,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
   AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
+  AddTooltip(hWnd, hMEMBar, hInst, L"Total RAM Usage");
   StartCPUMon(500L); // Start CPU Monitoring at end of controls initialization
 }
 
@@ -536,7 +544,7 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(18); // Must equal number of windows to redraw
+  HDWP hdwp = BeginDeferWindowPos(19); // Must equal number of windows to redraw
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
@@ -613,6 +621,10 @@ void HandleResize(HWND hWnd) {
                                          0, static_cast<int>(PROGBAR_WIDTH));
     hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
                           cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int membar_left = cpubar_left + CPUBAR_WIDTH + INTRA_PADDING;
+    hdwp = DeferWindowPos(hdwp, hMEMBar, nullptr,
+                          membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {

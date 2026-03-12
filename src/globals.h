@@ -18,6 +18,9 @@ extern WCHAR szWindowClass[MAX_LOADSTRING];
 // Module handle to osinfo.dll
 extern HMODULE hOsInfoDll;
 
+// Handle to cryocalc.ini file
+extern HANDLE g_ini_file;
+
 // Edit control handles
 extern HWND hInputEdit;
 extern HWND hTempSelectCombo;
@@ -27,57 +30,41 @@ extern HWND hKelvinEdit;
 extern HWND hFahrenheitEdit;
 extern HWND hRankineEdit;
 
-// Window handle to OS Info Window
-extern HWND hOsInfoWin;
+extern HWND hOsInfoWin; // Window handle to OS Info Window
 
-// Static text edit control for logging os info.
-extern HWND hOsInfoTextOut;
+extern HWND hOsInfoTextOut; // Static text edit control for logging os info.
 
-// Convert button handle
-extern HWND hConvButton;
+extern HWND hConvButton; // Convert button handle
 
-// Clear button handle
-extern HWND hClearButton;
+extern HWND hClearButton; // Clear button handle
 
-// Input box for CPU stressor for number of threads
-extern HWND hThreadsEdit;
+extern HWND hThreadsEdit; // Input box for CPU stressor for number of threads
 
-// Progress bar for CPU stressor
-extern HWND hProgressBar;
+extern HWND hProgressBar; // Progress bar for CPU stressor
 
-// Vertical progress bar for CPU usage
-extern HWND hCPUBar;
+extern HWND hCPUBar; // Vertical progress bar for CPU usage
 
-// Combobox to select L2/L3 Cache multiplier
-extern HWND hCacheSizeCombo;
+extern HWND hMEMBar; // Vertical progress bar for RAM usage
 
-// Checkbox on whether to use the SSE2 version of the stressor.
-extern HWND hSSE2Checkbox;
+extern HWND hCacheSizeCombo; // Combobox to select L2/L3 Cache multiplier
 
-// Button to allocate huge amounts of memory for RAM stressing.
-extern HWND hAllocMemButton;
+extern HWND hSSE2Checkbox; // Checkbox on whether to use the SSE2 version of the stressor.
+
+extern HWND hAllocMemButton; // Button to allocate huge amounts of memory for RAM stressing.
 
 // Start button handle for CPU stresser
 extern HWND hStartStresButton; // Intentionally called stres to make fun of
                                // winternals program called CPUSTRES.exe with
                                // product name of "Cpustrese.exe". LOL
 
-// Stop button handle for CPU stresser
-extern HWND hStopStresButton;
+extern HWND hStopStresButton; // Stop button handle for CPU stresser
 
-// About button handle
-extern HWND hAboutButton;
+extern HWND hAboutButton; // About button handle
 
-// Os Info button handle
-extern HWND hOsInfoButton;
+extern HWND hOsInfoButton; // Os Info button handle
 
-// Our status bar
-extern HWND hStatusBar;
+extern HWND hStatusBar; // Our status bar
 
-// Gets our global hInst for the main Window
-extern HINSTANCE GetGlobalHinst();
-
-// Handle to cryocalc.ini file
-extern HANDLE g_ini_file;
+extern HINSTANCE GetGlobalHinst(); // Gets our global hInst for the main Window
 
 #endif // CRYOCALC_GLOBALS_H_
