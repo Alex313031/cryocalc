@@ -13,9 +13,9 @@
 MinVersion=5.0
 AppName={#AppName}
 AppVersion={#AppVer}
-AppVerName={#AppName} v.{#AppVer}
+AppVerName={#AppName} v{#AppVer}
 OutputBaseFilename={#ExeName}_{#AppVer}_setup
-UninstallDisplayName={#AppName} v.{#AppVer}
+UninstallDisplayName={#AppName} {#AppVer}
 DefaultDirName={pf}\{#AppName}
 DefaultGroupName={#AppName}
 UninstallDisplayIcon={app}\{#ExeName}.exe
