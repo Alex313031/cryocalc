@@ -410,16 +410,16 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                                   kButtonCol3Left, kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT,
                                   hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
   const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
-  const unsigned int sys_monitor_height = kFrameBottom - (STATIC_BOTTOM * 2);
+  const unsigned int sys_monitor_height = kFrameBottom - INTRA_PADDING - STATIC_BOTTOM;
   const unsigned int sys_monitor_width = this_width - sys_monitor_left - (PADDING_X * 3u);
   hSysMonitorFrame =
       CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME | SS_NOTIFY,
                       sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
   const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
                             static_cast<int>(2 * CPUBAR_WIDTH + (INTRA_PADDING * 2)) / 2;
-  const int cpubar_top    = std::max(STATIC_TOP,
+  const int cpubar_top    = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT),
                                      STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
-                                     static_cast<int>(PROGBAR_WIDTH) / 2);
+                                     static_cast<int>(PROGBAR_WIDTH) / 2) - (INTRA_PADDING * 2);
   const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
                                        0, static_cast<int>(PROGBAR_WIDTH));
   hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
@@ -606,16 +606,16 @@ void HandleResize(HWND hWnd) {
     GetClientRect(hFrameOutline, &frameRect);
     const UINT frame_height = frameRect.bottom;
     const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
-    const unsigned int sys_monitor_height = frame_height - (STATIC_BOTTOM * 2);
+    const unsigned int sys_monitor_height = frame_height - INTRA_PADDING - STATIC_BOTTOM;
     const unsigned int sys_monitor_width = width - sys_monitor_left - (PADDING_X * 3u);
     hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
                           sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
                               static_cast<int>(2 * CPUBAR_WIDTH + (INTRA_PADDING * 2)) / 2;
-    const int cpubar_top    = std::max(STATIC_TOP,
+    const int cpubar_top    = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT),
                                        STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
-                                       static_cast<int>(PROGBAR_WIDTH) / 2);
+                                       static_cast<int>(PROGBAR_WIDTH) / 2) - (INTRA_PADDING * 2);
     const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
                                          0, static_cast<int>(PROGBAR_WIDTH));
     hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
