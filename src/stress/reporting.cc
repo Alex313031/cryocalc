@@ -22,6 +22,8 @@ void MonitorCPU() {
   const std::chrono::milliseconds delay = GetDelay();
   while (start_cpu_mon) {
     float current_cpu_percent = GetCPUPercent(); // Get validated CPU percent
+    const std::wstring out_percent = std::to_wstring(static_cast<int>(std::round(current_cpu_percent))) + L"%";
+    SetWindowTextW(hCPUPercent, out_percent.c_str());
     SetCPUBarPos(current_cpu_percent); // Update CPU progress bar to nearest 1 percent
     std::this_thread::sleep_for(delay); // Pause between updates.
   }
@@ -34,6 +36,8 @@ void MonitorMem() {
   const std::chrono::milliseconds delay = GetDelay();
   while (start_mem_mon) {
     float current_mem_percent = GetMemPercent(); // Get validated RAM percent
+    const std::wstring out_percent = std::to_wstring(static_cast<int>(std::round(current_mem_percent))) + L"%";
+    SetWindowTextW(hMemPercent, out_percent.c_str());
     SetMEMBarPos(current_mem_percent); // Update MEM progress bar to nearest 1 percent
     std::this_thread::sleep_for(delay);
   }
