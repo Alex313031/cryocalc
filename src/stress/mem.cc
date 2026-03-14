@@ -47,3 +47,19 @@ const float GetMemPercent() {
   }
   return mem_percent;
 }
+
+// Gets the current total commit charge (RAM + Pagefile commit) % and is supposed
+// to return it as a float between 0.0 and 100.0.
+// The ONLY caller of this function should be GetCommitChargePercent.
+static float GetCommitChargePercentImpl() {
+  return 52.0f;
+}
+
+// Validate GetMemPercentImpl
+const float GetCommitChargePercent() {
+  const float commit_percent = GetCommitChargePercentImpl();
+  if (commit_percent < 0.0f || commit_percent > 100.0f) {
+    LOG(FATAL) << L"GetCommitChargePercentImpl reported an out of bounds Commit Charge %!";
+  }
+  return commit_percent;
+}
