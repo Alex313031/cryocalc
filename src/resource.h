@@ -56,10 +56,6 @@
 #define IDC_CLOSE_OSINFO            311
 #define IDC_CLOSE_OSINFO_BUTTON     312
 #define IDC_PROGRESS                313
-#define IDC_CPUBAR                  314
-#define IDC_CPUPERC                 315
-#define IDC_MEMBAR                  316
-#define IDC_MEMPERC                 317
 
 // User input controls
 #define IDC_INPUT                   320
@@ -87,8 +83,13 @@
 #define IDC_FAHRENHEIT              342
 #define IDC_RANKINE                 343
 
+#define IDC_CPUBAR                  350
+#define IDC_MEMBAR                  351
+#define IDC_COMMITBAR               352
+#define IDC_IOBAR                   353
+
 // Os Info Logging Output Window
-#define IDC_OSINFO_OUT              350
+#define IDC_OSINFO_OUT              399
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC

@@ -46,6 +46,10 @@ HWND hCPUBar;
 HWND hCPUPercent;
 HWND hMEMBar;
 HWND hMemPercent;
+HWND hCommitBar;
+HWND hCommitPercent;
+HWND hIOBar;
+HWND hIOPercent;
 
 // Temp select titles
 static const wchar_t* kBlank          = L"";
@@ -417,8 +421,8 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hSysMonitorFrame =
       CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME | SS_NOTIFY,
                       sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
-  const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
-                            static_cast<int>(2 * CPUBAR_WIDTH + (INTRA_PADDING * 2)) / 2;
+  const int cpubar_left   = static_cast<int>(sys_monitor_left + INTRA_PADDING + (sys_monitor_width / 2)) -
+                            static_cast<int>(4 * (CPUBAR_WIDTH + (INTRA_PADDING * 2))) / 2;
   const int cpubar_top    = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT),
                                      STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
                                      static_cast<int>(PROGBAR_WIDTH) / 2) - (INTRA_PADDING * 2);
@@ -431,17 +435,33 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   const int cpu_perc_left = cpubar_left - INTRA_PADDING;
   const int cpu_perc_width = CPUBAR_WIDTH + (INTRA_PADDING * 2);
   const int cpu_perc_height = EDITCONTROL_HEIGHT - INTRA_PADDING;
-  hCPUPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_LEFT | ES_READONLY | SS_NOTIFY,
+  hCPUPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_CENTER | ES_READONLY,
                                 cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                                hWnd, (HMENU)IDC_CPUPERC, hInst, nullptr);
+                                hWnd, nullptr, hInst, nullptr);
   const int mem_perc_left = cpu_perc_left + cpu_perc_width;
-  hMemPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_LEFT | ES_READONLY | SS_NOTIFY,
+  hMemPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_CENTER | ES_READONLY,
                                 mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                                hWnd, (HMENU)IDC_CPUPERC, hInst, nullptr);
+                                hWnd, nullptr, hInst, nullptr);
+  const int commit_perc_left = mem_perc_left + cpu_perc_width;
+  hCommitPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_CENTER | ES_READONLY,
+                                   commit_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                                   hWnd, nullptr, hInst, nullptr);
+  const int io_perc_left = commit_perc_left + cpu_perc_width;
+  hIOPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_CENTER | ES_READONLY,
+                               io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                               hWnd, nullptr, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
   hMEMBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
                             membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
+  const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
+  hCommitBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
+                               commitbar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                               hWnd, (HMENU)IDC_COMMITBAR, hInst, nullptr);
+  const int iobar_left = commitbar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
+  hIOBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
+                           iobar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                           hWnd, (HMENU)IDC_IOBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -466,8 +486,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   }
   SendMessageW(hCPUBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hMEMBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+  SendMessageW(hCommitBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+  SendMessageW(hIOBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
   SendMessageW(hMEMBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hCommitBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hIOBar, PBM_SETPOS, 0, 0);
   // Make output edit controls read only.
   SendMessageW(hCelsiusEdit, EM_SETREADONLY, TRUE, 0);
   SendMessageW(hKelvinEdit, EM_SETREADONLY, TRUE, 0);
@@ -519,6 +543,10 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hCPUPercent, hInst, L"CPU Usage Percent");
   AddTooltip(hWnd, hMEMBar, hInst, L"Total RAM Usage");
   AddTooltip(hWnd, hMemPercent, hInst, L"RAM Usage Percent");
+  AddTooltip(hWnd, hCommitBar, hInst, L"Commit Charge (RAM + Pagefile Usage)");
+  AddTooltip(hWnd, hCommitPercent, hInst, L"Commit Charge % Usage");
+  AddTooltip(hWnd, hIOBar, hInst, L"Disk I/O Usage");
+  AddTooltip(hWnd, hIOPercent, hInst, L"Disk I/O Usage %");
   StartMonitoring(500L); // Start system Monitoring at end of controls initialization
 }
 
@@ -558,7 +586,7 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(21); // Must equal number of windows to redraw
+  HDWP hdwp = BeginDeferWindowPos(25); // Must equal number of windows to redraw
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
@@ -626,8 +654,8 @@ void HandleResize(HWND hWnd) {
     hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
                           sys_monitor_left, STATIC_TOP, sys_monitor_width, sys_monitor_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-    const int cpubar_left   = static_cast<int>(sys_monitor_left + sys_monitor_width / 2u) -
-                              static_cast<int>(2 * CPUBAR_WIDTH + (INTRA_PADDING * 2)) / 2;
+    const int cpubar_left   = static_cast<int>(sys_monitor_left + INTRA_PADDING + (sys_monitor_width / 2)) -
+                              static_cast<int>(4 * (CPUBAR_WIDTH + (INTRA_PADDING * 2))) / 2;
     const int cpubar_top    = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT),
                                        STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
                                        static_cast<int>(PROGBAR_WIDTH) / 2) - (INTRA_PADDING * 2);
@@ -647,9 +675,25 @@ void HandleResize(HWND hWnd) {
     hdwp = DeferWindowPos(hdwp, hMemPercent, nullptr,
                           mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
+    const int commit_perc_left = mem_perc_left + cpu_perc_width;
+    hdwp = DeferWindowPos(hdwp, hCommitPercent, nullptr,
+                          commit_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int io_perc_left = commit_perc_left + cpu_perc_width;
+    hdwp = DeferWindowPos(hdwp, hIOPercent, nullptr,
+                          io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
     const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
     hdwp = DeferWindowPos(hdwp, hMEMBar, nullptr,
                           membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
+    hdwp = DeferWindowPos(hdwp, hCommitBar, nullptr,
+                          commitbar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int iobar_left = commitbar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
+    hdwp = DeferWindowPos(hdwp, hIOBar, nullptr,
+                          iobar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {

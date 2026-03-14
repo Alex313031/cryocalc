@@ -50,6 +50,14 @@ extern HWND hMEMBar; // Vertical progress bar for RAM usage
 
 extern HWND hMemPercent; // Edit control showing RAM percentage usage
 
+extern HWND hIOBar; // Vertical progress bar disk usage percent
+
+extern HWND hIOPercent; // Edit control showing total disk usage %
+
+extern HWND hCommitBar; // Vertical progress bar showing total RAM + Pagefile allocated usage (commit charge)
+
+extern HWND hCommitPercent; // Edit control showing total RAM + Pagefile allocated percentage usage (commit charge)
+
 extern HWND hCacheSizeCombo; // Combobox to select L2/L3 Cache multiplier
 
 extern HWND hSSE2Checkbox; // Checkbox on whether to use the SSE2 version of the stressor.

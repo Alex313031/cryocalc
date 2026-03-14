@@ -43,13 +43,13 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH = 500u; // Default width of main window
+constexpr unsigned int MAINWIDTH = 520u; // Default width of main window
 constexpr unsigned int MAINHEIGHT = 400u; // Default height of main window
 
-constexpr unsigned int MINWIDTH  = 440u; // Min. width of main window
+constexpr unsigned int MINWIDTH  = 460u; // Min. width of main window
 constexpr unsigned int MINHEIGHT  = 360u; // Min. height of main window
 
-constexpr unsigned int MAXWIDTH  = 840u; // Max. width of main window
+constexpr unsigned int MAXWIDTH  = 860u; // Max. width of main window
 constexpr unsigned int MAXHEIGHT  = 680u; // Max. height of main window
 
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
