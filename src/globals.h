@@ -44,7 +44,11 @@ extern HWND hProgressBar; // Progress bar for CPU stressor
 
 extern HWND hCPUBar; // Vertical progress bar for CPU usage
 
+extern HWND hCPUPercent; // Edit control showing CPU percentage usage
+
 extern HWND hMEMBar; // Vertical progress bar for RAM usage
+
+extern HWND hMemPercent; // Edit control showing RAM percentage usage
 
 extern HWND hCacheSizeCombo; // Combobox to select L2/L3 Cache multiplier
 

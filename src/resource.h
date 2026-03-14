@@ -57,7 +57,9 @@
 #define IDC_CLOSE_OSINFO_BUTTON     312
 #define IDC_PROGRESS                313
 #define IDC_CPUBAR                  314
-#define IDC_MEMBAR                  315
+#define IDC_CPUPERC                 315
+#define IDC_MEMBAR                  316
+#define IDC_MEMPERC                 317
 
 // User input controls
 #define IDC_INPUT                   320

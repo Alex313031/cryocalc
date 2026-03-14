@@ -43,7 +43,9 @@ HWND hCacheSizeCombo;
 HWND hSSE2Checkbox;
 HWND hAllocMemButton;
 HWND hCPUBar;
+HWND hCPUPercent;
 HWND hMEMBar;
+HWND hMemPercent;
 
 // Temp select titles
 static const wchar_t* kBlank          = L"";
@@ -425,6 +427,17 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
                             cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
+  const int cpu_perc_top = cpubar_top + cpubar_height + INTRA_PADDING;
+  const int cpu_perc_left = cpubar_left - INTRA_PADDING;
+  const int cpu_perc_width = CPUBAR_WIDTH + (INTRA_PADDING * 2);
+  const int cpu_perc_height = EDITCONTROL_HEIGHT - INTRA_PADDING;
+  hCPUPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_LEFT | ES_READONLY | SS_NOTIFY,
+                                cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                                hWnd, (HMENU)IDC_CPUPERC, hInst, nullptr);
+  const int mem_perc_left = cpu_perc_left + cpu_perc_width;
+  hMemPercent = CreateWindowExW(0, WC_EDIT, L"NaN", dwCHILD | ES_LEFT | ES_READONLY | SS_NOTIFY,
+                                mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                                hWnd, (HMENU)IDC_CPUPERC, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
   hMEMBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL | SS_NOTIFY,
                             membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
@@ -503,7 +516,9 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hAboutButton, hInst, L"Show About dialog");
   AddTooltip(hWnd, hProgressBar, hInst, L"Threads computation status");
   AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
+  AddTooltip(hWnd, hCPUPercent, hInst, L"CPU Usage Percent");
   AddTooltip(hWnd, hMEMBar, hInst, L"Total RAM Usage");
+  AddTooltip(hWnd, hMemPercent, hInst, L"RAM Usage Percent");
   StartMonitoring(500L); // Start system Monitoring at end of controls initialization
 }
 
@@ -543,7 +558,7 @@ void HandleResize(HWND hWnd) {
   const unsigned int kFrameWidth        = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
-  HDWP hdwp = BeginDeferWindowPos(19); // Must equal number of windows to redraw
+  HDWP hdwp = BeginDeferWindowPos(21); // Must equal number of windows to redraw
   if (hdwp) {
     hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
                           PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
@@ -620,6 +635,17 @@ void HandleResize(HWND hWnd) {
                                          0, static_cast<int>(PROGBAR_WIDTH));
     hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
                           cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int cpu_perc_top = cpubar_top + cpubar_height + INTRA_PADDING;
+    const int cpu_perc_left = cpubar_left - INTRA_PADDING;
+    const int cpu_perc_width = CPUBAR_WIDTH + (INTRA_PADDING * 2);
+    const int cpu_perc_height = EDITCONTROL_HEIGHT - INTRA_PADDING;
+    hdwp = DeferWindowPos(hdwp, hCPUPercent, nullptr,
+                          cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int mem_perc_left = cpu_perc_left + cpu_perc_width;
+    hdwp = DeferWindowPos(hdwp, hMemPercent, nullptr,
+                          mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING * 2);
     hdwp = DeferWindowPos(hdwp, hMEMBar, nullptr,
