@@ -113,6 +113,7 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");
   AddTooltip(hWnd, hRunAppButton, hInst, L"Open \"Run\" Dialog");
   AddTooltip(hWnd, hCloseOSInfoButton, hInst, L"Close this OS Info Utilities Window");
+  AddTooltip(hWnd, hOsInfoStatusBar, hInst, L"Raw Windows NT version, reported from CryoCalc's osinfo.dll");
   OutputOsInfo(hWnd);
 }
 

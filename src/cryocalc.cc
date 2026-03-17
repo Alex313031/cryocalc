@@ -393,8 +393,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       if (set_color) {
         SetBkColor(hdc, bgColor);
         return reinterpret_cast<LRESULT>(hBrushToUse);
-      } else {
-        return reinterpret_cast<LRESULT>(hBrushDefault);
       }
     } break;
     // Handle resize events

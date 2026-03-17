@@ -43,16 +43,17 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH = 520u; // Default width of main window
-constexpr unsigned int MAINHEIGHT = 400u; // Default height of main window
+constexpr unsigned int MAINWIDTH = 528u; // Default width of main window
+constexpr unsigned int MAINHEIGHT = 420u; // Default height of main window
 
-constexpr unsigned int MINWIDTH  = 460u; // Min. width of main window
-constexpr unsigned int MINHEIGHT  = 360u; // Min. height of main window
+constexpr unsigned int MINWIDTH  = 480u; // Min. width of main window
+constexpr unsigned int MINHEIGHT  = 384u; // Min. height of main window
 
-constexpr unsigned int MAXWIDTH  = 860u; // Max. width of main window
+constexpr unsigned int MAXWIDTH  = 868u; // Max. width of main window
 constexpr unsigned int MAXHEIGHT  = 680u; // Max. height of main window
 
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
+constexpr int SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels
 constexpr unsigned int EDITCONTROL_HEIGHT = STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
@@ -78,7 +79,9 @@ constexpr UINT BOTTOM_AREA   = MAINHEIGHT / 3u; // Minimum height of bottom butt
 // Progress bar metrics
 constexpr UINT PROGBAR_WIDTH  = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
 constexpr UINT PROGBAR_HEIGHT = STATICLABEL_HEIGHT;
-constexpr UINT CPUBAR_WIDTH   = PROGBAR_HEIGHT - PADDING_X;
+// Invert values for vertical progress bars (i.e. cpu bars)
+constexpr UINT CPUBAR_HEIGHT  = PROGBAR_WIDTH;
+constexpr UINT CPUBAR_WIDTH   = PROGBAR_HEIGHT;
 // clang-format on
 
 // Minimum/Maximum number of threads for the CPU stressor.
