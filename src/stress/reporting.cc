@@ -79,6 +79,12 @@ void SetCPUBarPos(float cpu_percent) {
     return;
   }
   DCHECK(hCPUBar);
+  static float last_percent = 0.0f;
+  // If less than ~1%, don't bother with bar update.
+  if (std::abs(cpu_percent - last_percent) <= 0.9f) {
+    return;
+  }
+  last_percent = cpu_percent;
   const int cpubar_position = static_cast<int>(std::round(cpu_percent));
   SendMessageW(hCPUBar, PBM_SETPOS, static_cast<WPARAM>(cpubar_position), 0);
 }
@@ -89,6 +95,11 @@ void SetMEMBarPos(float mem_percent) {
     return;
   }
   DCHECK(hMEMBar);
+  static float last_percent = 0.0f;
+  if (std::abs(mem_percent - last_percent) <= 0.9f) {
+    return;
+  }
+  last_percent = mem_percent;
   const int membar_position = static_cast<int>(std::round(mem_percent));
   SendMessageW(hMEMBar, PBM_SETPOS, static_cast<WPARAM>(membar_position), 0);
 }
@@ -99,6 +110,11 @@ void SetCommitBarPos(float commit_percent) {
     return;
   }
   DCHECK(hCommitBar);
+  static float last_percent = 0.0f;
+  if (std::abs(commit_percent - last_percent) <= 0.9f) {
+    return;
+  }
+  last_percent = commit_percent;
   const int commitbar_position = static_cast<int>(std::round(commit_percent));
   SendMessageW(hCommitBar, PBM_SETPOS, static_cast<WPARAM>(commitbar_position), 0);
 }
@@ -109,6 +125,11 @@ void SetIOBarPos(float io_percent) {
     return;
   }
   DCHECK(hIOBar);
+  static float last_percent = 0.0f;
+  if (std::abs(io_percent - last_percent) <= 0.9f) {
+    return;
+  }
+  last_percent = io_percent;
   const int iobar_position = static_cast<int>(std::round(io_percent));
   SendMessageW(hIOBar, PBM_SETPOS, static_cast<WPARAM>(iobar_position), 0);
 }
