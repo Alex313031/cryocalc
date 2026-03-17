@@ -16,8 +16,5 @@ cpp_std = "17"
 # Whether to enable common controls
 use_common_controls = true
 
-# Whether to default to compiling as a console app or GUI app
-console_subsystem = false
-
 # Whether to use -Wl,--large-address-aware which is same as MSVC /LARGEADDRESSAWARE
 large_address_aware = true
