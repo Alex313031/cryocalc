@@ -1,4 +1,4 @@
-# Copyright 2025 Alex313031
+# Copyright 2026 Alex313031
 
 group("cryocalc_all") {
   public_deps = [
@@ -9,9 +9,7 @@ group("cryocalc_all") {
 }
 
 executable("cryocalc") {
-  configs -= [ "//build/config/win:console_subsystem" ]
   configs += [
-    "//build/config/win:windowed_subsystem",
     ":cryocalc_config",
     "src/logging:mini_logger_config",
   ]

@@ -12,7 +12,8 @@
 *.ts text eol=lf
 
 /assets/*.txt eol=crlf
-/cryocalc.iss eol=crlf
+*.iss eol=crlf
+*.dlg eol=crlf
 
 # .chm files
 *.chm text eol=crlf
