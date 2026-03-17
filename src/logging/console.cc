@@ -78,7 +78,12 @@ bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
       return false;
     }
   } else {
+#if _WIN32_WINNT < 0x0500
+    // Windows NT 4 doesn't have ATTACH_PARENT_PROCESS
+    if (!pAttachConsole((DWORD)-1)) {
+#else
     if (!pAttachConsole(ATTACH_PARENT_PROCESS)) {
+#endif
       unsigned int result = GetLastError();
       // Was probably already attached.
       if (result == ERROR_ACCESS_DENIED) {

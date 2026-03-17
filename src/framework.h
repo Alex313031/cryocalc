@@ -24,6 +24,7 @@
 #include <ntstatus.h> // Full NTSTATUS codes (e.g. STATUS_SUCCESS)
 
 #include <commctrl.h> // Common controls header
+#include <commdlg.h> // Common dialogs header
 #include <mmsystem.h> // For playing sounds
 #include <shlwapi.h>  // For DLL functions
 
