@@ -57,15 +57,15 @@ constexpr int SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels
 constexpr unsigned int EDITCONTROL_HEIGHT = STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
-constexpr UINT PADDING_X     = 4u;             // Min. pixels to pad all content on the left and right
-constexpr UINT PADDING_Y     = 4u;             // Min. pixels to pad all content on the top and bottom
-constexpr UINT INTRA_PADDING = 4u;             // Value in pixels of intra-item padding
-constexpr UINT END_PADDING   = PADDING_Y * 2u; // Min. pixels to pad all content at end diagonally
-constexpr INT STATIC_TOP     = 12;             // Min. pixels to pad all content from top
-constexpr INT STATIC_LEFT    = 8;              // How many pixels to pad left side before labels
-constexpr INT STATIC_RIGHT   = 8;              // How many pixels to pad right side after labels
-constexpr INT STATIC_BOTTOM  = 12;             // How many pixels to pad bottom
-constexpr INT ADJ_WINDOW_PADDING = 2;          // How many pixels to pad between adjacent parent windows
+constexpr UINT PADDING_X     = 4u; // Min. pixels to pad all content on the left and right
+constexpr UINT PADDING_Y     = 4u; // Min. pixels to pad all content on the top and bottom
+constexpr UINT INTRA_PADDING = 4u; // Value in pixels of intra-item padding
+constexpr UINT END_PADDING   = 8u; // Min. pixels to pad all content at end diagonally
+constexpr INT STATIC_TOP     = 12; // Min. pixels to pad all content from top
+constexpr INT STATIC_LEFT    = 8;  // How many pixels to pad left side before labels
+constexpr INT STATIC_RIGHT   = 8;  // How many pixels to pad right side after labels
+constexpr INT STATIC_BOTTOM  = 12; // How many pixels to pad bottom
+constexpr INT ADJ_WINDOW_PADDING = 2; // How many pixels to pad between adjacent parent windows
 
 // Control layout metrics
 constexpr UINT LABEL_WIDTH   = 80u;             // Width in pixels of a static label
@@ -81,7 +81,7 @@ constexpr UINT PROGBAR_WIDTH  = LABEL_WIDTH + (EDIT_WIDTH / 2u) + PADDING_X;
 constexpr UINT PROGBAR_HEIGHT = STATICLABEL_HEIGHT;
 // Invert values for vertical progress bars (i.e. cpu bars)
 constexpr UINT CPUBAR_HEIGHT  = PROGBAR_WIDTH;
-constexpr UINT CPUBAR_WIDTH   = PROGBAR_HEIGHT;
+constexpr UINT CPUBAR_WIDTH   = PROGBAR_HEIGHT + 4;
 // clang-format on
 
 // Minimum/Maximum number of threads for the CPU stressor.

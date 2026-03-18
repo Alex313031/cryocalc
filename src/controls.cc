@@ -271,8 +271,6 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   static RECT clientRect = GetMainClientRect();
   const UINT this_width  = clientRect.right;
   const UINT this_height = clientRect.bottom;
-  int padding            = PADDING_X * 2;          // Padding on left and right
-  const int x_padding    = -(PADDING_X + padding); // Padding already applied to left side + padding
   const unsigned int kFrameWidth  = this_width - END_PADDING;
   const unsigned int kFrameBottom = GetYOffset(this_height, 0, 0.6f) - STATIC_BOTTOM;
   const unsigned int kLabelYPad =
