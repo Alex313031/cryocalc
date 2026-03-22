@@ -128,7 +128,7 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
-  StopMonitoring(); // Stop CPU/RAM monitoring
+  StopMonitoring(); // Stop CPU/RAM monitoring and close any monitor windows
   logging::DeInitLogging(GetGlobalHinst()); // Can't log anything more after this
   DestroyWindow(hWnd); // Send WM_DESTROY message to close main window.
 }
@@ -704,4 +704,19 @@ DWORD GetCommCtrlVersion() {
     FreeLibrary(hComCtl32Dll);
   }
   return dwVersion;
+}
+
+bool IsRunningOnWine() {
+  HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+  if (!ntdll) {
+    return false;
+  }
+  const char* (CDECL *pwine_get_version)(void);
+  pwine_get_version = reinterpret_cast<const char* (CDECL *)(void)>(GetProcAddress(ntdll, "wine_get_version"));
+  if (!pwine_get_version) {
+    return false;
+  } else {
+    LOG(INFO) << L"Running on WINE " << pwine_get_version();
+    return true;
+  }
 }

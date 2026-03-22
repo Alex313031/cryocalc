@@ -23,6 +23,8 @@ executable("cryocalc") {
     "src/cryocalc.h",
     "src/framework.h",
     "src/globals.h",
+    "src/monitor_window.h",
+    "src/monitor_window.cc",
     "src/osinfo_window.h",
     "src/osinfo_window.cc",
     "src/painting.h",

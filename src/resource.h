@@ -10,13 +10,16 @@
 #define IDI_CRYOCALC                101
 #define IDI_SMALL                   102
 #define IDI_WINFLAG                 103
+#define IDI_WPERF                   104
+
+// Bitmaps
 
 // Main application resource
-#define IDC_CRYOCALC                104
+#define IDC_CRYOCALC                105
 
 // Dialogs
-#define IDD_ABOUT_DIALOG            105
-#define IDD_ABOUTBOX                106
+#define IDD_ABOUT_DIALOG            106
+#define IDD_ABOUTBOX                107
 
 // Menu items
 #define IDM_ABOUT                   200
@@ -36,6 +39,7 @@
 #define IDM_CLEAR_LOG               214
 #define IDM_TEST_LOG                215
 #define IDM_OPEN_LOG                216
+// TODO
 #define IDM_SPEED_LOW               217
 #define IDM_SPEED_MED               218
 #define IDM_SPEED_HIGH              219
@@ -89,7 +93,12 @@
 #define IDC_IOBAR                   353
 
 // Os Info Logging Output Window
-#define IDC_OSINFO_OUT              399
+#define IDC_OSINFO_OUT              380
+
+// Monitor Window
+#define IDC_WPERF                   390
+#define IDM_CLOSE_MON               391
+#define IDM_ABOUT_MON               392
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC
@@ -101,3 +110,4 @@
 #define APP_NAME                 L"CryoCalc"            // Name of the App
 #define CRYOCALC_MAIN_WNDCLASS   L"CryoCalcClass"       // Our main Window Class unique name
 #define CRYOCALC_OSINFO_WNDCLASS L"CryoCalcOsInfoClass" // OS Info Window Class
+#define WPERF_MAIN_WNDCLASS      L"MonitorWindowClass"  // System monitor window class

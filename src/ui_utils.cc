@@ -9,6 +9,8 @@ RECT kMainWinRect;
 
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
+static bool _about_handled = false;
+
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText) {
   if (!hWndParent || !hWndControl || !tooltipText) {
     return nullptr;
@@ -111,8 +113,6 @@ void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
     // Position at the right edge of the main window, aligned with its top
     *outX = thisRect.right;
     *outY = thisRect.top;
-    LOG(DEBUG) << L"thisRect.right = " << thisRect.right << L" \n"
-               << L"thisRect.top = " << thisRect.top << L" ";
   } else {
     *outX = kDefaultX;
     *outY = kDefaultY;
@@ -257,4 +257,62 @@ int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message) 
     hWndTmp = hWnd;
   }
   return MessageBoxW(hWndTmp, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+}
+
+void SetAboutHandled(bool handled) {
+  _about_handled = handled;
+}
+
+bool GetAboutHandledState() {
+  return _about_handled;
+}
+
+bool ShowAboutDialog(HWND hWnd) {
+  const HINSTANCE gHinst = GetGlobalHinst();
+  // Show "About" dialog box
+  PlaySoundW(L"SystemNotification", nullptr, SND_ASYNC);
+  DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+  bool handled_dialog = GetAboutHandledState();
+  if (handled_dialog) {
+    LOG(INFO) << L"Showed about dialog.";
+  } else {
+    LOG(ERROR) << L"About dialog failed!";
+  }
+  return handled_dialog;
+}
+
+INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+  UNREFERENCED_PARAMETER(lParam);
+
+  bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
+  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
+  switch (message) {
+    case WM_INITDIALOG: {
+      // Set icon in titlebar of about dialog
+      SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
+      SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
+      AboutHandled = true;
+      SetAboutHandled(AboutHandled);
+    } break;
+    case WM_COMMAND:
+      // Exit the dialog
+      if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+        if (EndDialog(hDlg, LOWORD(wParam))) {
+          AboutHandled = true;
+          SetAboutHandled(AboutHandled);
+          return (INT_PTR)AboutHandled;
+        } else {
+          AboutHandled = false;
+          SetAboutHandled(AboutHandled);
+          break;
+        }
+      }
+      break;
+    default:
+      SetAboutHandled(true);
+      break;
+  }
+
+  // About dialog failed
+  return (INT_PTR)AboutHandled;
 }

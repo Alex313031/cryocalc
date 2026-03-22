@@ -4,147 +4,31 @@
 
 #include "reporting.h"
 
-struct SysProcPerfInfo {
-  LARGE_INTEGER IdleTime;
-  LARGE_INTEGER KernelTime; // includes IdleTime
-  LARGE_INTEGER UserTime;
-  LARGE_INTEGER DpcTime;
-  LARGE_INTEGER InterruptTime;
-  ULONG         InterruptCount;
-};
-
 static GetNativeSystemInfo_t pfnGetNativeSystemInfo = nullptr;
 
-// Gets the current total CPU usage % and is supposed
-// to return it as a float between 0.0 and 100.0.
-// The ONLY caller of this function should be GetCPUPercent.
-static float GetCPUPercentImpl() {
-  // Helper: pack a FILETIME into a ULONGLONG (100ns intervals)
-  auto FileTimeToULL = [](const FILETIME& ft) -> ULONGLONG {
-    return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
-  };
+static NtQuerySystemInformation_t g_NtQSI         = nullptr;
+static GetSystemTimes_t           g_GetSystemTimes = nullptr;
+static bool                       g_legacy_fallback = false;
 
-  // State preserved between calls for delta computation.
-  // Only MonitorCPU() calls this (a single thread), so plain static is safe.
-  static bool first_call   = true;
-  static ULONGLONG prev_idle   = 0;
-  static ULONGLONG prev_kernel = 0;
-  static ULONGLONG prev_user   = 0;
+static int g_num_cpus = 0;
 
-  // GetSystemTimes is only Windows XP SP1+, so it is dynamically loaded
-  // so that it gracefully falls back to NtQuerySystemInformation on Windows 2000.
-  static GetSystemTimes_t pfnGetSystemTimes = reinterpret_cast<GetSystemTimes_t>(
-      GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetSystemTimes"));
+static bool g_first_sample = true; // Tracks whether this is first sample, for delta seeding
 
-  // Log the chosen backend function only once on the first call.
-  static bool backend_logged = false;
-  static const bool legacy_fallback = IsWinOlderThan(kWinXP);
-  if (pfnGetSystemTimes && !legacy_fallback) {
-    FILETIME idle_ft, kernel_ft, user_ft;
-    if (!pfnGetSystemTimes(&idle_ft, &kernel_ft, &user_ft)) {
-      return 0.0f;
-    }
-    if (!backend_logged && debug_mode) {
-      backend_logged = true;
-      LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
-    }
-    const ULONGLONG idle   = FileTimeToULL(idle_ft);
-    const ULONGLONG kernel = FileTimeToULL(kernel_ft); // includes idle
-    const ULONGLONG user   = FileTimeToULL(user_ft);
+static ULONGLONG g_prev_idle   = 0;
+static ULONGLONG g_prev_kernel = 0;
+static ULONGLONG g_prev_user   = 0;
 
-    const ULONGLONG idle_delta   = idle   - prev_idle;
-    const ULONGLONG kernel_delta = kernel - prev_kernel;
-    const ULONGLONG user_delta   = user   - prev_user;
+bool perf_data_initialized = false;
 
-    prev_idle   = idle;
-    prev_kernel = kernel;
-    prev_user   = user;
+static PerfSnapshot g_snapshot = {};
 
-    // First call has no previous sample; delta would be meaningless.
-    if (first_call) {
-      first_call = false;
-      return 0.0f;
-    }
-
-    const ULONGLONG total = kernel_delta + user_delta;
-    if (total == 0) {
-      return 0.0f;
-    }
-    // kernel includes idle, so busy_time = (kernel - idle) + user = total - idle
-    const ULONGLONG busy_time = total - idle_delta;
-    return std::clamp(
-        static_cast<float>(busy_time) / static_cast<float>(total) * 100.0f,
-        0.0f, 100.0f);
-  } else {
-    // Fallback for Windows 2000
-    // KernelTime includes IdleTime, same relationship as above.
-    static NtQuerySystemInformation_t pfnNtQuery =
-        reinterpret_cast<NtQuerySystemInformation_t>(
-            GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQuerySystemInformation"));
-    if (!pfnNtQuery) {
-      return 0.0f; // Should never happen
-    }
-    if (!backend_logged && debug_mode) {
-      backend_logged = true;
-      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
-    }
-
-    SYSTEM_INFO sysInfo;
-    GetSystemInfo(&sysInfo);
-    // Get number of logical CPU cores
-    const DWORD nCPUs = sysInfo.dwNumberOfProcessors;
-
-    std::vector<SysProcPerfInfo> info(nCPUs);
-    ULONG retLen = 0;
-    // Create entries for all CPUs
-    const ULONG num_cpus = static_cast<ULONG>(nCPUs * sizeof(SysProcPerfInfo));
-    // SystemProcessorPerformanceInformation (class 0x08) returns one entry
-    // per logical CPU.
-    SYSTEM_INFORMATION_CLASS query = SystemProcessorPerformanceInformation;
-    const NTSTATUS status = pfnNtQuery(query, info.data(),
-                                       num_cpus, &retLen);
-    if (status != STATUS_SUCCESS) {
-      return 0.0f;
-    }
-
-    ULONGLONG total_idle   = 0;
-    ULONGLONG total_kernel = 0;
-    ULONGLONG total_user   = 0;
-    for (DWORD i = 0; i < nCPUs; ++i) {
-      total_idle   += static_cast<ULONGLONG>(info[i].IdleTime.QuadPart);
-      total_kernel += static_cast<ULONGLONG>(info[i].KernelTime.QuadPart);
-      total_user   += static_cast<ULONGLONG>(info[i].UserTime.QuadPart);
-    }
-
-    const ULONGLONG idle_delta   = total_idle   - prev_idle;
-    const ULONGLONG kernel_delta = total_kernel - prev_kernel;
-    const ULONGLONG user_delta   = total_user   - prev_user;
-
-    prev_idle   = total_idle;
-    prev_kernel = total_kernel;
-    prev_user   = total_user;
-
-    if (first_call) {
-      first_call = false;
-      return 0.0f;
-    }
-
-    const ULONGLONG total = kernel_delta + user_delta;
-    if (total == 0) {
-      return 0.0f;
-    }
-    const ULONGLONG busy_time = total - idle_delta;
-    return std::clamp(
-        static_cast<float>(busy_time) / static_cast<float>(total) * 100.0f,
-        0.0f, 100.0f);
-  }
-}
-
-// Validate GetCPUPercentImpl
+// Returns the current CPU usage % as a float in [0.0, 100.0].
+// Calls UpdatePerfData() to take a fresh sample, then reads g_snapshot.
 const float GetCPUPercent() {
-  const float cpu_percent = GetCPUPercentImpl();
+  UpdatePerfData();
+  const float cpu_percent = static_cast<float>(g_snapshot.cpu_percent);
   if (cpu_percent < 0.0f || cpu_percent > 100.0f) {
-    LOG(FATAL) << L"GetCPUPercentImpl reported an out of bounds CPU %!";
+    LOG(FATAL) << L"UpdatePerfData reported an out of bounds CPU %!";
   }
   return cpu_percent;
 }
@@ -182,4 +66,126 @@ DWORD GetLogicalProcessorCount() {
 #endif
   const DWORD num_cpus = sysInfo.dwNumberOfProcessors;
   return num_cpus;
+}
+
+const bool IsPerfDataInitialized() {
+  return perf_data_initialized;
+}
+
+bool InitPerfData() {
+  HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+  if (!ntdll) {
+    LOG(ERROR) << L"Failed to get ntdll.dll!";
+    return false;
+  }
+
+  g_NtQSI =
+      reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(ntdll, "NtQuerySystemInformation"));
+  if (!g_NtQSI) {
+    WarnBox(nullptr, L"NtQuerySystemInformation Error",
+            L"Failed to load NtQuerySystemInformation from ntdll.dll. \nCPU usage will not be available.");
+    return false;
+  }
+
+  // GetSystemTimes is XP SP1+ only; gracefully absent on Windows 2000.
+  HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+  if (kernel32) {
+    g_GetSystemTimes = reinterpret_cast<GetSystemTimes_t>(
+        GetProcAddress(kernel32, "GetSystemTimes"));
+  }
+  g_legacy_fallback = IsWinOlderThan(kWinXP);
+
+  if (debug_mode) {
+    if (g_GetSystemTimes && !g_legacy_fallback) {
+      LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
+    } else {
+      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
+    }
+  }
+
+  g_num_cpus = static_cast<int>(GetLogicalProcessorCount());
+  if (g_num_cpus < 1) {
+    g_num_cpus = 1;
+  }
+
+  // Seed the previous-sample counters so the first timer tick yields a real
+  // CPU reading rather than 0%.
+  g_first_sample = true;
+  UpdatePerfData(); // sets g_first_sample = false, seeds prev counters
+
+  perf_data_initialized = true;
+  return true;
+}
+
+// Re-samples all CPU counters and updates g_snapshot.cpu_percent.
+// Preferred path: GetSystemTimes (XP SP1+). Fallback: NtQuerySystemInformation (Win2k).
+// Both MonitorCPU() (via GetCPUPercent) and MonitorWindowProc (WM_TIMER) call this;
+// the shared delta state means consecutive calls from either thread each compute the
+// delta since the last call by either — acceptable for a CPU usage display.
+void UpdatePerfData() {
+  auto FileTimeToULL = [](const FILETIME& ft) -> ULONGLONG {
+    return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+  };
+
+  ULONGLONG idle = 0, kernel = 0, user = 0;
+  bool got_sample = false;
+
+  if (g_GetSystemTimes && !g_legacy_fallback) {
+    // Preferred path: Windows XP SP1+
+    FILETIME idle_ft, kernel_ft, user_ft;
+    if (g_GetSystemTimes(&idle_ft, &kernel_ft, &user_ft)) {
+      idle       = FileTimeToULL(idle_ft);
+      kernel     = FileTimeToULL(kernel_ft); // includes idle
+      user       = FileTimeToULL(user_ft);
+      got_sample = true;
+    }
+  } else if (g_NtQSI) {
+    // Fallback: Windows 2000 / XP RTM
+    std::vector<SysProcPerfInfo> info(static_cast<size_t>(g_num_cpus));
+    ULONG ret_len = 0;
+    LONG status = g_NtQSI(
+        SystemProcessorPerformanceInformation,
+        info.data(),
+        static_cast<ULONG>(sizeof(SysProcPerfInfo) * static_cast<size_t>(g_num_cpus)),
+        &ret_len);
+    if (NT_SUCCESS(status)) {
+      for (int i = 0; i < g_num_cpus; i++) {
+        idle   += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].IdleTime.QuadPart);
+        kernel += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].KernelTime.QuadPart);
+        user   += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].UserTime.QuadPart);
+      }
+      got_sample = true;
+    }
+  }
+
+  if (got_sample) {
+    if (!g_first_sample) {
+      const ULONGLONG d_idle   = idle   - g_prev_idle;
+      const ULONGLONG d_kernel = kernel - g_prev_kernel;
+      const ULONGLONG d_user   = user   - g_prev_user;
+      const ULONGLONG d_total  = d_kernel + d_user;
+      if (d_total > 0) {
+        // kernel includes idle, so busy = (kernel - idle) + user = total - idle
+        const ULONGLONG busy = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
+        const int pct = static_cast<int>((busy * 100ULL) / d_total);
+        g_snapshot.cpu_percent = std::clamp(pct, 0, 100);
+      }
+    }
+
+    g_prev_idle    = idle;
+    g_prev_kernel  = kernel;
+    g_prev_user    = user;
+    g_first_sample = false;
+  }
+}
+
+const PerfSnapshot& GetPerfSnapshot() {
+  return g_snapshot;
+}
+
+void CleanupPerfData() {
+  // ntdll.dll and kernel32.dll are never unloaded; just null the pointers.
+  g_NtQSI          = nullptr;
+  g_GetSystemTimes  = nullptr;
+  g_legacy_fallback = false;
 }

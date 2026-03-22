@@ -52,19 +52,22 @@ constexpr unsigned int MINHEIGHT  = 384u; // Min. height of main window
 constexpr unsigned int MAXWIDTH  = 868u; // Max. width of main window
 constexpr unsigned int MAXHEIGHT  = 680u; // Max. height of main window
 
+constexpr unsigned int MONWIN_WIDTH  = 380u; // Default width of monitor Window
+constexpr unsigned int MONWIN_HEIGHT = 300u; // Default height of monitor window
+
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 constexpr int SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels
 constexpr unsigned int EDITCONTROL_HEIGHT = STATICLABEL_HEIGHT; // Height of edit controls
 
 // Padding metrics
-constexpr UINT PADDING_X     = 4u; // Min. pixels to pad all content on the left and right
-constexpr UINT PADDING_Y     = 4u; // Min. pixels to pad all content on the top and bottom
-constexpr UINT INTRA_PADDING = 4u; // Value in pixels of intra-item padding
-constexpr UINT END_PADDING   = 8u; // Min. pixels to pad all content at end diagonally
-constexpr INT STATIC_TOP     = 12; // Min. pixels to pad all content from top
-constexpr INT STATIC_LEFT    = 8;  // How many pixels to pad left side before labels
-constexpr INT STATIC_RIGHT   = 8;  // How many pixels to pad right side after labels
-constexpr INT STATIC_BOTTOM  = 12; // How many pixels to pad bottom
+constexpr inline UINT PADDING_X     = 4u; // Min. pixels to pad all content on the left and right
+constexpr inline UINT PADDING_Y     = 4u; // Min. pixels to pad all content on the top and bottom
+constexpr inline UINT INTRA_PADDING = 4u; // Value in pixels of intra-item padding
+constexpr inline UINT END_PADDING   = 8u; // Min. pixels to pad all content at end diagonally
+constexpr inline INT STATIC_TOP     = 12; // Min. pixels to pad all content from top
+constexpr inline INT STATIC_LEFT    = 8;  // How many pixels to pad left side before labels
+constexpr inline INT STATIC_RIGHT   = 8;  // How many pixels to pad right side after labels
+constexpr inline INT STATIC_BOTTOM  = 12; // How many pixels to pad bottom
 constexpr INT ADJ_WINDOW_PADDING = 2; // How many pixels to pad between adjacent parent windows
 
 // Control layout metrics

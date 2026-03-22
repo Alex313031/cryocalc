@@ -6,11 +6,10 @@
 #include "framework.h"
 #include "globals.h"
 #include "osinfo_window.h"
+#include "monitor_window.h"
 #include "resource.h"
 #include "strings.h"
 #include "utils.h"
-
-extern bool _about_handled;
 
 Scale parseScale(const std::wstring& wscale);
 
@@ -59,19 +58,6 @@ bool HandlePaste(HWND hWnd);
 
 // Handled input from the input edit box and temp selector control
 bool InputEntered(HWND hWnd);
-
-// Gets extern _about_handled above which is
-// set if about dialog completes successfully.
-bool GetAboutHandledState();
-
-// Sets extern _about_handled
-void SetAboutHandled(bool handled);
-
-// Handles the About dialog
-bool ShowAboutDialog(HWND hWnd);
-
-// Message handler for the "About" dialog box.
-INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 // Gets number of threads to launch from hThreadsEdit
 bool GetThreadsInput(HWND hWnd);

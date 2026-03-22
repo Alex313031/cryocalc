@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "../framework.h"
+#include "../utils.h"
 #include "../ui_utils.h"
 
 // For controlling sys monitoring threads activation

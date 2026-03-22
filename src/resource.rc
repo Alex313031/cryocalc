@@ -33,6 +33,7 @@ APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
 IDI_CRYOCALC   ICON  "res/cryocalc.ico"
 IDI_SMALL      ICON  "res/small.ico"
 IDI_WINFLAG    ICON  "res/winflag.ico"
+IDI_WPERF      ICON  "res/cpuslice.ico"
 
 #ifdef APSTUDIO_INVOKED
 
@@ -113,6 +114,26 @@ BEGIN
     BEGIN
         MENUITEM "&Help",    IDM_HELPEX
     END
+END
+
+// System Monitor window menu
+IDC_WPERF MENU
+BEGIN
+  POPUP "&Settings"
+  BEGIN
+    POPUP "&Update Speed"
+    BEGIN
+      MENUITEM "&Low (2.0 sec.)",    IDM_SPEED_LOW
+      MENUITEM "&Medium (1.0 sec.)", IDM_SPEED_MED
+      MENUITEM "&High (0.5 sec.)",   IDM_SPEED_HIGH
+    END
+    MENUITEM SEPARATOR
+    MENUITEM "&Close", IDM_CLOSE_MON
+  END
+  POPUP "&About"
+  BEGIN
+    MENUITEM "&About", IDM_ABOUT_MON
+  END
 END
 
 // Keyboard Accelerators

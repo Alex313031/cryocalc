@@ -143,7 +143,7 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.hIcon       = nullptr;                 // Load our main app icon
   wcex.hCursor     = LoadCursor(nullptr, IDC_ARROW);   // Choose default cursor style to show
   wcex.hbrBackground =
-      reinterpret_cast<HBRUSH>(COLOR_WINDOW);          // Choose window client area background color
+      reinterpret_cast<HBRUSH>(COLOR_3DSHADOW);        // Choose window client area background color (dialog gray)
   wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName = szWindowClass;                  // Use our unique window class name
   wcex.hIconSm       = main_icon;                      // Load titlebar icon
@@ -216,6 +216,12 @@ bool LaunchHelpEx(HWND hWnd) {
   LOG(INFO) << L"Opening online help";
   return LaunchHelp(hWnd);
 }
+
+// Posted (not sent) to hMainWindow to open the CPU monitor window.
+// Using PostMessage avoids re-entrancy: on Windows 2000/XP, PROGRESS_CLASS has
+// internal child windows whose clicks bubble multiple synchronous WM_PARENTNOTIFY
+// messages before OpenMonitorWindow can assign hMonitorWin.
+static constexpr UINT WM_OPEN_CPU_MONITOR = WM_APP + 1;
 
 // Window procedure for handling messages
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -416,6 +422,21 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       const uint64_t reason = static_cast<uint64_t>(lParam);
       LOG(WARN) << L"Reason = " << reason;
       CloseAllWindows(hWnd);
+    } break;
+    case WM_PARENTNOTIFY: {
+      if (LOWORD(wParam) == WM_LBUTTONDOWN) {
+        POINT pt = {(short)LOWORD(lParam), (short)HIWORD(lParam)};
+        ClientToScreen(hWnd, &pt);
+        if (WindowFromPoint(pt) == hCPUBar) {
+          PostMessageW(hWnd, WM_OPEN_CPU_MONITOR, 1u, 0);
+        }
+      }
+    } break;
+    case WM_OPEN_CPU_MONITOR: {
+      if (!hMonitorWin) {
+        LOG(DEBUG) << L"Opening CPU Monitor window";
+        OpenMonitorWindow(static_cast<UINT>(wParam), hWnd);
+      }
     } break;
     case WM_LBUTTONDOWN: {
     } break;

@@ -158,6 +158,14 @@ void StartMonitoring(const long update_delay) {
   StartIOMon();
 }
 
+// TODO add more
+bool CloseMonitorWindow() {
+  if (hMonitorWin != nullptr) {
+    PostMessageW(hMonitorWin, WM_CLOSE, 0, 0);
+  }
+  return hMonitorWin == nullptr;
+}
+
 void StopMonitoring() {
   // Stop monitoring in reverse order 
   SetIOMonitorState(false);
@@ -168,6 +176,8 @@ void StopMonitoring() {
   SendMessageW(hMEMBar, PBM_SETPOS, 0, 0);
   SetCPUMonitorState(false); // Tells MonitorCPU to return, acting like CPUMonitorThread.join()
   SendMessageW(hCPUBar, PBM_SETPOS, 0, 0); // Reset position to 0
+  CloseMonitorWindow();
+  CleanupPerfData();
 }
 
 void StartCPUMon() {

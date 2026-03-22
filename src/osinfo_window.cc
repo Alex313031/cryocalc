@@ -40,7 +40,7 @@ bool ShowOsInfo(HWND hWnd) {
   wcex.cbClsExtra    = 0;
   wcex.cbWndExtra    = 0;
   wcex.hInstance     = this_hinst;
-  wcex.hIcon         = LoadIcon(this_hinst, MAKEINTRESOURCE(IDI_CRYOCALC));
+  wcex.hIcon         = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_CRYOCALC));
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW);
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
   wcex.lpszMenuName  = nullptr;
@@ -61,7 +61,7 @@ bool ShowOsInfo(HWND hWnd) {
       OSINFO_WIDTH, OSINFO_HEIGHT, nullptr, nullptr, this_hinst, nullptr);
 
   if (!hOsInfoWin) {
-    success = false;
+    return false;
   } else {
     ShowWindow(hOsInfoWin, SW_NORMAL);
     success = UpdateWindow(hOsInfoWin);
@@ -188,7 +188,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
           OpenRunDialog(hWnd);
           break;
         case IDC_CLOSE_OSINFO:
-          PostMessageW(hWnd, WM_CLOSE, 0, 0); // Will be picked up on next WndProc loop
+          PostMessageW(hWnd, WM_CLOSE, 0, 0); // Will be picked up on next OsInfoWndProc loop
           break;
         case IDC_CLOSE_OSINFO_BUTTON:
           CloseWindow(hWnd); // Animate window close when done from button.

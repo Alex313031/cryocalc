@@ -161,4 +161,7 @@ const bool IsCommCtrlAtLeast(const DWORD to_compare);
 // Gets the installed comctl32.dll version
 DWORD GetCommCtrlVersion();
 
+// Returns if this program is running under WINE, in which case certain assumptions are naught
+bool IsRunningOnWine();
+
 #endif // CRYOCALC_UTILS_H_

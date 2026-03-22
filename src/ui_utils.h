@@ -52,4 +52,17 @@ int WarnBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
 int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
+// Gets _about_handled which is set if
+// about dialog completes successfully.
+bool GetAboutHandledState();
+
+// Sets extern _about_handled
+void SetAboutHandled(bool handled);
+
+// Handles the About dialog
+bool ShowAboutDialog(HWND hWnd);
+
+// Message handler for the "About" dialog box.
+INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+
 #endif // CRYOCALC_UI_UTILS_H_

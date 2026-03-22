@@ -32,6 +32,8 @@ extern HWND hRankineEdit;
 
 extern HWND hOsInfoWin; // Window handle to OS Info Window
 
+extern HWND hMonitorWin; // Window handle to system resource monitor Window
+
 extern HWND hOsInfoTextOut; // Static text edit control for logging os info.
 
 extern HWND hConvButton; // Convert button handle

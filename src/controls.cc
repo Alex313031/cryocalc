@@ -65,8 +65,6 @@ static const std::wstring kTempF      = L"F";
 static const std::wstring kTempR      = L"R";
 static const std::wstring kDummyScale = L"U";
 
-bool _about_handled = false;
-
 unsigned int num_threads_ = 0;
 
 static BOOL IsXP               = false;
@@ -574,7 +572,13 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hIOBar, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOBarLabel, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOPercent, hInst, L"Disk I/O Usage %");
-  StartMonitoring(500L); // Start system Monitoring at end of controls initialization
+  // Start system Monitoring at end of controls initialization
+  if (!InitPerfData()) {
+    ErrorBox(hWnd, L"Perf Data Init Failure", L"InitPerfData failed!");
+    return;
+  } else {
+    StartMonitoring(500L);
+  }
 }
 
 void HandleResize(HWND hWnd) {
@@ -864,64 +868,6 @@ bool HandlePaste(HWND hWnd) {
 
 bool InputEntered(HWND hWnd) {
   return true;
-}
-
-void SetAboutHandled(bool handled) {
-  _about_handled = handled;
-}
-
-bool GetAboutHandledState() {
-  return _about_handled;
-}
-
-bool ShowAboutDialog(HWND hWnd) {
-  const HINSTANCE gHinst = GetGlobalHinst();
-  // Show "About" dialog box
-  PlaySoundW(L"SystemNotification", nullptr, SND_ASYNC);
-  DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
-  bool handled_dialog = GetAboutHandledState();
-  if (handled_dialog) {
-    LOG(INFO) << L"Showed about dialog.";
-  } else {
-    LOG(ERROR) << L"About dialog failed!";
-  }
-  return handled_dialog;
-}
-
-INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-  UNREFERENCED_PARAMETER(lParam);
-
-  bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
-  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
-  switch (message) {
-    case WM_INITDIALOG: {
-      // Set icon in titlebar of about dialog
-      SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
-      SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
-      AboutHandled = true;
-      SetAboutHandled(AboutHandled);
-    } break;
-    case WM_COMMAND:
-      // Exit the dialog
-      if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-        if (EndDialog(hDlg, LOWORD(wParam))) {
-          AboutHandled = true;
-          SetAboutHandled(AboutHandled);
-          return (INT_PTR)AboutHandled;
-        } else {
-          AboutHandled = false;
-          SetAboutHandled(AboutHandled);
-          break;
-        }
-      }
-      break;
-    default:
-      SetAboutHandled(true);
-      break;
-  }
-
-  // About dialog failed
-  return (INT_PTR)AboutHandled;
 }
 
 bool GetThreadsInput(HWND hWnd) {
