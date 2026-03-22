@@ -77,9 +77,27 @@ static float GetCommitChargePercentImpl() {
 
 // Validate GetMemPercentImpl
 const float GetCommitChargePercent() {
+  static const bool isWine = IsRunningOnWine();
   const float commit_percent = GetCommitChargePercentImpl();
   if (commit_percent < 0.0f || commit_percent > 100.0f) {
-    LOG(FATAL) << L"GetCommitChargePercentImpl reported an out of bounds Commit Charge %!";
+    static bool winelogged = false;
+    if (isWine) {
+      float dummypercent = 255.0f;
+      if (!winelogged) {
+        LOG(ERROR) << L"WINE GetCommitChargePercentImpl reported an out of bounds Commit Charge: " << commit_percent;
+      }
+      if (commit_percent > 100.0f) {
+        //CLOG(ERROR) << L"Setting WINE Commit Charge to 100%";
+        dummypercent = 100.0f;
+      } else if (commit_percent < 0.0f) {
+        CLOG(ERROR) << L"Setting WINE Commit Charge to 0%";
+        dummypercent = 0.0f;
+      }
+      winelogged = true;
+      return dummypercent;
+    } else {
+      LOG(FATAL) << L"GetCommitChargePercentImpl reported an out of bounds Commit Charge: " << commit_percent;
+    }
   }
   return commit_percent;
 }
