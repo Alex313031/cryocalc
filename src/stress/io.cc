@@ -4,7 +4,6 @@
 
 #include "reporting.h"
 
-static bool g_first_io_sample = true; // Tracks whether this is first I/O sample, for delta seeding
 
 // Gets the current total disk I/O usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
@@ -78,5 +77,5 @@ const float GetDiskIOPercent() {
 }
 
 void UpdateIOPerfData() {
-  g_first_io_sample = false;
+  g_snapshot.io_percent = GetDiskIOPercent();
 }

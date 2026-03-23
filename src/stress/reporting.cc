@@ -16,6 +16,9 @@ int g_num_cpus = 0;
 
 PerfSnapshot g_snapshot = {};
 
+float g_total_ram_mb    = 0.0f;
+float g_total_commit_mb = 0.0f;
+
 static bool g_first_sample = true; // Tracks whether this is first sample, for delta seeding
 
 bool perf_data_initialized = false;

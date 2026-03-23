@@ -14,7 +14,7 @@ static ULONGLONG g_prev_user   = 0;
 // Calls UpdateCPUPerfData() to take a fresh sample, then reads g_snapshot.cpu_percent.
 const float GetCPUPercent() {
   UpdateCPUPerfData();
-  const float cpu_percent = static_cast<float>(g_snapshot.cpu_percent);
+  const float cpu_percent = g_snapshot.cpu_percent;
   if (cpu_percent < 0.0f || cpu_percent > 100.0f) {
     LOG(FATAL) << L"UpdateCPUPerfData reported an out of bounds CPU %!";
   }
@@ -106,8 +106,8 @@ void UpdateCPUPerfData() {
       if (d_total > 0) {
         // kernel includes idle, so busy = (kernel - idle) + user = total - idle
         const ULONGLONG busy = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
-        const int pct = static_cast<int>((busy * 100ULL) / d_total);
-        g_snapshot.cpu_percent = std::clamp(pct, 0, 100);
+        const float pct = static_cast<float>(busy * 100ULL) / static_cast<float>(d_total);
+        g_snapshot.cpu_percent = std::clamp(pct, 0.0f, 100.0f);
       }
     }
 

@@ -22,10 +22,10 @@ static HINSTANCE this_hinst = nullptr;
 // We store up to kHistoryMax entries and display the most recent
 // <graph_width> of them right-aligned (oldest on the left, newest on the right).
 static constexpr int kHistoryMax = 1024; // more than enough history for any window size
-static std::deque<int> g_cpu_history;
-static std::deque<int> g_ram_history;
-static std::deque<int> g_comm_history;
-static std::deque<int> g_io_history;
+static std::deque<float> g_cpu_history;
+static std::deque<float> g_ram_history;
+static std::deque<float> g_comm_history;
+static std::deque<float> g_io_history;
 
 static UINT g_update_interval = kSpeedHigh;
 
@@ -160,11 +160,17 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       if (wParam == kUpdateTimerId) {
         UpdatePerfData();
         const PerfSnapshot snapshot = GetPerfSnapshot();
-        PushSamples(snapshot.cpu_percent, static_cast<int>(snapshot.ram_percent),
-                    static_cast<int>(snapshot.comm_percent), snapshot.io_percent);
+        PushSamples(snapshot.cpu_percent, snapshot.ram_percent,
+                    snapshot.comm_percent, snapshot.io_percent);
         if (hMonitorStatusBar) {
-          wchar_t sb_text[32];
-          wsprintfW(sb_text, L" CPU: %d%%", GetPerfSnapshot().cpu_percent);
+          wchar_t sb_text[MAX_LOADSTRING];
+          const PerfSnapshot& sb_snap = GetPerfSnapshot();
+          swprintf(sb_text, MAX_LOADSTRING,
+                   L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%%",
+                   sb_snap.cpu_percent,
+                   sb_snap.ram_used_mb, g_total_ram_mb,
+                   sb_snap.comm_used_mb, g_total_commit_mb,
+                   sb_snap.io_percent);
           SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
                        reinterpret_cast<LPARAM>(sb_text));
         }
@@ -326,7 +332,7 @@ void InitMeters(HWND hWnd) {
   }
 }
 
-void PushSamples(int cpu_percent, int ram_percent, int comm_percent, int io_percent) {
+void PushSamples(float cpu_percent, float ram_percent, float comm_percent, float io_percent) {
   g_cpu_history.push_back(cpu_percent);
   g_ram_history.push_back(ram_percent);
   g_comm_history.push_back(comm_percent);
@@ -359,13 +365,23 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   }
 
   // Select the correct history ring based on graph type.
-  const std::deque<int>* history = nullptr;
+  const std::deque<float>* history = nullptr;
   switch (type) {
-    case RAM_TYPE:  history = &g_ram_history;  break;
-    case COMM_TYPE: history = &g_comm_history; break;
-    case IO_TYPE:   history = &g_io_history;   break;
+    case RAM_TYPE:
+      history = &g_ram_history;
+      break;
+    case COMM_TYPE:
+      history = &g_comm_history;
+      break;
+    case IO_TYPE:
+      history = &g_io_history;
+      break;
     case CPU_TYPE:
-    default:        history = &g_cpu_history;  break;
+      history = &g_cpu_history;
+      break;
+    default:
+      LOG(FATAL) << L"Unhandled kMonType type!";
+      break;
   }
 
   // How many history entries fit in the available pixel width
@@ -404,8 +420,8 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   std::vector<POINT> pts;
   pts.reserve(static_cast<size_t>(n_valid));
   for (int i = 0; i < n_valid; i++) {
-    int pct = (*history)[static_cast<size_t>(hist_offset + i)];
-    int y   = inner.top + ih - 1 - (pct * (ih - 1) / 100);
+    float pct = (*history)[static_cast<size_t>(hist_offset + i)];
+    int y   = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
     pts.push_back({inner.left + start_x + i, y});
   }
 

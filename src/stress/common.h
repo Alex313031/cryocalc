@@ -5,15 +5,29 @@
 
 #include "../framework.h"
 
+enum kMonType {
+  CPU_TYPE  = 0,
+  RAM_TYPE  = 1,
+  COMM_TYPE = 2,
+  IO_TYPE   = 3,
+  MAX_TYPE  = 4
+};
+
 // Snapshot of the most recently measured system performance counters.
 struct PerfSnapshot {
-  int cpu_percent; // CPU utilization %
-  float ram_percent; // RAM utilization %
-  float comm_percent; // Commit Charge utilization %
-  int io_percent; // Commit Charge utilization %
+  float cpu_percent;   // CPU utilization %
+  float ram_percent;   // RAM utilization %
+  float comm_percent;  // Commit Charge utilization %
+  float io_percent;    // Disk I/O utilization %
+  float ram_used_mb;   // Physical RAM currently in use (MB)
+  float comm_used_mb;  // Commit charge currently in use (MB)
 };
 
 extern PerfSnapshot g_snapshot;
+
+// Set once on first memory sample; never change at runtime.
+extern float g_total_ram_mb;    // Total physical RAM (MB)
+extern float g_total_commit_mb; // Total commit limit: RAM + pagefile (MB)
 
 // For controlling sys monitoring threads activation
 extern std::atomic<bool> start_cpu_mon;

@@ -4,7 +4,6 @@
 
 #include "reporting.h"
 
-static bool g_first_mem_sample = true; // Tracks whether this is first RAM/Commit Charge sample, for delta seeding
 
 // Gets the current total RAM usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
@@ -18,12 +17,22 @@ static float GetMemPercentImpl() {
     if (!g_GlobalMemoryStatusEx(&mem_status)) {
       return 0.0f;
     }
+    if (g_total_ram_mb == 0.0f) {
+      g_total_ram_mb = static_cast<float>(mem_status.ullTotalPhys) / (1024.0f * 1024.0f);
+    }
+    g_snapshot.ram_used_mb = static_cast<float>(mem_status.ullTotalPhys - mem_status.ullAvailPhys)
+                             / (1024.0f * 1024.0f);
     return static_cast<float>(mem_status.dwMemoryLoad);
   } else {
     // Fallback for Windows 2000: GlobalMemoryStatus is available since Win95.
     MEMORYSTATUS mem_status;
     mem_status.dwLength = sizeof(mem_status);
     GlobalMemoryStatus(&mem_status);
+    if (g_total_ram_mb == 0.0f) {
+      g_total_ram_mb = static_cast<float>(mem_status.dwTotalPhys) / (1024.0f * 1024.0f);
+    }
+    g_snapshot.ram_used_mb = static_cast<float>(mem_status.dwTotalPhys - mem_status.dwAvailPhys)
+                             / (1024.0f * 1024.0f);
     return static_cast<float>(mem_status.dwMemoryLoad);
   }
 }
@@ -49,14 +58,22 @@ static float GetCommitChargePercentImpl() {
     if (!g_GlobalMemoryStatusEx(&mem_status)) {
       return 0.0f;
     }
+    if (g_total_commit_mb == 0.0f) {
+      g_total_commit_mb = static_cast<float>(mem_status.ullTotalPageFile) / (1024.0f * 1024.0f);
+    }
     const DWORDLONG used = mem_status.ullTotalPageFile - mem_status.ullAvailPageFile;
+    g_snapshot.comm_used_mb = static_cast<float>(used) / (1024.0f * 1024.0f);
     return static_cast<float>(used) / static_cast<float>(mem_status.ullTotalPageFile) * 100.0f;
   } else {
     // Fallback for Windows 2000: GlobalMemoryStatus is available since Win95.
     MEMORYSTATUS mem_status;
     mem_status.dwLength = sizeof(mem_status);
     GlobalMemoryStatus(&mem_status);
+    if (g_total_commit_mb == 0.0f) {
+      g_total_commit_mb = static_cast<float>(mem_status.dwTotalPageFile) / (1024.0f * 1024.0f);
+    }
     const DWORD used = mem_status.dwTotalPageFile - mem_status.dwAvailPageFile;
+    g_snapshot.comm_used_mb = static_cast<float>(used) / (1024.0f * 1024.0f);
     return static_cast<float>(used) / static_cast<float>(mem_status.dwTotalPageFile) * 100.0f;
   }
 }
@@ -89,5 +106,6 @@ const float GetCommitChargePercent() {
 }
 
 void UpdateMemPerfData() {
-  g_first_mem_sample = false;
+  g_snapshot.ram_percent  = GetMemPercent();
+  g_snapshot.comm_percent = GetCommitChargePercent();
 }

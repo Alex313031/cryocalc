@@ -15,14 +15,6 @@ static inline constexpr int kDesiredClientH = MONWIN_HEIGHT;
 static inline constexpr int kMinOuterW = 180;
 static inline constexpr int kMinOuterH = 160;
 
-enum kMonType {
-  CPU_TYPE  = 0,
-  RAM_TYPE  = 1,
-  COMM_TYPE = 2,
-  IO_TYPE   = 3,
-  MAX_TYPE  = 4
-};
-
 // Status bar for showing percentages
 extern HWND hMonitorStatusBar;
 
@@ -38,9 +30,9 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 // Create GDI resources used by the graph drawing routines and status bar
 void InitMeters(HWND hWnd);
 
-// Append one CPU sample point (0-100%) to the scrolling history.
+// Append one sample point per counter (0.0–100.0) to the scrolling history.
 // Call once per timer tick, after UpdatePerfData().
-void PushSamples(int percent, int ram_percent, int comm_percent, int io_percent);
+void PushSamples(float cpu_percent, float ram_percent, float comm_percent, float io_percent);
 
 // Draw a single meter for monitor window with only 1 graph, covering whole client area
 void DrawMeter(HDC hdc, const RECT& area);
