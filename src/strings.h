@@ -4,25 +4,31 @@
 // clang-format off: Strings left alone
 
 // Button/Controls titles
-constexpr wchar_t convert_button[]  = L"Convert";
-constexpr wchar_t input_label[]     = L"Input:";
-constexpr wchar_t precision_label[] = L"Precision:";
-constexpr wchar_t threads_input[]   = L"Threads:";
-constexpr wchar_t clear_button[]    = L"Clear";
-constexpr wchar_t start_button[]    = L"Start";
-constexpr wchar_t stop_button[]     = L"Stop";
-constexpr wchar_t about_button[]    = L"About";
-constexpr wchar_t osinfo_button[]   = L"Show OS Info";
-constexpr wchar_t close_oi_button[] = L"Close OS Info";
-constexpr wchar_t osinfo_title[]    = L"OS Info";
-constexpr wchar_t winver_button[]   = L"Run Winver.exe";
-constexpr wchar_t msinfo_button[]   = L"Run MSInfo32.exe";
-constexpr wchar_t run_button[]      = L"Run Program";
-constexpr wchar_t run_title[]       = L"Create New Task";
-constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or file, and CryoCalc will open it for you.";
-constexpr wchar_t use_sse2q[]       = L"Use SSE2";
-constexpr wchar_t cache_multi[]     = L"Cache ";
-constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
+static constexpr wchar_t convert_button[]  = L"Convert";
+static constexpr wchar_t input_label[]     = L"Input:";
+static constexpr wchar_t precision_label[] = L"Precision:";
+static constexpr wchar_t threads_input[]   = L"Threads:";
+static constexpr wchar_t clear_button[]    = L"Clear";
+static constexpr wchar_t start_button[]    = L"Start";
+static constexpr wchar_t stop_button[]     = L"Stop";
+static constexpr wchar_t about_button[]    = L"About";
+static constexpr wchar_t osinfo_button[]   = L"Show OS Info";
+static constexpr wchar_t close_oi_button[] = L"Close OS Info";
+static constexpr wchar_t osinfo_title[]    = L"OS Info";
+static constexpr wchar_t winver_button[]   = L"Run Winver.exe";
+static constexpr wchar_t msinfo_button[]   = L"Run MSInfo32.exe";
+static constexpr wchar_t run_button[]      = L"Run Program";
+static constexpr wchar_t run_title[]       = L"Create New Task";
+static constexpr wchar_t run_prompt[]      = L"Type the name of a program, folder, or file, and CryoCalc will open it for you.";
+static constexpr wchar_t use_sse2q[]       = L"Use SSE2";
+static constexpr wchar_t cache_multi[]     = L"Cache ";
+static constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
+
+static constexpr wchar_t mon_title[]    = L"System Monitor";
+static constexpr wchar_t cpu_label[]    = L"CPU Usage";
+static constexpr wchar_t ram_label[]    = L"RAM Usage";
+static constexpr wchar_t commit_label[] = L"Commit Charge";
+static constexpr wchar_t io_label[]     = L"Disk I/O Usage";
 
 #if defined(AFX_TARG_ENU)
  inline const wchar_t* CONV_BUTTON   = convert_button;
@@ -44,6 +50,11 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* USE_SSE2Q     = use_sse2q;
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
+ inline const wchar_t* MON_TITLE     = mon_title;
+ inline const wchar_t* CPU_LABEL     = cpu_label;
+ inline const wchar_t* RAM_LABEL     = ram_label;
+ inline const wchar_t* COMM_LABEL    = commit_label;
+ inline const wchar_t* IO_LABEL      = io_label;
 #elif defined(AFX_TARG_PH)
  inline const wchar_t* CONV_BUTTON   = L"Magbalik-loob";
  inline const wchar_t* INPUT_LABEL   = L"Temperatura:";
@@ -64,6 +75,11 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* USE_SSE2Q     = use_sse2q;
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
+ inline const wchar_t* MON_TITLE     = mon_title;
+ inline const wchar_t* CPU_LABEL     = cpu_label;
+ inline const wchar_t* RAM_LABEL     = ram_label;
+ inline const wchar_t* COMM_LABEL    = commit_label;
+ inline const wchar_t* IO_LABEL      = io_label;
 #elif defined(AFX_TARG_RU)
  inline const wchar_t* CONV_BUTTON   = L"Конвертировать";
  inline const wchar_t* INPUT_LABEL   = L"Вход:";
@@ -84,6 +100,11 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* USE_SSE2Q     = use_sse2q;
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
+ inline const wchar_t* MON_TITLE     = mon_title;
+ inline const wchar_t* CPU_LABEL     = cpu_label;
+ inline const wchar_t* RAM_LABEL     = ram_label;
+ inline const wchar_t* COMM_LABEL    = commit_label;
+ inline const wchar_t* IO_LABEL      = io_label;
 #elif defined(AFX_TARG_ES)
  inline const wchar_t* CONV_BUTTON   = L"Convertir";
  inline const wchar_t* INPUT_LABEL   = L"Aporte:";
@@ -104,6 +125,11 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* USE_SSE2Q     = use_sse2q;
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
+ inline const wchar_t* MON_TITLE     = mon_title;
+ inline const wchar_t* CPU_LABEL     = cpu_label;
+ inline const wchar_t* RAM_LABEL     = ram_label;
+ inline const wchar_t* COMM_LABEL    = commit_label;
+ inline const wchar_t* IO_LABEL      = io_label;
 #else
  // Fallback to English
  inline const wchar_t* CONV_BUTTON   = convert_button;
@@ -125,6 +151,11 @@ constexpr wchar_t alloc_memory[]    = L"Allocate 100MB";
  inline const wchar_t* USE_SSE2Q     = use_sse2q;
  inline const wchar_t* CACHE_SIZEQ   = cache_multi;
  inline const wchar_t* ALLOC_MEM     = alloc_memory;
+ inline const wchar_t* MON_TITLE     = mon_title;
+ inline const wchar_t* CPU_LABEL     = cpu_label;
+ inline const wchar_t* RAM_LABEL     = ram_label;
+ inline const wchar_t* COMM_LABEL    = commit_label;
+ inline const wchar_t* IO_LABEL      = io_label;
 #endif
 
 // clang-format on: Done with strings.h

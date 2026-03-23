@@ -20,8 +20,6 @@ static ULONGLONG g_prev_user   = 0;
 
 bool perf_data_initialized = false;
 
-static PerfSnapshot g_snapshot = {};
-
 // Returns the current CPU usage % as a float in [0.0, 100.0].
 // Calls UpdatePerfData() to take a fresh sample, then reads g_snapshot.
 const float GetCPUPercent() {
@@ -110,7 +108,7 @@ bool InitPerfData() {
 
   // Seed the previous-sample counters so the first timer tick yields a real
   // CPU reading rather than 0%.
-  g_first_sample = true;
+  //g_first_sample = true;
   UpdatePerfData(); // sets g_first_sample = false, seeds prev counters
 
   perf_data_initialized = true;

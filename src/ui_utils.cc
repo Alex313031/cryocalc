@@ -259,6 +259,16 @@ int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message) 
   return MessageBoxW(hWndTmp, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
 }
 
+bool HandleChildClick(HWND parent, HWND child) {
+  if (!parent || !child) {
+    return false;
+  }
+  if (child == hCPUBar || child == hMEMBar || child == hCommitBar || child == hIOBar) {
+    return PostMessageW(parent, WM_OPEN_MONITOR_WIN, 0, 0);
+  }
+  return true;
+}
+
 void SetAboutHandled(bool handled) {
   _about_handled = handled;
 }

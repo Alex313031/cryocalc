@@ -1,13 +1,10 @@
 #ifndef CRYOCALC_STRESS_STRESS_H_
 #define CRYOCALC_STRESS_STRESS_H_
 
-#include <atomic>
-
+#include "common.h"
 #include "cpu.h"
 #include "mem.h"
 #include "reporting.h"
-
-#include "../framework.h"
 
 // Atomic flag for controlling thread activation state
 extern std::atomic<bool> running;

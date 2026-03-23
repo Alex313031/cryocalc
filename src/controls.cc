@@ -450,7 +450,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hMEMBarLabel = CreateWindowExW(0, WC_STATIC, L"RAM", dwCHILD | dwLABEL | SS_NOTIFY,
                                  mem_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                                  hWnd, nullptr, hInst, nullptr);
-  hCommitBarLabel = CreateWindowExW(0, WC_STATIC, L"COM", dwCHILD | dwLABEL | SS_NOTIFY,
+  hCommitBarLabel = CreateWindowExW(0, WC_STATIC, L"PF", dwCHILD | dwLABEL | SS_NOTIFY,
                                  commit_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                                  hWnd, nullptr, hInst, nullptr);
   hIOBarLabel = CreateWindowExW(0, WC_STATIC, L"I/O", dwCHILD | dwLABEL | SS_NOTIFY,

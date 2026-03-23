@@ -52,6 +52,9 @@ int WarnBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
 int ErrorBox(HWND hWnd, const std::wstring& title, const std::wstring& message);
 
+// Handles child window clicks
+bool HandleChildClick(HWND parent, HWND child);
+
 // Gets _about_handled which is set if
 // about dialog completes successfully.
 bool GetAboutHandledState();

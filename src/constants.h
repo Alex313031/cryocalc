@@ -43,8 +43,8 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH = 528u; // Default width of main window
-constexpr unsigned int MAINHEIGHT = 420u; // Default height of main window
+constexpr unsigned int MAINWIDTH = 640u; // Default width of main window
+constexpr unsigned int MAINHEIGHT = 480u; // Default height of main window
 
 constexpr unsigned int MINWIDTH  = 480u; // Min. width of main window
 constexpr unsigned int MINHEIGHT  = 384u; // Min. height of main window
@@ -52,8 +52,8 @@ constexpr unsigned int MINHEIGHT  = 384u; // Min. height of main window
 constexpr unsigned int MAXWIDTH  = 868u; // Max. width of main window
 constexpr unsigned int MAXHEIGHT  = 680u; // Max. height of main window
 
-constexpr unsigned int MONWIN_WIDTH  = 380u; // Default width of monitor Window
-constexpr unsigned int MONWIN_HEIGHT = 300u; // Default height of monitor window
+constexpr unsigned int MONWIN_WIDTH  = MAINWIDTH; // Default width of monitor Window
+constexpr unsigned int MONWIN_HEIGHT = MAINHEIGHT; // Default height of monitor window
 
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 constexpr int SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels
@@ -125,5 +125,11 @@ enum Scale {
   kScaleUnknown    = -1,
   kMaxScale        = 4
 };
+
+// Posted (not sent) to hMainWindow to open the CPU monitor window.
+// Using PostMessage avoids re-entrancy: on Windows 2000/XP, PROGRESS_CLASS has
+// internal child windows whose clicks bubble multiple synchronous WM_PARENTNOTIFY
+// messages before OpenMonitorWindow can assign hMonitorWin.
+inline constexpr UINT WM_OPEN_MONITOR_WIN = WM_APP + 1;
 
 #endif // CRYOCALC_CONSTANTS_H_

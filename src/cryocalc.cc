@@ -160,7 +160,7 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
   const unsigned int top_position =
       (static_cast<unsigned int>(kThisDesktop.bottom) / 2u) - (MAINHEIGHT / 2u);
   const unsigned int left_position =
-      (static_cast<unsigned int>(kThisDesktop.right) / 2u) - (MAINWIDTH / 2u);
+      (static_cast<unsigned int>(kThisDesktop.right) / 3u) - (MAINWIDTH / 2u);
   // Create the main window
   hMainWindow = CreateWindowExW(
       WS_EX_WINDOWEDGE, szWindowClass, CAPTION_TITLE,
@@ -216,12 +216,6 @@ bool LaunchHelpEx(HWND hWnd) {
   LOG(INFO) << L"Opening online help";
   return LaunchHelp(hWnd);
 }
-
-// Posted (not sent) to hMainWindow to open the CPU monitor window.
-// Using PostMessage avoids re-entrancy: on Windows 2000/XP, PROGRESS_CLASS has
-// internal child windows whose clicks bubble multiple synchronous WM_PARENTNOTIFY
-// messages before OpenMonitorWindow can assign hMonitorWin.
-static constexpr UINT WM_OPEN_CPU_MONITOR = WM_APP + 1;
 
 // Window procedure for handling messages
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -427,16 +421,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       if (LOWORD(wParam) == WM_LBUTTONDOWN) {
         POINT pt = {(short)LOWORD(lParam), (short)HIWORD(lParam)};
         ClientToScreen(hWnd, &pt);
-        if (WindowFromPoint(pt) == hCPUBar) {
-          PostMessageW(hWnd, WM_OPEN_CPU_MONITOR, 1u, 0);
+        const HWND clicked_hwnd = WindowFromPoint(pt); // Get which child HWND was clicked, if any
+        // Handle click for child windows that do something on click
+        if (!HandleChildClick(hWnd, clicked_hwnd)) {
+          LOG(ERROR) << L"Failed to handle click at " << clicked_hwnd;
         }
       }
     } break;
-    case WM_OPEN_CPU_MONITOR: {
-      if (!hMonitorWin) {
-        LOG(DEBUG) << L"Opening CPU Monitor window";
-        OpenMonitorWindow(static_cast<UINT>(wParam), hWnd);
-      }
+    case WM_OPEN_MONITOR_WIN: {
+      OpenMonitorWindow(hWnd);
     } break;
     case WM_LBUTTONDOWN: {
     } break;

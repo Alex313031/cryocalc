@@ -3,7 +3,7 @@
 
 #include <winternl.h>
 
-#include "../framework.h"
+#include "common.h"
 
 /* Typedefs for accessing system .dll functions through GetProcAddress() */
 typedef void (WINAPI* GetNativeSystemInfo_t)(SYSTEM_INFO* lpSystemInfo);
@@ -20,11 +20,6 @@ typedef BOOL (WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
 #ifndef NT_SUCCESS
  #define NT_SUCCESS(s) (((LONG)(s)) >= 0)
 #endif
-
-// Snapshot of the most recently measured system performance counters.
-struct PerfSnapshot {
-  int cpu_percent; // Int represent CPU utilization %
-};
 
 // Use a local struct name to avoid any conflict with <winternl.h>.
 struct SysProcPerfInfo {

@@ -1,18 +1,11 @@
 #ifndef CRYOCALC_STRESS_REPORTING_H_
 #define CRYOCALC_STRESS_REPORTING_H_
 
-#include <atomic>
 #include <chrono>
 
-#include "../framework.h"
+#include "common.h"
 #include "../utils.h"
 #include "../ui_utils.h"
-
-// For controlling sys monitoring threads activation
-extern std::atomic<bool> start_cpu_mon;
-extern std::atomic<bool> start_mem_mon;
-extern std::atomic<bool> start_commit_mon;
-extern std::atomic<bool> start_io_mon;
 
 // Set how many milliseconds to delay between CPU monitoring updates
 void SetDelay(long monitor_delay);

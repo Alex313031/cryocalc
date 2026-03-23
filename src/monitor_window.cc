@@ -5,6 +5,7 @@
 #include <deque>
 
 #include "stress/cpu.h"
+#include "strings.h"
 #include "ui_utils.h"
 
 static HFONT g_monitor_font = nullptr;
@@ -61,7 +62,7 @@ unsigned int GetUpdateSpeed() {
   return g_update_interval;
 }
 
-bool OpenMonitorWindow(UINT type, HWND hWnd) {
+bool OpenMonitorWindow(HWND hWnd) {
   bool success               = false;
   this_hinst = GetGlobalHinst();
 
@@ -73,8 +74,10 @@ bool OpenMonitorWindow(UINT type, HWND hWnd) {
 
   // If the monitor window is already open, bring it to the foreground.
   if (hMonitorWin != nullptr) {
-    SetForegroundWindow(hMonitorWin);
-    return true;
+    LOG(INFO) << L"Restoring Sys Monitor window to foreground";
+    return SetForegroundWindow(hMonitorWin);
+  } else {
+    LOG(INFO) << L"Opening Sys Monitor window";
   }
 
   WNDCLASSEXW wcex;
@@ -96,10 +99,11 @@ bool OpenMonitorWindow(UINT type, HWND hWnd) {
   DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX
                 | WS_MAXIMIZEBOX | WS_THICKFRAME;
   DWORD ex_style = 0;
-  RECT  adj     = {0, 0, kDesiredClientW, kDesiredClientH};
-  AdjustWindowRectEx(&adj, style, TRUE /*has menu*/, ex_style);
+
+  /* RECT adj = {0, 0, kDesiredClientW, kDesiredClientH};
+  AdjustWindowRectEx(&adj, style, true, ex_style);
   int outer_w = adj.right  - adj.left;
-  int outer_h = adj.bottom - adj.top;
+  int outer_h = adj.bottom - adj.top; */
 
   // Put to right of main window
   int left, top;
@@ -108,9 +112,9 @@ bool OpenMonitorWindow(UINT type, HWND hWnd) {
   hMonitorWin = CreateWindowExW(
       ex_style,
       szMonitorWindowClass,
-      L"CPU Monitor",
+      MON_TITLE,
       style,
-      left, top, outer_w, outer_h,
+      left, top, kDesiredClientW, kDesiredClientH,
       nullptr, nullptr, this_hinst, nullptr);
 
   if (!hMonitorWin) {
@@ -136,18 +140,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
   switch (uMsg) {
     case WM_CREATE: {
       // Initialize anything we need to
-      InitMeters();
-      // Create the status bar.
-      hMonitorStatusBar = CreateWindowExW(
-          0, STATUSCLASSNAME, nullptr,
-          WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
-          0, 0, 0, 0,
-          hWnd, nullptr, this_hinst, nullptr);
-      if (hMonitorStatusBar) {
-        SendMessageW(hMonitorStatusBar, WM_SIZE, 0, 0);
-        SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
-                     reinterpret_cast<LPARAM>(L" CPU: 0%"));
-      }
+      InitMeters(hWnd);
 
       // Start the update timer at the default interval.
       SetTimer(hWnd, kUpdateTimerId, GetUpdateSpeed(), nullptr);
@@ -156,7 +149,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       HMENU hSpd = GetSpeedMenu(hWnd);
       if (hSpd) {
         CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH,
-                           IDM_SPEED_MED, MF_BYCOMMAND);
+                           IDM_SPEED_HIGH, MF_BYCOMMAND);
       }
     } break;
     // Periodic update
@@ -197,7 +190,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       int dh = draw_area.bottom;
 
       // Double-buffer to help eliminate flicker.
-      HDC     hmem     = CreateCompatibleDC(hdc);
+      HDC hmem         = CreateCompatibleDC(hdc);
       HBITMAP hbmp     = CreateCompatibleBitmap(hdc, dw, dh);
       HBITMAP hbmp_old = static_cast<HBITMAP>(SelectObject(hmem, hbmp));
 
@@ -217,7 +210,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = kMinOuterW;
       pMinMaxInfo->ptMinTrackSize.y = kMinOuterH;
-      pMinMaxInfo->ptMaxTrackSize.x = 640;
+      pMinMaxInfo->ptMaxTrackSize.x = MAXWIDTH;
       pMinMaxInfo->ptMaxTrackSize.y = MAXHEIGHT;
     } break;
     case WM_COMMAND: {
@@ -303,7 +296,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
   return 0;
 }
 
-void InitMeters() {
+void InitMeters(HWND hWnd) {
   /* g_monitor_font = CreateFontW(-11, 0, 0, 0, FW_NORMAL,
                        FALSE, FALSE, FALSE,
                        DEFAULT_CHARSET,
@@ -314,6 +307,17 @@ void InitMeters() {
                        L"MS Shell Dlg"); */
   if (!g_monitor_font) {
     g_monitor_font = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+  }
+  // Create the status bar.
+  hMonitorStatusBar = CreateWindowExW(
+      0, STATUSCLASSNAME, nullptr,
+      WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
+      0, 0, 0, 0,
+      hWnd, nullptr, this_hinst, nullptr);
+  if (hMonitorStatusBar) {
+    SendMessageW(hMonitorStatusBar, WM_SIZE, 0, 0);
+    SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
+                 reinterpret_cast<LPARAM>(L" CPU: 0%"));
   }
 }
 
@@ -327,7 +331,7 @@ void PushCpuSample(int percent) {
 // Renders the scrolling line graph into the already-clipped
 // inner RECT, (background should already be filled by the caller)
 static void DrawGraph(HDC hdc, const RECT& inner) {
-  int iw = inner.right  - inner.left;
+  int iw = inner.right - inner.left;
   int ih = inner.bottom - inner.top;
   bool make_grid = false;
   if (iw <= 0 || ih <= 0) {
@@ -348,7 +352,7 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
 
   // Grid lines - 9 horizontal + 9 vertical, dividing the area into 10 equal sized cells
   if (make_grid) {
-    HPEN grid_pen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 96));
+    HPEN grid_pen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 128)); // Blue grid lines
     HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, grid_pen));
     for (int i = 1; i <= 9; i++) {
       // Horizontal lines evenly spaced in Y
@@ -385,9 +389,9 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
     poly.push_back({pts.back().x,  inner.bottom - 1}); // bottom-right corner
     poly.push_back({pts.front().x, inner.bottom - 1}); // bottom-left corner
 
-    HPEN   null_pen   = static_cast<HPEN>(GetStockObject(NULL_PEN));
-    HBRUSH fill_brush = CreateSolidBrush(RGB(0, 96, 0));
-    HPEN   saved_pen  = static_cast<HPEN>(SelectObject(hdc, null_pen));
+    HPEN null_pen     = static_cast<HPEN>(GetStockObject(NULL_PEN));
+    HBRUSH fill_brush = CreateSolidBrush(RGB(0, 96, 0)); // Dark green
+    HPEN saved_pen    = static_cast<HPEN>(SelectObject(hdc, null_pen));
     HBRUSH saved_br   = static_cast<HBRUSH>(SelectObject(hdc, fill_brush));
     Polygon(hdc, poly.data(), static_cast<int>(poly.size()));
     SelectObject(hdc, saved_pen);
@@ -397,7 +401,7 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
 
   // Bright green line along the top contour
   if (make_grid) {
-    HPEN line_pen  = CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
+    HPEN line_pen  = CreatePen(PS_SOLID, 1, RGB(0, 255, 0)); // Full bright green
     HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, line_pen));
     Polyline(hdc, pts.data(), static_cast<int>(pts.size()));
     SelectObject(hdc, saved_pen);
@@ -405,9 +409,9 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
   }
 }
 
-void DrawMeters(HDC hdc, const RECT& area) {
-  int cw = area.right  - area.left;
-  int ch = area.bottom - area.top;
+void DrawMeter(HDC hdc, const RECT& area) {
+  int cw = (area.right - area.left);
+  int ch = (area.bottom - area.top);
 
   // Regular dialog gray color
   FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DSHADOW)));
@@ -417,7 +421,8 @@ void DrawMeters(HDC hdc, const RECT& area) {
   SelectObject(hdc, g_monitor_font);
   SetBkMode(hdc, TRANSPARENT);
   SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
-  DrawTextW(hdc, L"CPU", -1, &label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+  // const std::wstring label = 
+  DrawTextW(hdc, CPU_LABEL, -1, &label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 
   // Graph box rect, fills most of the rest of monitor window
   RECT graph_rect = {kMarginH, kMarginTop + kLabelH, cw - kMarginH, ch - kMarginBot};
@@ -430,6 +435,64 @@ void DrawMeters(HDC hdc, const RECT& area) {
 
   // Scrolling line graph
   DrawGraph(hdc, graph_rect);
+}
+
+void DrawMeters(HDC hdc, const RECT& area) {
+  // Regular dialog gray color
+  FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DSHADOW)));
+
+  // Layout constants for the 4 graphs
+  const int halfwidth  = (area.right  - area.left) / 2;
+  const int halfheight = (area.bottom - area.top) / 2;
+  const int graph_width = halfwidth - kMarginH;
+  const int graph_height = halfheight - kMarginBot;
+
+  SelectObject(hdc, g_monitor_font); // Set font for this
+  SetBkMode(hdc, TRANSPARENT); // Background opacity
+  SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT)); // Text color
+  // Labels centered at the top
+  RECT cpu_label_rect = {kMarginH, // x-coordinate of the upper-left corner
+                         kMarginTop, // y-coordinate of the upper-left corner
+                         graph_width, // x-coordinate of the lower-right corner
+                         kMarginTop + kLabelH}; // y-coordinate of the lower-right corner
+  RECT ram_label_rect = {graph_width + kMarginH, kMarginTop, graph_width * 2, kMarginTop + kLabelH};
+  RECT comm_label_rect = {kMarginH, graph_height + kMarginTop, graph_width, kMarginTop + kLabelH + graph_height};
+  RECT io_label_rect = {graph_width + kMarginH, graph_height + kMarginTop, graph_width * 2, kMarginTop + kLabelH + graph_height};
+
+  DrawTextW(hdc, CPU_LABEL, -1, &cpu_label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER); // Label above CPU Graph
+  DrawTextW(hdc, RAM_LABEL, -1, &ram_label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER); // Label above RAM Graph
+  DrawTextW(hdc, COMM_LABEL, -1, &comm_label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER); // Label above Commit Charge graph
+  DrawTextW(hdc, IO_LABEL, -1, &io_label_rect, DT_CENTER | DT_SINGLELINE | DT_VCENTER); // Label above I/O graph
+
+  // Graph box rects, one for each quadrant
+  RECT cpu_graph_rect = {kMarginH, kMarginTop + kLabelH, graph_width, graph_height};
+  RECT ram_graph_rect = {graph_width + kMarginH, kMarginTop + kLabelH, graph_width * 2, graph_height};
+  RECT comm_graph_rect = {kMarginH, graph_height + kMarginTop + kLabelH, graph_width, graph_height * 2};
+  RECT io_graph_rect = {graph_width + kMarginH, graph_height + kMarginTop + kLabelH, graph_width * 2, graph_height * 2};
+
+  //DrawEdge(hdc, &cpu_label_rect, EDGE_ETCHED, BF_RECT | BF_ADJUST);
+  DrawEdge(hdc, &cpu_graph_rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+
+  //DrawEdge(hdc, &ram_label_rect, EDGE_ETCHED, BF_RECT | BF_ADJUST);
+  DrawEdge(hdc, &ram_graph_rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+
+  //DrawEdge(hdc, &comm_label_rect, EDGE_ETCHED, BF_RECT | BF_ADJUST);
+  DrawEdge(hdc, &comm_graph_rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+
+  //DrawEdge(hdc, &io_label_rect, EDGE_ETCHED, BF_RECT | BF_ADJUST);
+  DrawEdge(hdc, &io_graph_rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
+
+  // Fill backgrounds (do this before calling DrawGraph) TODO: CHANGE COLOR
+  FillRect(hdc, &cpu_graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+  FillRect(hdc, &ram_graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+  FillRect(hdc, &comm_graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+  FillRect(hdc, &io_graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+
+  // Scrolling line graphs
+  DrawGraph(hdc, cpu_graph_rect);
+  DrawGraph(hdc, ram_graph_rect);
+  DrawGraph(hdc, comm_graph_rect);
+  DrawGraph(hdc, io_graph_rect);
 }
 
 // TODO Rename

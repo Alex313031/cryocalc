@@ -4,6 +4,8 @@
 #include "io.h"
 #include "mem.h"
 
+PerfSnapshot g_snapshot = {};
+
 std::atomic<bool> start_cpu_mon{false};
 std::atomic<bool> start_mem_mon{false};
 std::atomic<bool> start_commit_mon{false};

@@ -1,7 +1,7 @@
 #ifndef CRYOCALC_STRESS_MEM_H_
 #define CRYOCALC_STRESS_MEM_H_
 
-#include "../framework.h"
+#include "common.h"
 
 typedef BOOL (WINAPI* GlobalMemoryStatusEx_t)(MEMORYSTATUSEX*);
 

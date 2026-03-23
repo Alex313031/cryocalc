@@ -1,7 +1,7 @@
 #ifndef CRYOCALC_STRESS_IO_H_
 #define CRYOCALC_STRESS_IO_H_
 
-#include "../framework.h"
+#include "common.h"
 
 struct DiskPerfState {
   LONGLONG prev_read_time  = 0;
