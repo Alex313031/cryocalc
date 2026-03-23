@@ -1,32 +1,22 @@
 #include "cpu.h"
 
-#include <os_info_dll.h>
-
 #include "reporting.h"
 
 static GetNativeSystemInfo_t pfnGetNativeSystemInfo = nullptr;
 
-static NtQuerySystemInformation_t g_NtQSI         = nullptr;
-static GetSystemTimes_t           g_GetSystemTimes = nullptr;
-static bool                       g_legacy_fallback = false;
-
-static int g_num_cpus = 0;
-
-static bool g_first_sample = true; // Tracks whether this is first sample, for delta seeding
+static bool g_first_cpu_sample = true; // Tracks whether this is first CPU sample, for delta seeding
 
 static ULONGLONG g_prev_idle   = 0;
 static ULONGLONG g_prev_kernel = 0;
 static ULONGLONG g_prev_user   = 0;
 
-bool perf_data_initialized = false;
-
 // Returns the current CPU usage % as a float in [0.0, 100.0].
-// Calls UpdatePerfData() to take a fresh sample, then reads g_snapshot.
+// Calls UpdateCPUPerfData() to take a fresh sample, then reads g_snapshot.cpu_percent.
 const float GetCPUPercent() {
-  UpdatePerfData();
+  UpdateCPUPerfData();
   const float cpu_percent = static_cast<float>(g_snapshot.cpu_percent);
   if (cpu_percent < 0.0f || cpu_percent > 100.0f) {
-    LOG(FATAL) << L"UpdatePerfData reported an out of bounds CPU %!";
+    LOG(FATAL) << L"UpdateCPUPerfData reported an out of bounds CPU %!";
   }
   return cpu_percent;
 }
@@ -66,61 +56,12 @@ DWORD GetLogicalProcessorCount() {
   return num_cpus;
 }
 
-const bool IsPerfDataInitialized() {
-  return perf_data_initialized;
-}
-
-bool InitPerfData() {
-  HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-  if (!ntdll) {
-    LOG(ERROR) << L"Failed to get ntdll.dll!";
-    return false;
-  }
-
-  g_NtQSI =
-      reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(ntdll, "NtQuerySystemInformation"));
-  if (!g_NtQSI) {
-    WarnBox(nullptr, L"NtQuerySystemInformation Error",
-            L"Failed to load NtQuerySystemInformation from ntdll.dll. \nCPU usage will not be available.");
-    return false;
-  }
-
-  // GetSystemTimes is XP SP1+ only; gracefully absent on Windows 2000.
-  HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-  if (kernel32) {
-    g_GetSystemTimes = reinterpret_cast<GetSystemTimes_t>(
-        GetProcAddress(kernel32, "GetSystemTimes"));
-  }
-  g_legacy_fallback = IsWinOlderThan(kWinXP);
-
-  if (debug_mode) {
-    if (g_GetSystemTimes && !g_legacy_fallback) {
-      LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
-    } else {
-      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
-    }
-  }
-
-  g_num_cpus = static_cast<int>(GetLogicalProcessorCount());
-  if (g_num_cpus < 1) {
-    g_num_cpus = 1;
-  }
-
-  // Seed the previous-sample counters so the first timer tick yields a real
-  // CPU reading rather than 0%.
-  //g_first_sample = true;
-  UpdatePerfData(); // sets g_first_sample = false, seeds prev counters
-
-  perf_data_initialized = true;
-  return true;
-}
-
 // Re-samples all CPU counters and updates g_snapshot.cpu_percent.
 // Preferred path: GetSystemTimes (XP SP1+). Fallback: NtQuerySystemInformation (Win2k).
 // Both MonitorCPU() (via GetCPUPercent) and MonitorWindowProc (WM_TIMER) call this;
 // the shared delta state means consecutive calls from either thread each compute the
 // delta since the last call by either — acceptable for a CPU usage display.
-void UpdatePerfData() {
+void UpdateCPUPerfData() {
   auto FileTimeToULL = [](const FILETIME& ft) -> ULONGLONG {
     return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
   };
@@ -157,7 +98,7 @@ void UpdatePerfData() {
   }
 
   if (got_sample) {
-    if (!g_first_sample) {
+    if (!g_first_cpu_sample) {
       const ULONGLONG d_idle   = idle   - g_prev_idle;
       const ULONGLONG d_kernel = kernel - g_prev_kernel;
       const ULONGLONG d_user   = user   - g_prev_user;
@@ -173,13 +114,6 @@ void UpdatePerfData() {
     g_prev_idle    = idle;
     g_prev_kernel  = kernel;
     g_prev_user    = user;
-    g_first_sample = false;
+    g_first_cpu_sample = false;
   }
-}
-
-void CleanupPerfData() {
-  // ntdll.dll and kernel32.dll are never unloaded; just null the pointers.
-  g_NtQSI          = nullptr;
-  g_GetSystemTimes  = nullptr;
-  g_legacy_fallback = false;
 }

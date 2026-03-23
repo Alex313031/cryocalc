@@ -17,6 +17,12 @@ typedef BOOL (WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
                                         LPFILETIME lpKernelTime,
                                         LPFILETIME lpUserTime);
 
+extern NtQuerySystemInformation_t g_NtQSI;
+
+extern GetSystemTimes_t g_GetSystemTimes;
+
+extern int g_num_cpus;
+
 #ifndef NT_SUCCESS
  #define NT_SUCCESS(s) (((LONG)(s)) >= 0)
 #endif
@@ -39,25 +45,15 @@ static constexpr UINT kSpeedLow  = 2000u;
 static constexpr UINT kSpeedMed  = 1000u;
 static constexpr UINT kSpeedHigh =  500u;
 
-// Calls UpdatePerfData() to take a fresh sample, then returns g_snapshot.cpu_percent
+// Calls UpdateCPUPerfData() to take a fresh sample, then returns g_snapshot.cpu_percent
 // as a float clamped to [0.0, 100.0].
 const float GetCPUPercent();
 
 // Gets the number of logical CPU threads of the host system.
 DWORD GetLogicalProcessorCount();
 
-// Returns true if InitPerfData has been run at least once
-const bool IsPerfDataInitialized();
-
-// Dynamically load NtQuerySystemInformation from ntdll.dll and take an
-// initial CPU counter sample so the first timer tick gives a real reading.
-bool InitPerfData();
-
-// Re-sample all counters and update the internal PerfSnapshot.
+// Re-sample counters and update the internal PerfSnapshot cpu_percent.
 // Call this once per timer tick before requesting the snapshot.
-void UpdatePerfData();
-
-// Release any resources from InitPerfData().
-void CleanupPerfData();
+void UpdateCPUPerfData();
 
 #endif // CRYOCALC_STRESS_CPU_H_

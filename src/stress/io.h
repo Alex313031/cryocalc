@@ -11,4 +11,8 @@ struct DiskPerfState {
 
 const float GetDiskIOPercent();
 
+// Re-sample counters and update the internal PerfSnapshot io_percent.
+// Call this once per timer tick before requesting the snapshot.
+void UpdateIOPerfData();
+
 #endif // CRYOCALC_STRESS_IO_H_

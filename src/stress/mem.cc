@@ -4,26 +4,19 @@
 
 #include "reporting.h"
 
+static bool g_first_mem_sample = true; // Tracks whether this is first RAM/Commit Charge sample, for delta seeding
+
 // Gets the current total RAM usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetMemPercent.
 static float GetMemPercentImpl() {
-  static const bool legacy_fallback = IsWinOlderThan(kWinXP);
-  static GlobalMemoryStatusEx_t pfnGlobalMemoryStatusEx =
-      reinterpret_cast<GlobalMemoryStatusEx_t>(
-          GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GlobalMemoryStatusEx"));
+  static const bool legacy_fallback = g_legacy_fallback;
 
-  static bool backend_logged = false;
-
-  if (pfnGlobalMemoryStatusEx && !legacy_fallback) {
+  if (g_GlobalMemoryStatusEx && !legacy_fallback) {
     MEMORYSTATUSEX mem_status;
     mem_status.dwLength = sizeof(mem_status);
-    if (!pfnGlobalMemoryStatusEx(&mem_status)) {
+    if (!g_GlobalMemoryStatusEx(&mem_status)) {
       return 0.0f;
-    }
-    if (!backend_logged && debug_mode) {
-      backend_logged = true;
-      LOG(DEBUG) << L"RAM monitoring using GlobalMemoryStatusEx() (Windows XP+).";
     }
     return static_cast<float>(mem_status.dwMemoryLoad);
   } else {
@@ -31,10 +24,6 @@ static float GetMemPercentImpl() {
     MEMORYSTATUS mem_status;
     mem_status.dwLength = sizeof(mem_status);
     GlobalMemoryStatus(&mem_status);
-    if (!backend_logged && debug_mode) {
-      backend_logged = true;
-      LOG(DEBUG) << L"RAM monitoring using GlobalMemoryStatus() (Windows 2000 fallback).";
-    }
     return static_cast<float>(mem_status.dwMemoryLoad);
   }
 }
@@ -52,15 +41,12 @@ const float GetMemPercent() {
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetCommitChargePercent.
 static float GetCommitChargePercentImpl() {
-  static const bool legacy_fallback = IsWinOlderThan(kWinXP);
-  static GlobalMemoryStatusEx_t pfnGlobalMemoryStatusEx =
-      reinterpret_cast<GlobalMemoryStatusEx_t>(
-          GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GlobalMemoryStatusEx"));
+  static const bool legacy_fallback = g_legacy_fallback;
 
-  if (pfnGlobalMemoryStatusEx && !legacy_fallback) {
+  if (g_GlobalMemoryStatusEx && !legacy_fallback) {
     MEMORYSTATUSEX mem_status;
     mem_status.dwLength = sizeof(mem_status);
-    if (!pfnGlobalMemoryStatusEx(&mem_status)) {
+    if (!g_GlobalMemoryStatusEx(&mem_status)) {
       return 0.0f;
     }
     const DWORDLONG used = mem_status.ullTotalPageFile - mem_status.ullAvailPageFile;
@@ -100,4 +86,8 @@ const float GetCommitChargePercent() {
     }
   }
   return commit_percent;
+}
+
+void UpdateMemPerfData() {
+  g_first_mem_sample = false;
 }

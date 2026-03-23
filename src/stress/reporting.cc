@@ -1,10 +1,24 @@
 #include "reporting.h"
 
+#include <os_info_dll.h>
+
 #include "cpu.h"
 #include "io.h"
 #include "mem.h"
 
+NtQuerySystemInformation_t g_NtQSI = nullptr;
+GetSystemTimes_t g_GetSystemTimes  = nullptr;
+GlobalMemoryStatusEx_t g_GlobalMemoryStatusEx = nullptr;
+
+bool g_legacy_fallback = false;
+
+int g_num_cpus = 0;
+
 PerfSnapshot g_snapshot = {};
+
+static bool g_first_sample = true; // Tracks whether this is first sample, for delta seeding
+
+bool perf_data_initialized = false;
 
 std::atomic<bool> start_cpu_mon{false};
 std::atomic<bool> start_mem_mon{false};
@@ -216,4 +230,77 @@ void PauseMonitoring() {
 
 const PerfSnapshot& GetPerfSnapshot() {
   return g_snapshot;
+}
+
+const bool IsPerfDataInitialized() {
+  return perf_data_initialized;
+}
+
+bool InitPerfData() {
+  HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+  if (!ntdll) {
+    LOG(ERROR) << L"Failed to get ntdll.dll!";
+    return false;
+  }
+  g_legacy_fallback = IsWinOlderThan(kWinXP);
+
+  g_NtQSI =
+      reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(ntdll, "NtQuerySystemInformation"));
+  if (!g_NtQSI) {
+    ErrorBox(nullptr, L"NtQuerySystemInformation Error",
+            L"Failed to load NtQuerySystemInformation from ntdll.dll. \nCPU usage will not be available.");
+    return false;
+  }
+
+  // GetSystemTimes is XP SP1+ only; gracefully absent on Windows 2000.
+  HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+  if (kernel32) {
+    g_GetSystemTimes = reinterpret_cast<GetSystemTimes_t>(
+        GetProcAddress(kernel32, "GetSystemTimes"));
+    g_GlobalMemoryStatusEx =
+        reinterpret_cast<GlobalMemoryStatusEx_t>(
+            GetProcAddress(kernel32, "GlobalMemoryStatusEx"));
+  }
+
+  if (debug_mode) {
+    if (g_GetSystemTimes && !g_legacy_fallback) {
+      LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
+    } else {
+      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
+    }
+    if (g_GlobalMemoryStatusEx && !g_legacy_fallback) {
+      LOG(DEBUG) << L"RAM monitoring using GlobalMemoryStatusEx() (Windows XP+).";
+    } else {
+      LOG(DEBUG) << L"RAM monitoring using GlobalMemoryStatus() (Windows 2000 fallback).";
+    }
+  }
+
+  g_num_cpus = static_cast<int>(GetLogicalProcessorCount());
+  if (g_num_cpus < 1) {
+    g_num_cpus = 1;
+  }
+
+  // Seed the previous-sample counters so the first timer tick yields a real
+  // reading rather than 0%.
+  UpdatePerfData(); // sets g_first_sample = false, seeds prev counters
+
+  perf_data_initialized = true;
+  return true;
+}
+
+void UpdatePerfData() {
+  // Update all the performance counters
+  if (!g_first_sample) {
+    UpdateCPUPerfData();
+    UpdateMemPerfData(); // Updates both RAM and Commit Charge
+    UpdateIOPerfData(); // Updates both RAM and Commit Charge
+  }
+  g_first_sample = false;
+}
+
+void CleanupPerfData() {
+  // ntdll.dll and kernel32.dll are never unloaded; just null the pointers.
+  g_NtQSI          = nullptr;
+  g_GetSystemTimes  = nullptr;
+  g_GlobalMemoryStatusEx = nullptr;
 }
