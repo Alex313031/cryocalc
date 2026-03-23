@@ -177,10 +177,6 @@ void UpdatePerfData() {
   }
 }
 
-const PerfSnapshot& GetPerfSnapshot() {
-  return g_snapshot;
-}
-
 void CleanupPerfData() {
   // ntdll.dll and kernel32.dll are never unloaded; just null the pointers.
   g_NtQSI          = nullptr;

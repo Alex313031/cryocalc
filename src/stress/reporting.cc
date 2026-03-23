@@ -213,3 +213,7 @@ void PauseMonitoring() {
   SetIOMonitorState(false);
   // TODO: Progress bar states
 }
+
+const PerfSnapshot& GetPerfSnapshot() {
+  return g_snapshot;
+}

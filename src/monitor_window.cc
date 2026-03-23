@@ -22,7 +22,10 @@ static HINSTANCE this_hinst = nullptr;
 // We store up to kHistoryMax entries and display the most recent
 // <graph_width> of them right-aligned (oldest on the left, newest on the right).
 static constexpr int kHistoryMax = 1024; // more than enough history for any window size
-static std::deque<int> g_history;
+static std::deque<int> g_cpu_history;
+static std::deque<int> g_ram_history;
+static std::deque<int> g_comm_history;
+static std::deque<int> g_io_history;
 
 static UINT g_update_interval = kSpeedHigh;
 
@@ -156,7 +159,9 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_TIMER:
       if (wParam == kUpdateTimerId) {
         UpdatePerfData();
-        PushCpuSample(GetPerfSnapshot().cpu_percent);
+        const PerfSnapshot snapshot = GetPerfSnapshot();
+        PushSamples(snapshot.cpu_percent, static_cast<int>(snapshot.ram_percent),
+                    static_cast<int>(snapshot.comm_percent), snapshot.io_percent);
         if (hMonitorStatusBar) {
           wchar_t sb_text[32];
           wsprintfW(sb_text, L" CPU: %d%%", GetPerfSnapshot().cpu_percent);
@@ -321,16 +326,29 @@ void InitMeters(HWND hWnd) {
   }
 }
 
-void PushCpuSample(int percent) {
-  g_history.push_back(percent);
-  while (static_cast<int>(g_history.size()) > kHistoryMax) {
-    g_history.pop_front();
+void PushSamples(int cpu_percent, int ram_percent, int comm_percent, int io_percent) {
+  g_cpu_history.push_back(cpu_percent);
+  g_ram_history.push_back(ram_percent);
+  g_comm_history.push_back(comm_percent);
+  g_io_history.push_back(io_percent);
+  while (static_cast<int>(g_cpu_history.size()) > kHistoryMax) {
+    g_cpu_history.pop_front();
+  }
+  while (static_cast<int>(g_ram_history.size()) > kHistoryMax) {
+    g_ram_history.pop_front();
+  }
+  while (static_cast<int>(g_comm_history.size()) > kHistoryMax) {
+    g_comm_history.pop_front();
+  }
+  while (static_cast<int>(g_io_history.size()) > kHistoryMax) {
+    g_io_history.pop_front();
   }
 }
 
 // Renders the scrolling line graph into the already-clipped
-// inner RECT, (background should already be filled by the caller)
-static void DrawGraph(HDC hdc, const RECT& inner) {
+// inner RECT, (background should already be filled by the caller). 
+// kMonType selects which performance counter to use, for the four different graphs
+static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   int iw = inner.right - inner.left;
   int ih = inner.bottom - inner.top;
   bool make_grid = false;
@@ -340,15 +358,25 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
     make_grid = true;
   }
 
+  // Select the correct history ring based on graph type.
+  const std::deque<int>* history = nullptr;
+  switch (type) {
+    case RAM_TYPE:  history = &g_ram_history;  break;
+    case COMM_TYPE: history = &g_comm_history; break;
+    case IO_TYPE:   history = &g_io_history;   break;
+    case CPU_TYPE:
+    default:        history = &g_cpu_history;  break;
+  }
+
   // How many history entries fit in the available pixel width
-  int n_valid = static_cast<int>(g_history.size());
+  int n_valid = static_cast<int>(history->size());
   if (n_valid > iw) {
     n_valid = iw;
   }
 
   // Data is right-aligned: most recent sample appears at the far right.
   int start_x      = iw - n_valid;
-  int hist_offset  = static_cast<int>(g_history.size()) - n_valid;
+  int hist_offset  = static_cast<int>(history->size()) - n_valid;
 
   // Grid lines - 9 horizontal + 9 vertical, dividing the area into 10 equal sized cells
   if (make_grid) {
@@ -376,7 +404,7 @@ static void DrawGraph(HDC hdc, const RECT& inner) {
   std::vector<POINT> pts;
   pts.reserve(static_cast<size_t>(n_valid));
   for (int i = 0; i < n_valid; i++) {
-    int pct = g_history[static_cast<size_t>(hist_offset + i)];
+    int pct = (*history)[static_cast<size_t>(hist_offset + i)];
     int y   = inner.top + ih - 1 - (pct * (ih - 1) / 100);
     pts.push_back({inner.left + start_x + i, y});
   }
@@ -434,7 +462,7 @@ void DrawMeter(HDC hdc, const RECT& area) {
   FillRect(hdc, &graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
 
   // Scrolling line graph
-  DrawGraph(hdc, graph_rect);
+  DrawGraph(hdc, graph_rect, CPU_TYPE);
 }
 
 void DrawMeters(HDC hdc, const RECT& area) {
@@ -489,10 +517,10 @@ void DrawMeters(HDC hdc, const RECT& area) {
   FillRect(hdc, &io_graph_rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
 
   // Scrolling line graphs
-  DrawGraph(hdc, cpu_graph_rect);
-  DrawGraph(hdc, ram_graph_rect);
-  DrawGraph(hdc, comm_graph_rect);
-  DrawGraph(hdc, io_graph_rect);
+  DrawGraph(hdc, cpu_graph_rect, CPU_TYPE);
+  DrawGraph(hdc, ram_graph_rect, RAM_TYPE);
+  DrawGraph(hdc, comm_graph_rect, COMM_TYPE);
+  DrawGraph(hdc, io_graph_rect, IO_TYPE);
 }
 
 // TODO Rename
@@ -501,5 +529,8 @@ void CleanupMeters() {
     DeleteObject(g_monitor_font);
   }
   g_monitor_font = nullptr;
-  g_history.clear();
+  g_cpu_history.clear();
+  g_ram_history.clear();
+  g_comm_history.clear();
+  g_io_history.clear();
 }

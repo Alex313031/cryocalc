@@ -70,4 +70,7 @@ void StartIOMon();
 // Helper function to stop monitoring, but keep hCPUBar/hMEMBar current position
 void PauseMonitoring();
 
+// Returns a const reference to the last snapshot produced by UpdatePerfData().
+const PerfSnapshot& GetPerfSnapshot();
+
 #endif // CRYOCALC_STRESS_REPORTING_H_

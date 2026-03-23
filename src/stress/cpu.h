@@ -57,9 +57,6 @@ bool InitPerfData();
 // Call this once per timer tick before requesting the snapshot.
 void UpdatePerfData();
 
-// Returns a const reference to the last snapshot produced by UpdatePerfData().
-const PerfSnapshot& GetPerfSnapshot();
-
 // Release any resources from InitPerfData().
 void CleanupPerfData();
 
