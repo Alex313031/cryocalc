@@ -29,10 +29,5 @@ extern PerfSnapshot g_snapshot;
 extern float g_total_ram_mb;    // Total physical RAM (MB)
 extern float g_total_commit_mb; // Total commit limit: RAM + pagefile (MB)
 
-// For controlling sys monitoring threads activation
-extern std::atomic<bool> start_cpu_mon;
-extern std::atomic<bool> start_mem_mon;
-extern std::atomic<bool> start_commit_mon;
-extern std::atomic<bool> start_io_mon;
 
 #endif // CRYOCALC_STRESS_COMMON_H_

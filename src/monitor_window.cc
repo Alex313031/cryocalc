@@ -27,7 +27,7 @@ static std::deque<float> g_ram_history;
 static std::deque<float> g_comm_history;
 static std::deque<float> g_io_history;
 
-static UINT g_update_interval = kSpeedHigh;
+UINT g_update_interval = kSpeedHigh; // Shared; also read by controls.cc on init
 
 // Layout constants
 static inline constexpr int kMarginH   = 4;  // left/right margin outside the graph box
@@ -35,34 +35,37 @@ static inline constexpr int kMarginTop = 4;  // top margin above the label
 static inline constexpr int kMarginBot = 4;  // bottom margin below the graph box
 static inline constexpr int kLabelH    = 16; // height of the label above the graph box, also used for hit-testing
 
-// Returns the HMENU for the "Update Speed" popup so we can radio-check it.
-static HMENU GetSpeedMenu(HWND hWnd) {
-  HMENU hBar  = GetMenu(hWnd);
-  if (!hBar) {
-    return nullptr;
-  }
-  HMENU hOpts = GetSubMenu(hBar, 0); // "Settings" is index 0
-  if (!hOpts) {
-    return nullptr;
-  }
-  return GetSubMenu(hOpts, 0); // "Update Speed" is index 0 within "Settings"
+// "Update Speed" popup from the monitor window menu (Settings > index 0).
+static HMENU GetMonitorSpeedMenu() {
+  HMENU hBar  = GetMenu(hMonitorWin);
+  HMENU hOpts = hBar ? GetSubMenu(hBar, 0) : nullptr;
+  return hOpts ? GetSubMenu(hOpts, 0) : nullptr;
 }
 
-// Apply a new update interval: kill the old timer, start a new one, and
-// update the radio-button checkmark on the speed submenu.
-static void SetUpdateSpeed(HWND hWnd, UINT interval, UINT menu_id) {
+// "Update Speed" popup from the main CryoCalc window menu (Settings=index 2, submenu index 1).
+static HMENU GetMainSpeedMenu() {
+  HMENU hBar      = GetMenu(hMainWindow);
+  HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
+  return hSettings ? GetSubMenu(hSettings, 1) : nullptr;
+}
+
+// Restart the single monitoring timer on the main window at the new rate and
+// radio-check both menus. Safe to call from either window's message handler.
+void SetUpdateSpeed(UINT interval, UINT menu_id) {
   g_update_interval = interval;
-  KillTimer(hWnd, kUpdateTimerId);
-  SetTimer(hWnd, kUpdateTimerId, g_update_interval, nullptr);
+  KillTimer(hMainWindow, kUpdateTimerId);
+  SetTimer(hMainWindow, kUpdateTimerId, g_update_interval, nullptr);
 
-  HMENU hSpd = GetSpeedMenu(hWnd);
-  if (hSpd) {
-    CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, menu_id, MF_BYCOMMAND);
+  HMENU hMainSpd = GetMainSpeedMenu();
+  if (hMainSpd) {
+    CheckMenuRadioItem(hMainSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, menu_id, MF_BYCOMMAND);
   }
-}
-
-unsigned int GetUpdateSpeed() {
-  return g_update_interval;
+  if (hMonitorWin) {
+    HMENU hMonSpd = GetMonitorSpeedMenu();
+    if (hMonSpd) {
+      CheckMenuRadioItem(hMonSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, menu_id, MF_BYCOMMAND);
+    }
+  }
 }
 
 bool OpenMonitorWindow(HWND hWnd) {
@@ -142,42 +145,16 @@ void HandleMonitorWindowResize(HWND hWnd) {
 LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_CREATE: {
-      // Initialize anything we need to
       InitMeters(hWnd);
-
-      // Start the update timer at the default interval.
-      SetTimer(hWnd, kUpdateTimerId, GetUpdateSpeed(), nullptr);
-
-      // Radio check the default speed item.
-      HMENU hSpd = GetSpeedMenu(hWnd);
+      // Sync the speed radio check to whatever the main window timer is using.
+      HMENU hSpd = GetMonitorSpeedMenu();
       if (hSpd) {
-        CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH,
-                           IDM_SPEED_HIGH, MF_BYCOMMAND);
+        UINT cur_id = IDM_SPEED_HIGH;
+        if (g_update_interval == kSpeedLow)      { cur_id = IDM_SPEED_LOW; }
+        else if (g_update_interval == kSpeedMed) { cur_id = IDM_SPEED_MED; }
+        CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, cur_id, MF_BYCOMMAND);
       }
     } break;
-    // Periodic update
-    case WM_TIMER:
-      if (wParam == kUpdateTimerId) {
-        UpdatePerfData();
-        const PerfSnapshot snapshot = GetPerfSnapshot();
-        PushSamples(snapshot.cpu_percent, snapshot.ram_percent,
-                    snapshot.comm_percent, snapshot.io_percent);
-        if (hMonitorStatusBar) {
-          wchar_t sb_text[MAX_LOADSTRING];
-          const PerfSnapshot& sb_snap = GetPerfSnapshot();
-          swprintf(sb_text, MAX_LOADSTRING,
-                   L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%%",
-                   sb_snap.cpu_percent,
-                   sb_snap.ram_used_mb, g_total_ram_mb,
-                   sb_snap.comm_used_mb, g_total_commit_mb,
-                   sb_snap.io_percent);
-          SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
-                       reinterpret_cast<LPARAM>(sb_text));
-        }
-        // FALSE = do not erase background (we paint it fully in WM_PAINT).
-        InvalidateRect(hWnd, nullptr, FALSE);
-      }
-      break;
     // Painting
     case WM_ERASEBKGND:
       // Suppress default erase; WM_PAINT handles the full background.
@@ -234,13 +211,13 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
           ShowAboutDialog(hWnd);
           break;
         case IDM_SPEED_LOW:
-          SetUpdateSpeed(hWnd, kSpeedLow, IDM_SPEED_LOW);
+          SetUpdateSpeed(kSpeedLow, IDM_SPEED_LOW);
           break;
         case IDM_SPEED_MED:
-          SetUpdateSpeed(hWnd, kSpeedMed, IDM_SPEED_MED);
+          SetUpdateSpeed(kSpeedMed, IDM_SPEED_MED);
           break;
         case IDM_SPEED_HIGH:
-          SetUpdateSpeed(hWnd, kSpeedHigh, IDM_SPEED_HIGH);
+          SetUpdateSpeed(kSpeedHigh, IDM_SPEED_HIGH);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -263,9 +240,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         TrackPopupMenu(hOpts, TPM_RIGHTBUTTON, screen_x, screen_y, 0, hWnd, nullptr);
       }
     } break;
-    // Stop monitoring on shutdown, before CryoCalc close
     case WM_QUERYENDSESSION:
-      KillTimer(hWnd, kUpdateTimerId);
       DestroyWindow(hWnd);
       break;
     // Left-click on the graph area drags the whole window,
@@ -282,18 +257,15 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       }
     } break;
     case WM_CLOSE:
-      KillTimer(hWnd, kUpdateTimerId);
       if (!ResetFocus(hMainWindow, nullptr)) {
         LOG(ERROR) << L"ResetFocus failed!";
       }
       DestroyWindow(hWnd);
       break;
     case WM_DESTROY:
-      KillTimer(hWnd, kUpdateTimerId);
       CleanupMeters();
-      // Do NOT call CleanupPerfData() here: PerfData is shared with the MonitorCPU
-      // thread (hCPUBar) which may still be running after this window closes.
-      // CleanupPerfData() should be called at application shutdown.
+      // Do NOT call CleanupPerfData() here; it is owned by the main window
+      // and cleaned up via StopMonitoring() at application shutdown.
       if (UnregisterClassW(szMonitorWindowClass, this_hinst)) {
         hMonitorWin = nullptr;
       }

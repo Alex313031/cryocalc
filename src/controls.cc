@@ -572,12 +572,19 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hIOBar, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOBarLabel, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOPercent, hInst, L"Disk I/O Usage %");
-  // Start system Monitoring at end of controls initialization
+  // Start the unified monitoring timer on the main window.
   if (!InitPerfData()) {
     ErrorBox(hWnd, L"Perf Data Init Failure", L"InitPerfData failed!");
     return;
-  } else {
-    StartMonitoring(500L);
+  }
+  SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
+  // Radio-check "High" as the default speed in the main window menu.
+  // Settings is index 2 in the menu bar; Update Speed is index 1 within Settings.
+  HMENU hBar      = GetMenu(hWnd);
+  HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
+  HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
+  if (hSpeed) {
+    CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
   }
 }
 

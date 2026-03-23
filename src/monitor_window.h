@@ -18,6 +18,13 @@ static inline constexpr int kMinOuterH = 160;
 // Status bar for showing percentages
 extern HWND hMonitorStatusBar;
 
+// Current update interval in ms (kSpeedLow/Med/High). Shared between windows.
+extern UINT g_update_interval;
+
+// Restart the monitoring timer on the main window at the new rate and
+// radio-check both speed menus. Safe to call from either window's handler.
+void SetUpdateSpeed(UINT interval, UINT menu_id);
+
 // Opens a monitor window to graph
 bool OpenMonitorWindow(HWND hWnd);
 

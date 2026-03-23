@@ -320,10 +320,56 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           const std::wstring cryocalc_logfile_path = GetExeDir() + kLogFileName;
           OpenLogFile(hWnd, cryocalc_logfile_path);
         } break;
+        case IDM_SPEED_LOW:
+          SetUpdateSpeed(kSpeedLow, IDM_SPEED_LOW);
+          break;
+        case IDM_SPEED_MED:
+          SetUpdateSpeed(kSpeedMed, IDM_SPEED_MED);
+          break;
+        case IDM_SPEED_HIGH:
+          SetUpdateSpeed(kSpeedHigh, IDM_SPEED_HIGH);
+          break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
     } break;
+    // Unified monitoring timer: update perf data, bars, text labels, and
+    // the monitor window graphs (if open) all in one tick.
+    case WM_TIMER:
+      if (wParam == kUpdateTimerId) {
+        UpdatePerfData();
+        const PerfSnapshot& snap = GetPerfSnapshot();
+        SetCPUBarPos(snap.cpu_percent);
+        SetMEMBarPos(snap.ram_percent);
+        SetCommitBarPos(snap.comm_percent);
+        SetIOBarPos(snap.io_percent);
+        wchar_t pct_text[16];
+        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.cpu_percent)));
+        SetWindowTextW(hCPUPercent, pct_text);
+        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.ram_percent)));
+        SetWindowTextW(hMemPercent, pct_text);
+        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.comm_percent)));
+        SetWindowTextW(hCommitPercent, pct_text);
+        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.io_percent)));
+        SetWindowTextW(hIOPercent, pct_text);
+        if (hMonitorWin) {
+          PushSamples(snap.cpu_percent, snap.ram_percent,
+                      snap.comm_percent, snap.io_percent);
+          if (hMonitorStatusBar) {
+            wchar_t sb_text[MAX_LOADSTRING];
+            swprintf(sb_text, MAX_LOADSTRING,
+                     L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%%",
+                     snap.cpu_percent,
+                     snap.ram_used_mb,  g_total_ram_mb,
+                     snap.comm_used_mb, g_total_commit_mb,
+                     snap.io_percent);
+            SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
+                         reinterpret_cast<LPARAM>(sb_text));
+          }
+          InvalidateRect(hMonitorWin, nullptr, FALSE);
+        }
+      }
+      break;
     // When window is shown
     case WM_CREATE:
       SetClientRects(hWnd, hInst);
