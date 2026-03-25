@@ -263,7 +263,8 @@ bool HandleChildClick(HWND parent, HWND child) {
   if (!parent || !child) {
     return false;
   }
-  if (child == hCPUBar || child == hMEMBar || child == hCommitBar || child == hIOBar) {
+  if (child == hCPUBar || child == hCPUPercent || child == hMemBar || child == hMemPercent
+      || child == hCommitBar || child == hCommitPercent || child == hIOBar || child == hIOPercent) {
     return PostMessageW(parent, WM_OPEN_MONITOR_WIN, 0, 0);
   }
   return true;
