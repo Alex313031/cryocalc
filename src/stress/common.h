@@ -3,13 +3,7 @@
 
 #include "../framework.h"
 
-enum kMonType {
-  CPU_TYPE  = 0,
-  RAM_TYPE  = 1,
-  COMM_TYPE = 2,
-  IO_TYPE   = 3,
-  MAX_TYPE  = 4
-};
+enum kMonType { CPU_TYPE = 0, RAM_TYPE = 1, COMM_TYPE = 2, IO_TYPE = 3, MAX_TYPE = 4 };
 
 // Snapshot of the most recently measured system performance counters.
 struct PerfSnapshot {
@@ -27,6 +21,5 @@ extern PerfSnapshot g_snapshot;
 // Set once on first memory sample; never change at runtime.
 extern float g_total_ram_mb;    // Total physical RAM (MB)
 extern float g_total_commit_mb; // Total commit limit: RAM + pagefile (MB)
-
 
 #endif // CRYOCALC_STRESS_COMMON_H_

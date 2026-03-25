@@ -1,22 +1,28 @@
 #include "logging.h"
 
 namespace logging {
-  volatile bool dcheck_log_ = false;
-  bool logging_initialized  = false;
-  std::wstring kProgName    = L"";
-  std::wstring kLogFileName = L"";
-  static bool show_func_sigs = false;
+  volatile bool dcheck_log_     = false;
+  bool logging_initialized      = false;
+  std::wstring kProgName        = L"";
+  std::wstring kLogFileName     = L"";
+  static bool show_func_sigs    = false;
   static bool show_line_numbers = true;
-  static bool show_time = false;
+  static bool show_time         = false;
   // What minimum log level to show all prefixes,
   // for example FATAL to help diagnose errors.
   LogLevel full_prefix_level = LOG_FATAL;
 } // namespace logging
 
-logging::LogMessage::LogMessage(LogLevel level, bool log_to_file, bool log_to_console,
-                                const char* func_sig, int line_number)
-    : level_(level), log_to_file_(log_to_file), log_to_console_(log_to_console),
-      func_sig_(func_sig), line_number_(line_number) {
+logging::LogMessage::LogMessage(LogLevel level,
+                                bool log_to_file,
+                                bool log_to_console,
+                                const char* func_sig,
+                                int line_number)
+    : level_(level),
+      log_to_file_(log_to_file),
+      log_to_console_(log_to_console),
+      func_sig_(func_sig),
+      line_number_(line_number) {
 }
 
 logging::LogMessage::~LogMessage() {
@@ -61,12 +67,12 @@ logging::LogMessage::~LogMessage() {
     SYSTEMTIME systime;
     GetSystemTime(&systime);
     std::wostringstream ts;
-    ts << std::setfill(L'0') << L'T'
-    /* << std::setw(4) << systime.wYear  << L'-'
-       << std::setw(2) << systime.wMonth << L'-'
-       << std::setw(2) << systime.wDay   << L'|' */
-       << std::setw(2) << systime.wHour  << L':'
-       << std::setw(2) << systime.wMinute << L':'
+    ts << std::setfill(L'0')
+       << L'T'
+       /* << std::setw(4) << systime.wYear  << L'-'
+          << std::setw(2) << systime.wMonth << L'-'
+          << std::setw(2) << systime.wDay   << L'|' */
+       << std::setw(2) << systime.wHour << L':' << std::setw(2) << systime.wMinute << L':'
        << std::setw(2) << systime.wSecond << L' ';
     full_prefix += ts.str();
   }
@@ -203,17 +209,16 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
   dcheck_log_ = set_is_dcheck;
 }
 
-bool logging::InitLogging(HINSTANCE hInstance,
-                          LogInitSettings InitSettings) {
+bool logging::InitLogging(HINSTANCE hInstance, LogInitSettings InitSettings) {
   DCHECK(!logging_initialized);
-  bool success = false;
-  LogDest log_sink = InitSettings.log_sink;
+  bool success                    = false;
+  LogDest log_sink                = InitSettings.log_sink;
   const std::wstring logfile_name = InitSettings.logfile_name;
-  const std::wstring app_name = InitSettings.app_name;
-  show_func_sigs = InitSettings.show_func_sigs;
-  show_line_numbers = InitSettings.show_line_numbers;
-  show_time = InitSettings.show_time;
-  full_prefix_level = InitSettings.full_prefix_level;
+  const std::wstring app_name     = InitSettings.app_name;
+  show_func_sigs                  = InitSettings.show_func_sigs;
+  show_line_numbers               = InitSettings.show_line_numbers;
+  show_time                       = InitSettings.show_time;
+  full_prefix_level               = InitSettings.full_prefix_level;
   if (!hInstance || log_sink >= MAX_LOG_DEST) {
     logging_initialized = false;
     return false;

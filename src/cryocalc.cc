@@ -82,14 +82,14 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   const std::wstring kLogFile(kLogFileName);
 
   logging::LogInitSettings LoggingSettings;
-  LoggingSettings.log_sink = kLogSink;
-  LoggingSettings.logfile_name = kLogFile;
-  LoggingSettings.app_name = kAppName;
-  LoggingSettings.show_func_sigs = false;
+  LoggingSettings.log_sink          = kLogSink;
+  LoggingSettings.logfile_name      = kLogFile;
+  LoggingSettings.app_name          = kAppName;
+  LoggingSettings.show_func_sigs    = false;
   LoggingSettings.show_line_numbers = false;
-  LoggingSettings.show_time = false;
+  LoggingSettings.show_time         = false;
   LoggingSettings.full_prefix_level = LOG_ERROR;
-  const bool init_logging = logging::InitLogging(hInstance, LoggingSettings);
+  const bool init_logging           = logging::InitLogging(hInstance, LoggingSettings);
   if (init_logging) {
     logging::SetIsDCheck(is_dcheck);
     HandleDebugMode(debug_mode ? debug_mode
@@ -135,15 +135,15 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.cbSize                  = sizeof(WNDCLASSEX);
   static const HICON main_icon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CRYOCALC));
   // Set styles, icons, and window message handling function.
-  wcex.style       = CS_HREDRAW | CS_VREDRAW; // Drawing style
-  wcex.lpfnWndProc = WindowProc;              // Window Procedure function
-  wcex.cbClsExtra  = 0;                       // Extra bytes to add to end of this window class
-  wcex.cbWndExtra  = 0;                       // Extra bytes to add to end hInstance
-  wcex.hInstance   = hInstance;               // This instance
-  wcex.hIcon       = nullptr;                 // Load our main app icon
-  wcex.hCursor     = LoadCursor(nullptr, IDC_ARROW);   // Choose default cursor style to show
-  wcex.hbrBackground =
-      reinterpret_cast<HBRUSH>(COLOR_3DSHADOW);        // Choose window client area background color (dialog gray)
+  wcex.style         = CS_HREDRAW | CS_VREDRAW; // Drawing style
+  wcex.lpfnWndProc   = WindowProc;              // Window Procedure function
+  wcex.cbClsExtra    = 0;                       // Extra bytes to add to end of this window class
+  wcex.cbWndExtra    = 0;                       // Extra bytes to add to end hInstance
+  wcex.hInstance     = hInstance;               // This instance
+  wcex.hIcon         = nullptr;                 // Load our main app icon
+  wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
+  wcex.hbrBackground = reinterpret_cast<HBRUSH>(
+      COLOR_3DSHADOW); // Choose window client area background color (dialog gray)
   wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName = szWindowClass;                  // Use our unique window class name
   wcex.hIconSm       = main_icon;                      // Load titlebar icon
@@ -357,18 +357,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.io_percent)));
         SetWindowTextW(hIOPercent, pct_text);
         if (hMonitorWin) {
-          PushSamples(snap.cpu_percent, snap.kernel_percent,
-                      snap.ram_percent, snap.comm_percent, snap.io_percent);
+          PushSamples(snap.cpu_percent, snap.kernel_percent, snap.ram_percent, snap.comm_percent,
+                      snap.io_percent);
           if (hMonitorStatusBar) {
             wchar_t sb_text[MAX_LOADSTRING];
             swprintf(sb_text, MAX_LOADSTRING,
                      L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%%",
-                     snap.cpu_percent,
-                     snap.ram_used_mb,  g_total_ram_mb,
-                     snap.comm_used_mb, g_total_commit_mb,
-                     snap.io_percent);
-            SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0,
-                         reinterpret_cast<LPARAM>(sb_text));
+                     snap.cpu_percent, snap.ram_used_mb, g_total_ram_mb, snap.comm_used_mb,
+                     g_total_commit_mb, snap.io_percent);
+            SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(sb_text));
           }
           InvalidateRect(hMonitorWin, nullptr, FALSE);
         }

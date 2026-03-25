@@ -6,16 +6,17 @@
 #include "common.h"
 
 /* Typedefs for accessing system .dll functions through GetProcAddress() */
-typedef void (WINAPI* GetNativeSystemInfo_t)(SYSTEM_INFO* lpSystemInfo);
+typedef void(WINAPI* GetNativeSystemInfo_t)(SYSTEM_INFO* lpSystemInfo);
 
-typedef NTSTATUS (WINAPI* NtQuerySystemInformation_t)(SYSTEM_INFORMATION_CLASS SystemInformationClass,
-                                                      PVOID SystemInformation,
-                                                      ULONG SystemInformationLength,
-                                                      PULONG ReturnLength);
+typedef NTSTATUS(WINAPI* NtQuerySystemInformation_t)(
+    SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength);
 
-typedef BOOL (WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
-                                        LPFILETIME lpKernelTime,
-                                        LPFILETIME lpUserTime);
+typedef BOOL(WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
+                                       LPFILETIME lpKernelTime,
+                                       LPFILETIME lpUserTime);
 
 extern NtQuerySystemInformation_t g_NtQSI;
 
@@ -34,7 +35,7 @@ struct SysProcPerfInfo {
   LARGE_INTEGER UserTime;
   LARGE_INTEGER DpcTime;
   LARGE_INTEGER InterruptTime;
-  ULONG         InterruptCount;
+  ULONG InterruptCount;
 };
 
 // Timer stuff
@@ -43,7 +44,7 @@ static constexpr UINT kUpdateTimerId = 1u;
 // Graph Update speed intervals in milliseconds
 static constexpr UINT kSpeedLow  = 2000u;
 static constexpr UINT kSpeedMed  = 1000u;
-static constexpr UINT kSpeedHigh =  500u;
+static constexpr UINT kSpeedHigh = 500u;
 
 // Calls UpdateCPUPerfData() to take a fresh sample, then returns g_snapshot.cpu_percent
 // as a float clamped to [0.0, 100.0].

@@ -21,7 +21,7 @@ ReflowComments: true
  # Align multiple trailing comments for readability
 AlignTrailingComments:
   Kind: Always
-  OverEmptyLines: 1
+  OverEmptyLines: 0
  # Enforce one space and one space only after // comment prefix
 SpacesInLineCommentPrefix:
   Minimum: 1

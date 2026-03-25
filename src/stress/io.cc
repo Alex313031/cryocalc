@@ -4,7 +4,6 @@
 
 #include "reporting.h"
 
-
 // Gets the current total disk I/O usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetDiskIOPercent.
@@ -16,20 +15,21 @@ static float GetDiskIOPercentImpl() {
 
   for (int i = 0; i < 16; ++i) {
     const std::wstring drive_path = L"\\\\.\\PhysicalDrive" + std::to_wstring(i);
-    HANDLE hDisk = CreateFileW(drive_path.c_str(), 0,
-        FILE_SHARE_READ | FILE_SHARE_WRITE,
-        nullptr, OPEN_EXISTING, 0, nullptr);
+    HANDLE hDisk = CreateFileW(drive_path.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                               OPEN_EXISTING, 0, nullptr);
     if (hDisk == INVALID_HANDLE_VALUE) {
       break;
     }
 
     DISK_PERFORMANCE perf = {};
-    DWORD bytes_returned = 0;
-    const BOOL ok = DeviceIoControl(hDisk, IOCTL_DISK_PERFORMANCE,
-        nullptr, 0, &perf, sizeof(perf), &bytes_returned, nullptr);
+    DWORD bytes_returned  = 0;
+    const BOOL ok = DeviceIoControl(hDisk, IOCTL_DISK_PERFORMANCE, nullptr, 0, &perf, sizeof(perf),
+                                    &bytes_returned, nullptr);
     CloseHandle(hDisk);
 
-    if (!ok) continue;
+    if (!ok) {
+      continue;
+    }
 
     if (i >= static_cast<int>(disk_states.size())) {
       disk_states.resize(i + 1);
@@ -44,7 +44,7 @@ static float GetDiskIOPercentImpl() {
       continue;
     }
 
-    const LONGLONG read_delta  = perf.ReadTime.QuadPart  - state.prev_read_time;
+    const LONGLONG read_delta  = perf.ReadTime.QuadPart - state.prev_read_time;
     const LONGLONG write_delta = perf.WriteTime.QuadPart - state.prev_write_time;
     const LONGLONG query_delta = perf.QueryTime.QuadPart - state.prev_query_time;
 
@@ -52,10 +52,12 @@ static float GetDiskIOPercentImpl() {
     state.prev_write_time = perf.WriteTime.QuadPart;
     state.prev_query_time = perf.QueryTime.QuadPart;
 
-    if (query_delta <= 0) continue;
+    if (query_delta <= 0) {
+      continue;
+    }
 
-    const float percent = static_cast<float>(read_delta + write_delta) /
-                          static_cast<float>(query_delta) * 100.0f;
+    const float percent =
+        static_cast<float>(read_delta + write_delta) / static_cast<float>(query_delta) * 100.0f;
     max_percent = std::max(max_percent, percent);
   }
 

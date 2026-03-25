@@ -36,7 +36,7 @@ namespace logging {
 
 #if !defined(NDEBUG)
  #define DCHECK(condition) CHECK(condition)
-#else  // NDEBUG defined (release build)
+#else // NDEBUG defined (release build)
  #define DCHECK(condition) ((void)0)
 #endif // !defined(NDEBUG)
 

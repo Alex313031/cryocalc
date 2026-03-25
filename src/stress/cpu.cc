@@ -82,16 +82,14 @@ void UpdateCPUPerfData() {
     // Fallback: Windows 2000 / XP RTM
     std::vector<SysProcPerfInfo> info(static_cast<size_t>(g_num_cpus));
     ULONG ret_len = 0;
-    LONG status = g_NtQSI(
-        SystemProcessorPerformanceInformation,
-        info.data(),
-        static_cast<ULONG>(sizeof(SysProcPerfInfo) * static_cast<size_t>(g_num_cpus)),
-        &ret_len);
+    LONG status   = g_NtQSI(
+        SystemProcessorPerformanceInformation, info.data(),
+        static_cast<ULONG>(sizeof(SysProcPerfInfo) * static_cast<size_t>(g_num_cpus)), &ret_len);
     if (NT_SUCCESS(status)) {
       for (int i = 0; i < g_num_cpus; i++) {
-        idle   += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].IdleTime.QuadPart);
+        idle += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].IdleTime.QuadPart);
         kernel += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].KernelTime.QuadPart);
-        user   += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].UserTime.QuadPart);
+        user += static_cast<ULONGLONG>(info[static_cast<size_t>(i)].UserTime.QuadPart);
       }
       got_sample = true;
     }
@@ -99,23 +97,25 @@ void UpdateCPUPerfData() {
 
   if (got_sample) {
     if (!g_first_cpu_sample) {
-      const ULONGLONG d_idle   = idle   - g_prev_idle;
+      const ULONGLONG d_idle   = idle - g_prev_idle;
       const ULONGLONG d_kernel = kernel - g_prev_kernel;
-      const ULONGLONG d_user   = user   - g_prev_user;
+      const ULONGLONG d_user   = user - g_prev_user;
       const ULONGLONG d_total  = d_kernel + d_user;
       if (d_total > 0) {
         // kernel includes idle, so busy = (kernel - idle) + user = total - idle
-        const ULONGLONG busy      = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
-        const ULONGLONG kbusy     = (d_idle <= d_kernel) ? (d_kernel - d_idle) : 0ULL;
-        const float final_total   = static_cast<float>(d_total);
-        g_snapshot.cpu_percent    = std::clamp(static_cast<float>(busy  * 100ULL) / final_total, 0.0f, 100.0f);
-        g_snapshot.kernel_percent = std::clamp(static_cast<float>(kbusy * 100ULL) / final_total, 0.0f, 100.0f);
+        const ULONGLONG busy    = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
+        const ULONGLONG kbusy   = (d_idle <= d_kernel) ? (d_kernel - d_idle) : 0ULL;
+        const float final_total = static_cast<float>(d_total);
+        g_snapshot.cpu_percent =
+            std::clamp(static_cast<float>(busy * 100ULL) / final_total, 0.0f, 100.0f);
+        g_snapshot.kernel_percent =
+            std::clamp(static_cast<float>(kbusy * 100ULL) / final_total, 0.0f, 100.0f);
       }
     }
 
-    g_prev_idle    = idle;
-    g_prev_kernel  = kernel;
-    g_prev_user    = user;
+    g_prev_idle        = idle;
+    g_prev_kernel      = kernel;
+    g_prev_user        = user;
     g_first_cpu_sample = false;
   }
 }

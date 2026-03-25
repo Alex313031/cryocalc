@@ -258,18 +258,18 @@ bool HandleConvert(HWND hWnd) {
   return success;
 }
 
-static const UINT kProgressBarTop       = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
-static const UINT kOsInfoButtonWidth    = PROGBAR_WIDTH;
-static const UINT kSmallButtonWidth     = (kOsInfoButtonWidth / 2u) - (PADDING_X / 2u);
-static const UINT kTempEditLeft         = STATIC_LEFT + LABEL_WIDTH + INTRA_PADDING;
-static const UINT kButtonCol2Left       = kTempEditLeft + EDIT_WIDTH + INTRA_PADDING;
+static const UINT kProgressBarTop    = STATIC_TOP + STATICLABEL_HEIGHT + PADDING_Y;
+static const UINT kOsInfoButtonWidth = PROGBAR_WIDTH;
+static const UINT kSmallButtonWidth  = (kOsInfoButtonWidth / 2u) - (PADDING_X / 2u);
+static const UINT kTempEditLeft      = STATIC_LEFT + LABEL_WIDTH + INTRA_PADDING;
+static const UINT kButtonCol2Left    = kTempEditLeft + EDIT_WIDTH + INTRA_PADDING;
 static unsigned int orig_sys_monitor_left; // For setting minimum x for cpu bars
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
-  IsXP                   = IsAtLeast(kWinXP);
-  static RECT clientRect = GetMainClientRect();
-  const UINT this_width  = clientRect.right;
-  const UINT this_height = clientRect.bottom;
+  IsXP                            = IsAtLeast(kWinXP);
+  static RECT clientRect          = GetMainClientRect();
+  const UINT this_width           = clientRect.right;
+  const UINT this_height          = clientRect.bottom;
   const unsigned int kFrameWidth  = this_width - END_PADDING;
   const unsigned int kFrameBottom = GetYOffset(this_height, 0, 0.6f) - STATIC_BOTTOM;
   const unsigned int kLabelYPad =
@@ -339,29 +339,29 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                       hWnd, (HMENU)IDC_KELVIN, hInst, nullptr);
   hFahrenheitEdit =
       CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
-                      kTempEditLeft, STATIC_TOP + (kEditYPad * 3u), EDIT_WIDTH,
-                      EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
+                      kTempEditLeft, STATIC_TOP + (kEditYPad * 3u), EDIT_WIDTH, EDITCONTROL_HEIGHT,
+                      hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
   hRankineEdit =
       CreateWindowExW(WS_EX_CLIENTEDGE, WC_EDIT, L"", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP,
                       kTempEditLeft, STATIC_TOP + (kEditYPad * 4), EDIT_WIDTH, EDITCONTROL_HEIGHT,
                       hWnd, (HMENU)IDC_FAHRENHEIT, hInst, nullptr);
 
   // Create the "Convert" Button control
-  hConvButton = CreateWindowExW(
-      0, WC_BUTTON, CONV_BUTTON, dwCHILD | dwBUTTON | BS_DEFPUSHBUTTON, kButtonColLeft,
-      kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr);
+  hConvButton = CreateWindowExW(0, WC_BUTTON, CONV_BUTTON, dwCHILD | dwBUTTON | BS_DEFPUSHBUTTON,
+                                kButtonColLeft, kButtonRowTop, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd,
+                                (HMENU)IDC_CONVERT_BUTTON, hInst, nullptr);
   // Create the "Precision" combobox
   hPrecisionCombo =
       CreateWindowExW(0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP,
                       kButtonColLeft + LABEL_WIDTH + INTRA_PADDING, kButtonRow2Top, COMBO_WIDTH,
                       COMBO_HEIGHT, hWnd, (HMENU)IDC_PRECISION, hInst, nullptr);
   // Create the "Clear" Button control
-  hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON, dwCHILD | dwBUTTON,
-                                 kButtonCol2Left, kButtonRowTop, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
+  hClearButton = CreateWindowExW(0, WC_BUTTON, CLEAR_BUTTON, dwCHILD | dwBUTTON, kButtonCol2Left,
+                                 kButtonRowTop, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_CLEAR_BUTTON, hInst, nullptr);
   // Create the "About" Button control
-  hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON, dwCHILD | dwBUTTON,
-                                 kButtonCol2Left, kButtonRow2Top, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
+  hAboutButton = CreateWindowExW(0, WC_BUTTON, ABOUT_BUTTON, dwCHILD | dwBUTTON, kButtonCol2Left,
+                                 kButtonRow2Top, kSmallButtonWidth, BUTTON_HEIGHT, hWnd,
                                  (HMENU)IDC_ABOUT_BUTTON, hInst, nullptr);
   // Create the status bar
   hStatusBar =
@@ -383,24 +383,24 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   const DWORD dwProgressStyle = IsXP ? PBS_MARQUEE | dwCHILD : dwCHILD;
   // Create the CPU stressor progress bar.
-  hProgressBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwProgressStyle,
-                                 kButtonCol3Left, kProgressBarTop, PROGBAR_WIDTH, PROGBAR_HEIGHT,
-                                 hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr);
+  hProgressBar =
+      CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwProgressStyle, kButtonCol3Left, kProgressBarTop,
+                      PROGBAR_WIDTH, PROGBAR_HEIGHT, hWnd, (HMENU)IDC_PROGRESS, hInst, nullptr);
 
   hCacheSizeLabel = CreateWindowEx(
       0, WC_STATIC, CACHE_SIZEQ, dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y, LABEL_WIDTH - 16u, STATICLABEL_HEIGHT, hWnd,
       (HMENU)IDC_LABEL_CACHE, hInst, nullptr);
-  hCacheSizeCombo = CreateWindowEx(
-      0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP,
-      kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u, kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y,
-      COMBO_WIDTH + 16u, COMBO_HEIGHT, hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr);
+  hCacheSizeCombo = CreateWindowEx(0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | dwCHILD | WS_TABSTOP,
+                                   kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
+                                   kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y, COMBO_WIDTH + 16u,
+                                   COMBO_HEIGHT, hWnd, (HMENU)IDC_CACHE_SIZE, hInst, nullptr);
 
   hSSE2Checkbox = CreateWindowEx(
-      0, WC_BUTTON, USE_SSE2Q, dwCHILD | dwCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,
-      kButtonCol3Left,
-      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y, PROGBAR_WIDTH - PADDING_X,
-      EDITCONTROL_HEIGHT - PADDING_Y, hWnd, (HMENU)IDC_SSE2_CHECKBOX, hInst, nullptr);
+      0, WC_BUTTON, USE_SSE2Q, dwCHILD | dwCHECKBOX | BS_LEFTTEXT | WS_TABSTOP, kButtonCol3Left,
+      kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y,
+      PROGBAR_WIDTH - PADDING_X, EDITCONTROL_HEIGHT - PADDING_Y, hWnd, (HMENU)IDC_SSE2_CHECKBOX,
+      hInst, nullptr);
   hAllocMemButton = CreateWindowExW(
       0, WC_BUTTON, ALLOC_MEM, dwCHILD | dwBUTTON, kButtonCol3Left,
       kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y),
@@ -408,82 +408,86 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
 
   // Create the "Start" CPU Stress Button control
   hStartStresButton = CreateWindowExW(0, WC_BUTTON, START_BUTTON, dwCHILD | dwBUTTON,
-                                      kButtonCol3Left, kButtonRowTop, kSmallButtonWidth, BUTTON_HEIGHT,
-                                      hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr);
+                                      kButtonCol3Left, kButtonRowTop, kSmallButtonWidth,
+                                      BUTTON_HEIGHT, hWnd, (HMENU)IDC_START_BUTTON, hInst, nullptr);
   // Create the "Stop" CPU Stress Button control
-  hStopStresButton =
-      CreateWindowExW(0, WC_BUTTON, STOP_BUTTON, dwCHILD | dwBUTTON,
-                      kButtonCol3Left + kSmallButtonWidth + PADDING_X, kButtonRowTop, kSmallButtonWidth,
-                      BUTTON_HEIGHT, hWnd, (HMENU)IDC_STOP_BUTTON, hInst, nullptr);
+  hStopStresButton = CreateWindowExW(0, WC_BUTTON, STOP_BUTTON, dwCHILD | dwBUTTON,
+                                     kButtonCol3Left + kSmallButtonWidth + PADDING_X, kButtonRowTop,
+                                     kSmallButtonWidth, BUTTON_HEIGHT, hWnd, (HMENU)IDC_STOP_BUTTON,
+                                     hInst, nullptr);
   // Create the "Show OS Info" Button control
-  hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON, dwCHILD | dwBUTTON,
-                                  kButtonCol3Left, kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT,
-                                  hWnd, (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
-  const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
-  orig_sys_monitor_left = sys_monitor_left;
+  hOsInfoButton = CreateWindowExW(0, WC_BUTTON, OSINFO_BUTTON, dwCHILD | dwBUTTON, kButtonCol3Left,
+                                  kButtonRow2Top, kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd,
+                                  (HMENU)IDC_OSINFO_BUTTON, hInst, nullptr);
+  const unsigned int sys_monitor_left   = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
+  orig_sys_monitor_left                 = sys_monitor_left;
   const unsigned int sys_monitor_height = kFrameBottom - STATIC_BOTTOM;
-  const unsigned int sys_monitor_width = this_width - sys_monitor_left - (PADDING_X * 3u);
-  hSysMonitorFrame =
-      CreateWindowExW(0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME,
-                      sys_monitor_left, STATIC_TOP - INTRA_PADDING, sys_monitor_width, sys_monitor_height, hWnd, nullptr, hInst, nullptr);
+  const unsigned int sys_monitor_width  = this_width - sys_monitor_left - (PADDING_X * 3u);
+  hSysMonitorFrame                      = CreateWindowExW(
+      0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME,
+      sys_monitor_left, STATIC_TOP - INTRA_PADDING, sys_monitor_width, sys_monitor_height, hWnd,
+      nullptr, hInst, nullptr);
   const int cpubar_left =
       static_cast<int>(sys_monitor_left + ((sys_monitor_width + INTRA_PADDING) / 2)) -
       static_cast<int>((4 * CPUBAR_WIDTH) + (INTRA_PADDING * 4)) / 2;
-  const int cpubar_top    = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
-                                     STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
-                                     static_cast<int>(CPUBAR_HEIGHT) / 2) - (INTRA_PADDING * 2);
-  const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
-                                       0, static_cast<int>(CPUBAR_HEIGHT));
-  const int cpubar_label_left = cpubar_left;
-  const int cpu_perc_left = cpubar_label_left;
+  const int cpubar_top =
+      std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
+               STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+                   static_cast<int>(CPUBAR_HEIGHT) / 2) -
+      (INTRA_PADDING * 2);
+  const int cpubar_height =
+      std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top, 0,
+                 static_cast<int>(CPUBAR_HEIGHT));
+  const int cpubar_label_left   = cpubar_left;
+  const int cpu_perc_left       = cpubar_label_left;
   const int cpubar_label_height = SMALLLABEL_HEIGHT;
-  const int cpu_perc_height = cpubar_label_height;
-  const int cpubar_label_top = cpubar_top - cpubar_label_height - INTRA_PADDING;
-  const int cpu_perc_top = cpubar_top + cpubar_height + INTRA_PADDING;
-  const int cpubar_label_width = CPUBAR_WIDTH;
-  const int cpu_perc_width = cpubar_label_width;
-  const int mem_perc_left = cpu_perc_left + cpu_perc_width + INTRA_PADDING;
-  const int commit_perc_left = mem_perc_left + cpu_perc_width + INTRA_PADDING;
-  const int io_perc_left = commit_perc_left + cpu_perc_width + INTRA_PADDING;
+  const int cpu_perc_height     = cpubar_label_height;
+  const int cpubar_label_top    = cpubar_top - cpubar_label_height - INTRA_PADDING;
+  const int cpu_perc_top        = cpubar_top + cpubar_height + INTRA_PADDING;
+  const int cpubar_label_width  = CPUBAR_WIDTH;
+  const int cpu_perc_width      = cpubar_label_width;
+  const int mem_perc_left       = cpu_perc_left + cpu_perc_width + INTRA_PADDING;
+  const int commit_perc_left    = mem_perc_left + cpu_perc_width + INTRA_PADDING;
+  const int io_perc_left        = commit_perc_left + cpu_perc_width + INTRA_PADDING;
   hCPUBarLabel = CreateWindowExW(0, WC_STATIC, L"CPU", dwCHILD | dwLABEL | SS_NOTIFY,
-                                 cpubar_label_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                                 hWnd, nullptr, hInst, nullptr);
-  hMemBarLabel = CreateWindowExW(0, WC_STATIC, L"RAM", dwCHILD | dwLABEL | SS_NOTIFY,
-                                 mem_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                                 hWnd, nullptr, hInst, nullptr);
+                                 cpubar_label_left, cpubar_label_top, cpubar_label_width,
+                                 cpubar_label_height, hWnd, nullptr, hInst, nullptr);
+  hMemBarLabel = CreateWindowExW(0, WC_STATIC, L"RAM", dwCHILD | dwLABEL | SS_NOTIFY, mem_perc_left,
+                                 cpubar_label_top, cpubar_label_width, cpubar_label_height, hWnd,
+                                 nullptr, hInst, nullptr);
   hCommitBarLabel = CreateWindowExW(0, WC_STATIC, L"PF", dwCHILD | dwLABEL | SS_NOTIFY,
-                                 commit_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                                 hWnd, nullptr, hInst, nullptr);
-  hIOBarLabel = CreateWindowExW(0, WC_STATIC, L"I/O", dwCHILD | dwLABEL | SS_NOTIFY,
-                                 io_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                                 hWnd, nullptr, hInst, nullptr);
-  hCPUBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
-                            cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                            hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
+                                    commit_perc_left, cpubar_label_top, cpubar_label_width,
+                                    cpubar_label_height, hWnd, nullptr, hInst, nullptr);
+  hIOBarLabel = CreateWindowExW(0, WC_STATIC, L"I/O", dwCHILD | dwLABEL | SS_NOTIFY, io_perc_left,
+                                cpubar_label_top, cpubar_label_width, cpubar_label_height, hWnd,
+                                nullptr, hInst, nullptr);
+  hCPUBar =
+      CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, cpubar_left, cpubar_top,
+                      CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
   hCPUPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                                hWnd, nullptr, hInst, nullptr);
+                                cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd,
+                                nullptr, hInst, nullptr);
   hMemPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                                mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                                hWnd, nullptr, hInst, nullptr);
+                                mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd,
+                                nullptr, hInst, nullptr);
   hCommitPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
                                    commit_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
                                    hWnd, nullptr, hInst, nullptr);
-  hIOPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
-                               io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                               hWnd, nullptr, hInst, nullptr);
+  hIOPercent =
+      CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, io_perc_left,
+                      cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd, nullptr, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-  hMemBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
-                            membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                            hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
+  hMemBar =
+      CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, membar_left, cpubar_top,
+                      CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
   const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-  hCommitBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
-                               commitbar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                               hWnd, (HMENU)IDC_COMMITBAR, hInst, nullptr);
+  hCommitBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, commitbar_left,
+                               cpubar_top, CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_COMMITBAR,
+                               hInst, nullptr);
   const int iobar_left = commitbar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-  hIOBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
-                           iobar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                           hWnd, (HMENU)IDC_IOBAR, hInst, nullptr);
+  hIOBar =
+      CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, iobar_left, cpubar_top,
+                      CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_IOBAR, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
@@ -580,7 +584,7 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   } else {
     SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
     HMENU hBar      = GetMenu(hWnd);
-    HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
+    HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
     HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
     if (hSpeed) {
       CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
@@ -610,149 +614,128 @@ void HandleResize(HWND hWnd) {
   last_width  = current_width;
   last_height = current_height;
   // TODO, move copy of this to InitControls with MAINWIDTH/MAINHEIGHT
-  const unsigned int width              = current_width;
-  const unsigned int height             = current_height;
-  const int kFrameBottom                = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
-  const int button_top                  = kFrameBottom + (PADDING_Y * 3u);
-  const int button2_top                 = button_top + BUTTON_HEIGHT + PADDING_Y;
-  unsigned int toadd                    = 0;
+  const unsigned int width  = current_width;
+  const unsigned int height = current_height;
+  const int kFrameBottom    = GetYOffset(height, 0, 0.6f) - STATIC_BOTTOM;
+  const int button_top      = kFrameBottom + (PADDING_Y * 3u);
+  const int button2_top     = button_top + BUTTON_HEIGHT + PADDING_Y;
+  unsigned int toadd        = 0;
   if (width > MAINWIDTH) {
     toadd = width - MAINWIDTH;
   }
-  const float kCol3Candidate = static_cast<float>(kButtonCol2Left + kSmallButtonWidth + PADDING_X + toadd);
+  const float kCol3Candidate =
+      static_cast<float>(kButtonCol2Left + kSmallButtonWidth + PADDING_X + toadd);
   const unsigned int kButtonCol3Left =
       // Make sure column 3 cant be resized indefinitely
-      static_cast<unsigned int>(std::clamp(kCol3Candidate, 1.0f, (static_cast<float>(MAINWIDTH) * 0.60f)));
+      static_cast<unsigned int>(
+          std::clamp(kCol3Candidate, 1.0f, (static_cast<float>(MAINWIDTH) * 0.60f)));
   const unsigned int kFrameWidth = width - END_PADDING;
 
   // Move all controls atomically to avoid intermediate redraws between each move.
   HDWP hdwp = BeginDeferWindowPos(29); // Must equal number of windows to redraw
   if (hdwp) {
-    hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr,
-                          PADDING_X, PADDING_Y, kFrameWidth, kFrameBottom,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hConvButton, nullptr,
-                          PADDING_X, button_top, BUTTON_WIDTH, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hPrecisionLabel, nullptr,
-                          PADDING_X, button2_top, LABEL_WIDTH, STATICLABEL_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hPrecisionCombo, nullptr,
-                          PADDING_X + LABEL_WIDTH + INTRA_PADDING, button2_top,
-                          COMBO_WIDTH, COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hClearButton, nullptr,
-                          kButtonCol2Left, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hAboutButton, nullptr,
-                          kButtonCol2Left, button2_top, kSmallButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hStartStresButton, nullptr,
-                          kButtonCol3Left, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hFrameOutline, nullptr, PADDING_X, PADDING_Y, kFrameWidth,
+                          kFrameBottom, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hConvButton, nullptr, PADDING_X, button_top, BUTTON_WIDTH,
+                          BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hPrecisionLabel, nullptr, PADDING_X, button2_top, LABEL_WIDTH,
+                          STATICLABEL_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hPrecisionCombo, nullptr, PADDING_X + LABEL_WIDTH + INTRA_PADDING,
+                          button2_top, COMBO_WIDTH, COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hClearButton, nullptr, kButtonCol2Left, button_top,
+                          kSmallButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hAboutButton, nullptr, kButtonCol2Left, button2_top,
+                          kSmallButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hStartStresButton, nullptr, kButtonCol3Left, button_top,
+                          kSmallButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hStopStresButton, nullptr,
-                          kButtonCol3Left + kSmallButtonWidth + PADDING_X, button_top, kSmallButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hOsInfoButton, nullptr,
-                          kButtonCol3Left, button2_top, kOsInfoButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+                          kButtonCol3Left + kSmallButtonWidth + PADDING_X, button_top,
+                          kSmallButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hOsInfoButton, nullptr, kButtonCol3Left, button2_top,
+                          kOsInfoButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
     unsigned int top = STATIC_TOP;
-    hdwp = DeferWindowPos(hdwp, hThreadsLabel, nullptr,
-                          kButtonCol3Left, top, LABEL_WIDTH, STATICLABEL_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hThreadsEdit, nullptr,
-                          kButtonCol3Left + LABEL_WIDTH + PADDING_X,
-                          top, EDIT_WIDTH / 2u, EDITCONTROL_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    top = kProgressBarTop;
-    hdwp = DeferWindowPos(hdwp, hProgressBar, nullptr,
-                          kButtonCol3Left, top, PROGBAR_WIDTH, PROGBAR_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y;
-    hdwp = DeferWindowPos(hdwp, hCacheSizeLabel, nullptr,
-                          kButtonCol3Left, top, LABEL_WIDTH - 16u, STATICLABEL_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hThreadsLabel, nullptr, kButtonCol3Left, top, LABEL_WIDTH,
+                          STATICLABEL_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hThreadsEdit, nullptr, kButtonCol3Left + LABEL_WIDTH + PADDING_X,
+                          top, EDIT_WIDTH / 2u, EDITCONTROL_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    top  = kProgressBarTop;
+    hdwp = DeferWindowPos(hdwp, hProgressBar, nullptr, kButtonCol3Left, top, PROGBAR_WIDTH,
+                          PROGBAR_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    top  = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y;
+    hdwp = DeferWindowPos(hdwp, hCacheSizeLabel, nullptr, kButtonCol3Left, top, LABEL_WIDTH - 16u,
+                          STATICLABEL_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hCacheSizeCombo, nullptr,
-                          kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u,
-                          top, COMBO_WIDTH + 16u, COMBO_HEIGHT,
+                          kButtonCol3Left + LABEL_WIDTH + PADDING_X - 16u, top, COMBO_WIDTH + 16u,
+                          COMBO_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    top  = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y;
+    hdwp = DeferWindowPos(hdwp, hSSE2Checkbox, nullptr, kButtonCol3Left, top,
+                          PROGBAR_WIDTH - PADDING_X, EDITCONTROL_HEIGHT - PADDING_Y,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + EDITCONTROL_HEIGHT + PADDING_Y;
-    hdwp = DeferWindowPos(hdwp, hSSE2Checkbox, nullptr,
-                          kButtonCol3Left, top, PROGBAR_WIDTH - PADDING_X, EDITCONTROL_HEIGHT - PADDING_Y,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    top = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y);
-    hdwp = DeferWindowPos(hdwp, hAllocMemButton, nullptr,
-                          kButtonCol3Left, top, PROGBAR_WIDTH, EDITCONTROL_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    top  = kProgressBarTop + PROGBAR_HEIGHT + PADDING_Y + ((EDITCONTROL_HEIGHT * 2u) + PADDING_Y);
+    hdwp = DeferWindowPos(hdwp, hAllocMemButton, nullptr, kButtonCol3Left, top, PROGBAR_WIDTH,
+                          EDITCONTROL_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
     RECT frameRect;
     GetClientRect(hFrameOutline, &frameRect);
-    const UINT frame_height = frameRect.bottom;
-    const unsigned int sys_monitor_left = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
+    const UINT frame_height               = frameRect.bottom;
+    const unsigned int sys_monitor_left   = kButtonCol3Left + kOsInfoButtonWidth + PADDING_X;
     const unsigned int sys_monitor_height = frame_height - STATIC_BOTTOM;
-    const unsigned int sys_monitor_width = width - sys_monitor_left - (PADDING_X * 3u);
-    hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr,
-                          sys_monitor_left, STATIC_TOP - INTRA_PADDING, sys_monitor_width, sys_monitor_height,
+    const unsigned int sys_monitor_width  = width - sys_monitor_left - (PADDING_X * 3u);
+    hdwp = DeferWindowPos(hdwp, hSysMonitorFrame, nullptr, sys_monitor_left,
+                          STATIC_TOP - INTRA_PADDING, sys_monitor_width, sys_monitor_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int cpubar_left_candidate =
         static_cast<int>(sys_monitor_left + ((sys_monitor_width + INTRA_PADDING) / 2)) -
         static_cast<int>((4 * CPUBAR_WIDTH) + (INTRA_PADDING * 4)) / 2;
-    const unsigned int cpubar_left = std::clamp(static_cast<unsigned int>(cpubar_left_candidate), orig_sys_monitor_left + INTRA_PADDING, MAXWIDTH);
-    const int cpubar_top  = std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
-                                     STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
-                                     static_cast<int>(CPUBAR_HEIGHT) / 2) - (INTRA_PADDING * 2);
-    const int cpubar_height = std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top,
-                                         0, static_cast<int>(CPUBAR_HEIGHT));
-    const int cpubar_label_left = cpubar_left;
-    const int cpu_perc_left = cpubar_label_left;
+    const unsigned int cpubar_left = std::clamp(static_cast<unsigned int>(cpubar_left_candidate),
+                                                orig_sys_monitor_left + INTRA_PADDING, MAXWIDTH);
+    const int cpubar_top =
+        std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
+                 STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+                     static_cast<int>(CPUBAR_HEIGHT) / 2) -
+        (INTRA_PADDING * 2);
+    const int cpubar_height =
+        std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top, 0,
+                   static_cast<int>(CPUBAR_HEIGHT));
+    const int cpubar_label_left   = cpubar_left;
+    const int cpu_perc_left       = cpubar_label_left;
     const int cpubar_label_height = SMALLLABEL_HEIGHT;
-    const int cpu_perc_height = cpubar_label_height;
-    const int cpubar_label_top = cpubar_top - cpubar_label_height - INTRA_PADDING;
-    const int cpu_perc_top = cpubar_top + cpubar_height + INTRA_PADDING;
-    const int cpubar_label_width = CPUBAR_WIDTH;
-    const int cpu_perc_width = cpubar_label_width;
-    const int mem_perc_left = cpu_perc_left + cpu_perc_width + INTRA_PADDING;
-    const int commit_perc_left = mem_perc_left + cpu_perc_width + INTRA_PADDING;
-    const int io_perc_left = commit_perc_left + cpu_perc_width + INTRA_PADDING;
-    hdwp = DeferWindowPos(hdwp, hCPUBarLabel, nullptr,
-                          cpubar_label_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hMemBarLabel, nullptr,
-                          mem_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hCommitBarLabel, nullptr,
-                          commit_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hIOBarLabel, nullptr,
-                          io_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr,
-                          cpubar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hCPUPercent, nullptr,
-                          cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hMemPercent, nullptr,
-                          mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hCommitPercent, nullptr,
-                          commit_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hIOPercent, nullptr,
-                          io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    const int cpu_perc_height     = cpubar_label_height;
+    const int cpubar_label_top    = cpubar_top - cpubar_label_height - INTRA_PADDING;
+    const int cpu_perc_top        = cpubar_top + cpubar_height + INTRA_PADDING;
+    const int cpubar_label_width  = CPUBAR_WIDTH;
+    const int cpu_perc_width      = cpubar_label_width;
+    const int mem_perc_left       = cpu_perc_left + cpu_perc_width + INTRA_PADDING;
+    const int commit_perc_left    = mem_perc_left + cpu_perc_width + INTRA_PADDING;
+    const int io_perc_left        = commit_perc_left + cpu_perc_width + INTRA_PADDING;
+    hdwp = DeferWindowPos(hdwp, hCPUBarLabel, nullptr, cpubar_label_left, cpubar_label_top,
+                          cpubar_label_width, cpubar_label_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hMemBarLabel, nullptr, mem_perc_left, cpubar_label_top,
+                          cpubar_label_width, cpubar_label_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCommitBarLabel, nullptr, commit_perc_left, cpubar_label_top,
+                          cpubar_label_width, cpubar_label_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hIOBarLabel, nullptr, io_perc_left, cpubar_label_top,
+                          cpubar_label_width, cpubar_label_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCPUBar, nullptr, cpubar_left, cpubar_top, CPUBAR_WIDTH,
+                          cpubar_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCPUPercent, nullptr, cpu_perc_left, cpu_perc_top, cpu_perc_width,
+                          cpu_perc_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hMemPercent, nullptr, mem_perc_left, cpu_perc_top, cpu_perc_width,
+                          cpu_perc_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCommitPercent, nullptr, commit_perc_left, cpu_perc_top,
+                          cpu_perc_width, cpu_perc_height, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hIOPercent, nullptr, io_perc_left, cpu_perc_top, cpu_perc_width,
+                          cpu_perc_height, SWP_NOZORDER | SWP_NOACTIVATE);
     const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-    hdwp = DeferWindowPos(hdwp, hMemBar, nullptr,
-                          membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hMemBar, nullptr, membar_left, cpubar_top, CPUBAR_WIDTH,
+                          cpubar_height, SWP_NOZORDER | SWP_NOACTIVATE);
     const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-    hdwp = DeferWindowPos(hdwp, hCommitBar, nullptr,
-                          commitbar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hCommitBar, nullptr, commitbar_left, cpubar_top, CPUBAR_WIDTH,
+                          cpubar_height, SWP_NOZORDER | SWP_NOACTIVATE);
     const int iobar_left = commitbar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-    hdwp = DeferWindowPos(hdwp, hIOBar, nullptr,
-                          iobar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hIOBar, nullptr, iobar_left, cpubar_top, CPUBAR_WIDTH,
+                          cpubar_height, SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
     EndDeferWindowPos(hdwp);

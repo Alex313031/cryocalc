@@ -98,8 +98,7 @@ namespace logging {
   extern volatile bool dcheck_log_;
 
   // Initialize logging for this program
-  bool InitLogging(HINSTANCE hInstance,
-                   LogInitSettings InitSettings);
+  bool InitLogging(HINSTANCE hInstance, LogInitSettings InitSettings);
 
   // Call to clean up logging stream and any file handles
   bool DeInitLogging(HINSTANCE hInstance);

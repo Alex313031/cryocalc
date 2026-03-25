@@ -1,7 +1,6 @@
 #include "stress.h"
 
 #include <emmintrin.h>
-
 #include <logging.h>
 #include <os_info_dll.h>
 
@@ -117,8 +116,9 @@ void StressCPUVec(const size_t cache_size) {
         // More integer operations
         size_t idx = static_cast<size_t>(std::abs(val)) % VECTOR_SIZE;
         vec[i]     = val + vec[idx] * 0.5;
-        if (!std::isfinite(vec[i]))
+        if (!std::isfinite(vec[i])) {
           vec[i] = dis(gen);
+        }
       }
     }
 

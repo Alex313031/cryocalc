@@ -17,23 +17,22 @@
 #ifdef _MSC_VER
  #define WIN32_NO_STATUS
 #endif
-#include <windows.h>  // Main Windows header
+#include <windows.h> // Main Windows header
 #ifdef _MSC_VER
  #undef WIN32_NO_STATUS
 #endif
-#include <ntstatus.h> // Full NTSTATUS codes (e.g. STATUS_SUCCESS)
-
 #include <commctrl.h> // Common controls header
-#include <commdlg.h> // Common dialogs header
+#include <commdlg.h>  // Common dialogs header
 #include <mmsystem.h> // For playing sounds
+#include <ntstatus.h> // Full NTSTATUS codes (e.g. STATUS_SUCCESS)
 #include <shlwapi.h>  // For DLL functions
 
 // C Runtime Headers
 #include <tchar.h> // For TCHAR, and automatically deducing wchar_t type
 
 // C++ STL Headers
-#include <cmath>     // std::round
 #include <algorithm> // std::clamp
+#include <cmath>     // std::round
 #include <iomanip>   // std::setprecision
 #include <iostream>  // std::cout/std::wcout
 #include <sstream>   // std::ostringstream/std::wostringstream

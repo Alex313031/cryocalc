@@ -52,9 +52,11 @@ extern HWND hMemBar; // Vertical progress bar for RAM usage
 
 extern HWND hMemPercent; // Edit control showing RAM percentage usage
 
-extern HWND hCommitBar; // Vertical progress bar showing total RAM + Pagefile allocated usage (commit charge)
+extern HWND hCommitBar; // Vertical progress bar showing total RAM + Pagefile allocated usage
+                        // (commit charge)
 
-extern HWND hCommitPercent; // Edit control showing total RAM + Pagefile allocated percentage usage (commit charge)
+extern HWND hCommitPercent; // Edit control showing total RAM + Pagefile allocated percentage usage
+                            // (commit charge)
 
 extern HWND hIOBar; // Vertical progress bar disk usage percent
 

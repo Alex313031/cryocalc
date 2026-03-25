@@ -58,7 +58,7 @@ bool SetClientRects(HWND hWnd, HINSTANCE hInst) {
   if (!GetClientRect(hWnd, &clientRect)) {
     return false;
   }
-  kMainWinRect = winRect;
+  kMainWinRect    = winRect;
   kMainClientRect = clientRect;
   return true;
 }
@@ -135,7 +135,7 @@ bool ConfirmClearControls(HWND hWnd) {
 
 // Restore parent window to foreground, optional child window HWND to set keyboard focus
 bool ResetFocus(HWND foreground, HWND keyb_focus) {
-  bool success = false;
+  bool success        = false;
   bool set_foreground = false;
   if (foreground == nullptr) {
     return false;
@@ -148,7 +148,7 @@ bool ResetFocus(HWND foreground, HWND keyb_focus) {
     HWND prev_focus = nullptr;
     // Set keyboard focus to specified child window
     prev_focus = SetFocus(keyb_focus); // Returns previously focused window
-    success = set_foreground && prev_focus != nullptr;
+    success    = set_foreground && prev_focus != nullptr;
   }
   return success;
 }
@@ -263,8 +263,8 @@ bool HandleChildClick(HWND parent, HWND child) {
   if (!parent || !child) {
     return false;
   }
-  if (child == hCPUBar || child == hCPUPercent || child == hMemBar || child == hMemPercent
-      || child == hCommitBar || child == hCommitPercent || child == hIOBar || child == hIOPercent) {
+  if (child == hCPUBar || child == hCPUPercent || child == hMemBar || child == hMemPercent ||
+      child == hCommitBar || child == hCommitPercent || child == hIOBar || child == hIOPercent) {
     return PostMessageW(parent, WM_OPEN_MONITOR_WIN, 0, 0);
   }
   return true;

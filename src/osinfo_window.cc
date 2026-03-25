@@ -53,7 +53,7 @@ bool ShowOsInfo(HWND hWnd) {
   int osInfoX, osInfoY;
   GetRightOfWindow(hMainWindow, &osInfoX, &osInfoY);
   osInfoX = osInfoX + ADJ_WINDOW_PADDING; // 2 pixels padding between windows
-  //osInfoY = osInfoY + ADJ_WINDOW_PADDING; // 2 pixels lower than top of main window
+  // osInfoY = osInfoY + ADJ_WINDOW_PADDING; // 2 pixels lower than top of main window
 
   hOsInfoWin = CreateWindowExW(
       WS_EX_WINDOWEDGE | WS_EX_TOOLWINDOW, szOSInfoWindowClass, OSINFO_TITLE,
@@ -113,7 +113,8 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");
   AddTooltip(hWnd, hRunAppButton, hInst, L"Open \"Run\" Dialog");
   AddTooltip(hWnd, hCloseOSInfoButton, hInst, L"Close this OS Info Utilities Window");
-  AddTooltip(hWnd, hOsInfoStatusBar, hInst, L"Raw Windows NT version, reported from CryoCalc's osinfo.dll");
+  AddTooltip(hWnd, hOsInfoStatusBar, hInst,
+             L"Raw Windows NT version, reported from CryoCalc's osinfo.dll");
   OutputOsInfo(hWnd);
 }
 
@@ -150,21 +151,17 @@ void HandleOsInfoResize(HWND hWnd) {
 
   HDWP hdwp = BeginDeferWindowPos(5); // Number of child windows to redraw
   if (hdwp) {
-    hdwp = DeferWindowPos(hdwp, hOsInfoTextOut, nullptr,
-                          PADDING_X, PADDING_Y, kOsOutputWidth, kOsOutputHeight,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hWinVerButton, nullptr,
-                          kButtonLeft, kButtonTop, kButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hRunAppButton, nullptr,
-                          kButtonLeft, kButton2Top, kButtonWidth, BUTTON_HEIGHT,
-                          SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hMsInfoButton, nullptr,
-                          kButtonLeft + kButtonWidth + INTRA_PADDING, kButtonTop,
-                          kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hOsInfoTextOut, nullptr, PADDING_X, PADDING_Y, kOsOutputWidth,
+                          kOsOutputHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hWinVerButton, nullptr, kButtonLeft, kButtonTop, kButtonWidth,
+                          BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hRunAppButton, nullptr, kButtonLeft, kButton2Top, kButtonWidth,
+                          BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+    hdwp = DeferWindowPos(hdwp, hMsInfoButton, nullptr, kButtonLeft + kButtonWidth + INTRA_PADDING,
+                          kButtonTop, kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hCloseOSInfoButton, nullptr,
-                          kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top,
-                          kButtonWidth, BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
+                          kButtonLeft + kButtonWidth + INTRA_PADDING, kButton2Top, kButtonWidth,
+                          BUTTON_HEIGHT, SWP_NOZORDER | SWP_NOACTIVATE);
   }
   if (hdwp) {
     // Move all controls together

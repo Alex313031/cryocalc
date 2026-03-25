@@ -6,8 +6,8 @@
 #include "io.h"
 #include "mem.h"
 
-NtQuerySystemInformation_t g_NtQSI = nullptr;
-GetSystemTimes_t g_GetSystemTimes  = nullptr;
+NtQuerySystemInformation_t g_NtQSI            = nullptr;
+GetSystemTimes_t g_GetSystemTimes             = nullptr;
 GlobalMemoryStatusEx_t g_GlobalMemoryStatusEx = nullptr;
 
 bool g_legacy_fallback = false;
@@ -23,7 +23,6 @@ static bool g_first_sample = true; // Tracks whether this is first sample, for d
 
 bool perf_data_initialized = false;
 
-
 void SetCPUBarPos(float cpu_percent) {
   if (cpu_percent < 0.0f || cpu_percent > 100.0f) {
     LOG(ERROR) << __FUNC__ << L" cpu_percent out of bounds! " << cpu_percent;
@@ -35,7 +34,7 @@ void SetCPUBarPos(float cpu_percent) {
   if (std::abs(cpu_percent - last_percent) <= 0.9f) {
     return;
   }
-  last_percent = cpu_percent;
+  last_percent              = cpu_percent;
   const int cpubar_position = static_cast<int>(std::round(cpu_percent));
   SendMessageW(hCPUBar, PBM_SETPOS, static_cast<WPARAM>(cpubar_position), 0);
 }
@@ -50,7 +49,7 @@ void SetMEMBarPos(float mem_percent) {
   if (std::abs(mem_percent - last_percent) <= 0.9f) {
     return;
   }
-  last_percent = mem_percent;
+  last_percent              = mem_percent;
   const int membar_position = static_cast<int>(std::round(mem_percent));
   SendMessageW(hMemBar, PBM_SETPOS, static_cast<WPARAM>(membar_position), 0);
 }
@@ -65,7 +64,7 @@ void SetCommitBarPos(float commit_percent) {
   if (std::abs(commit_percent - last_percent) <= 0.9f) {
     return;
   }
-  last_percent = commit_percent;
+  last_percent                 = commit_percent;
   const int commitbar_position = static_cast<int>(std::round(commit_percent));
   SendMessageW(hCommitBar, PBM_SETPOS, static_cast<WPARAM>(commitbar_position), 0);
 }
@@ -80,7 +79,7 @@ void SetIOBarPos(float io_percent) {
   if (std::abs(io_percent - last_percent) <= 0.9f) {
     return;
   }
-  last_percent = io_percent;
+  last_percent             = io_percent;
   const int iobar_position = static_cast<int>(std::round(io_percent));
   SendMessageW(hIOBar, PBM_SETPOS, static_cast<WPARAM>(iobar_position), 0);
 }
@@ -118,29 +117,30 @@ bool InitPerfData() {
   }
   g_legacy_fallback = IsWinOlderThan(kWinXP);
 
-  g_NtQSI =
-      reinterpret_cast<NtQuerySystemInformation_t>(GetProcAddress(ntdll, "NtQuerySystemInformation"));
+  g_NtQSI = reinterpret_cast<NtQuerySystemInformation_t>(
+      GetProcAddress(ntdll, "NtQuerySystemInformation"));
   if (!g_NtQSI) {
     ErrorBox(nullptr, L"NtQuerySystemInformation Error",
-            L"Failed to load NtQuerySystemInformation from ntdll.dll. \nCPU usage will not be available.");
+             L"Failed to load NtQuerySystemInformation from ntdll.dll. \nCPU usage will not be "
+             L"available.");
     return false;
   }
 
   // GetSystemTimes is XP SP1+ only; gracefully absent on Windows 2000.
   HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
   if (kernel32) {
-    g_GetSystemTimes = reinterpret_cast<GetSystemTimes_t>(
-        GetProcAddress(kernel32, "GetSystemTimes"));
+    g_GetSystemTimes =
+        reinterpret_cast<GetSystemTimes_t>(GetProcAddress(kernel32, "GetSystemTimes"));
     g_GlobalMemoryStatusEx =
-        reinterpret_cast<GlobalMemoryStatusEx_t>(
-            GetProcAddress(kernel32, "GlobalMemoryStatusEx"));
+        reinterpret_cast<GlobalMemoryStatusEx_t>(GetProcAddress(kernel32, "GlobalMemoryStatusEx"));
   }
 
   if (debug_mode) {
     if (g_GetSystemTimes && !g_legacy_fallback) {
       LOG(DEBUG) << L"CPU monitoring using GetSystemTimes() (Windows XP SP1+).";
     } else {
-      LOG(DEBUG) << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
+      LOG(DEBUG)
+          << L"CPU monitoring using NtQuerySystemInformation() (Windows 2000/XP RTM fallback).";
     }
     if (g_GlobalMemoryStatusEx && !g_legacy_fallback) {
       LOG(DEBUG) << L"RAM monitoring using GlobalMemoryStatusEx() (Windows XP+).";
@@ -167,14 +167,14 @@ void UpdatePerfData() {
   if (!g_first_sample) {
     UpdateCPUPerfData();
     UpdateMemPerfData(); // Updates both RAM and Commit Charge
-    UpdateIOPerfData(); // Updates both RAM and Commit Charge
+    UpdateIOPerfData();  // Updates both RAM and Commit Charge
   }
   g_first_sample = false;
 }
 
 void CleanupPerfData() {
   // ntdll.dll and kernel32.dll are never unloaded; just null the pointers.
-  g_NtQSI          = nullptr;
-  g_GetSystemTimes  = nullptr;
+  g_NtQSI                = nullptr;
+  g_GetSystemTimes       = nullptr;
   g_GlobalMemoryStatusEx = nullptr;
 }

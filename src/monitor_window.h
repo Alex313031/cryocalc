@@ -34,8 +34,11 @@ void InitMeters(HWND hWnd);
 
 // Append one sample point per counter (0.0–100.0) to the scrolling history.
 // Call once per timer tick, after UpdatePerfData().
-void PushSamples(float cpu_percent, float kernel_percent,
-                 float ram_percent, float comm_percent, float io_percent);
+void PushSamples(float cpu_percent,
+                 float kernel_percent,
+                 float ram_percent,
+                 float comm_percent,
+                 float io_percent);
 
 // Draw a single meter for monitor window with only 1 graph, covering whole client area
 void DrawMeter(HDC hdc, const RECT& area);

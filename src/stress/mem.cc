@@ -4,7 +4,6 @@
 
 #include "reporting.h"
 
-
 // Gets the current total RAM usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetMemPercent.
@@ -20,8 +19,8 @@ static float GetMemPercentImpl() {
     if (g_total_ram_mb == 0.0f) {
       g_total_ram_mb = static_cast<float>(mem_status.ullTotalPhys) / (1024.0f * 1024.0f);
     }
-    g_snapshot.ram_used_mb = static_cast<float>(mem_status.ullTotalPhys - mem_status.ullAvailPhys)
-                             / (1024.0f * 1024.0f);
+    g_snapshot.ram_used_mb =
+        static_cast<float>(mem_status.ullTotalPhys - mem_status.ullAvailPhys) / (1024.0f * 1024.0f);
     return static_cast<float>(mem_status.dwMemoryLoad);
   } else {
     // Fallback for Windows 2000: GlobalMemoryStatus is available since Win95.
@@ -31,8 +30,8 @@ static float GetMemPercentImpl() {
     if (g_total_ram_mb == 0.0f) {
       g_total_ram_mb = static_cast<float>(mem_status.dwTotalPhys) / (1024.0f * 1024.0f);
     }
-    g_snapshot.ram_used_mb = static_cast<float>(mem_status.dwTotalPhys - mem_status.dwAvailPhys)
-                             / (1024.0f * 1024.0f);
+    g_snapshot.ram_used_mb =
+        static_cast<float>(mem_status.dwTotalPhys - mem_status.dwAvailPhys) / (1024.0f * 1024.0f);
     return static_cast<float>(mem_status.dwMemoryLoad);
   }
 }
@@ -61,7 +60,7 @@ static float GetCommitChargePercentImpl() {
     if (g_total_commit_mb == 0.0f) {
       g_total_commit_mb = static_cast<float>(mem_status.ullTotalPageFile) / (1024.0f * 1024.0f);
     }
-    const DWORDLONG used = mem_status.ullTotalPageFile - mem_status.ullAvailPageFile;
+    const DWORDLONG used    = mem_status.ullTotalPageFile - mem_status.ullAvailPageFile;
     g_snapshot.comm_used_mb = static_cast<float>(used) / (1024.0f * 1024.0f);
     return static_cast<float>(used) / static_cast<float>(mem_status.ullTotalPageFile) * 100.0f;
   } else {
@@ -72,7 +71,7 @@ static float GetCommitChargePercentImpl() {
     if (g_total_commit_mb == 0.0f) {
       g_total_commit_mb = static_cast<float>(mem_status.dwTotalPageFile) / (1024.0f * 1024.0f);
     }
-    const DWORD used = mem_status.dwTotalPageFile - mem_status.dwAvailPageFile;
+    const DWORD used        = mem_status.dwTotalPageFile - mem_status.dwAvailPageFile;
     g_snapshot.comm_used_mb = static_cast<float>(used) / (1024.0f * 1024.0f);
     return static_cast<float>(used) / static_cast<float>(mem_status.dwTotalPageFile) * 100.0f;
   }
@@ -80,17 +79,18 @@ static float GetCommitChargePercentImpl() {
 
 // Validate GetMemPercentImpl
 const float GetCommitChargePercent() {
-  static const bool isWine = IsRunningOnWine();
+  static const bool isWine   = IsRunningOnWine();
   const float commit_percent = GetCommitChargePercentImpl();
   if (commit_percent < 0.0f || commit_percent > 100.0f) {
     static bool winelogged = false;
     if (isWine) {
       float dummypercent = 255.0f;
       if (!winelogged) {
-        LOG(ERROR) << L"WINE GetCommitChargePercentImpl reported an out of bounds Commit Charge: " << commit_percent;
+        LOG(ERROR) << L"WINE GetCommitChargePercentImpl reported an out of bounds Commit Charge: "
+                   << commit_percent;
       }
       if (commit_percent > 100.0f) {
-        //CLOG(ERROR) << L"Setting WINE Commit Charge to 100%";
+        // CLOG(ERROR) << L"Setting WINE Commit Charge to 100%";
         dummypercent = 100.0f;
       } else if (commit_percent < 0.0f) {
         CLOG(ERROR) << L"Setting WINE Commit Charge to 0%";
@@ -99,7 +99,8 @@ const float GetCommitChargePercent() {
       winelogged = true;
       return dummypercent;
     } else {
-      LOG(FATAL) << L"GetCommitChargePercentImpl reported an out of bounds Commit Charge: " << commit_percent;
+      LOG(FATAL) << L"GetCommitChargePercentImpl reported an out of bounds Commit Charge: "
+                 << commit_percent;
     }
   }
   return commit_percent;

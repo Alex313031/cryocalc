@@ -128,9 +128,9 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
-  StopMonitoring(); // Stop CPU/RAM monitoring and close any monitor windows
+  StopMonitoring();                         // Stop CPU/RAM monitoring and close any monitor windows
   logging::DeInitLogging(GetGlobalHinst()); // Can't log anything more after this
-  DestroyWindow(hWnd); // Send WM_DESTROY message to close main window.
+  DestroyWindow(hWnd);                      // Send WM_DESTROY message to close main window.
 }
 
 int ConfirmExit(HWND hWnd) {
@@ -268,7 +268,7 @@ void AppendTextToEditControl(HWND hWnd, const std::wstring line) {
   const WCHAR* text = line.c_str();
   int length        = GetWindowTextLength(hWnd); // Get current text length
   SendMessageW(hWnd, EM_SETSEL, static_cast<WPARAM>(length),
-               static_cast<LPARAM>(length));     // Set cursor at the end
+               static_cast<LPARAM>(length));                                // Set cursor at the end
   SendMessageW(hWnd, EM_REPLACESEL, FALSE, reinterpret_cast<LPARAM>(text)); // Append the text
 }
 
@@ -601,7 +601,7 @@ bool OpenIniFileForReading(const std::wstring ini_file) {
 
   // Try to open the .ini file in read only mode.
   g_ini_file = CreateFileW(ini_file.c_str(),
-                           GENERIC_READ,  // Only allow reading
+                           GENERIC_READ, // Only allow reading
                            FILE_SHARE_READ | FILE_SHARE_WRITE,
                            nullptr,       // Default security
                            OPEN_EXISTING, // Only open if .ini file exists
@@ -675,7 +675,7 @@ DWORD GetCommCtrlVersion() {
     LOG(ERROR) << "Failed to get system directory!";
   }
   const std::wstring comctl32_path =
-      kSystemDir + L"\\" + kComCtl32Dll;   // Add \\ backslash before .dll file name
+      kSystemDir + L"\\" + kComCtl32Dll; // Add \\ backslash before .dll file name
   hComCtl32Dll =
       LoadLibraryW(comctl32_path.c_str()); // Explicity reference system installed version
   DLLGETVERSIONPROC pDllGetVersion;
@@ -711,8 +711,9 @@ bool IsRunningOnWine() {
   if (!ntdll) {
     return false;
   }
-  const char* (CDECL *pwine_get_version)(void);
-  pwine_get_version = reinterpret_cast<const char* (CDECL *)(void)>(GetProcAddress(ntdll, "wine_get_version"));
+  const char*(CDECL * pwine_get_version)(void);
+  pwine_get_version =
+      reinterpret_cast<const char*(CDECL*)(void)>(GetProcAddress(ntdll, "wine_get_version"));
   if (!pwine_get_version) {
     return false;
   } else {

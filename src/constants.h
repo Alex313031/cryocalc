@@ -101,9 +101,9 @@ constexpr unsigned int MIN_THREADS = 1u;   // Less than one thread doesn't make 
 constexpr unsigned int MAX_THREADS = 128u; // Threadrippers top out at 128
 
 // Window style constants, to not clutter up function declarations
-inline constexpr DWORD dwCHILD  = WS_CHILD | WS_VISIBLE;
-inline constexpr DWORD dwLABEL  = SS_CENTER | SS_CENTERIMAGE;
-inline constexpr DWORD dwBUTTON = BS_CENTER | BS_VCENTER | WS_TABSTOP;
+inline constexpr DWORD dwCHILD    = WS_CHILD | WS_VISIBLE;
+inline constexpr DWORD dwLABEL    = SS_CENTER | SS_CENTERIMAGE;
+inline constexpr DWORD dwBUTTON   = BS_CENTER | BS_VCENTER | WS_TABSTOP;
 inline constexpr DWORD dwCHECKBOX = BS_VCENTER | BS_CHECKBOX | BS_AUTOCHECKBOX;
 
 // Minimum common controls version for certain functions, used for fallback codepaths

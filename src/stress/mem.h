@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-typedef BOOL (WINAPI* GlobalMemoryStatusEx_t)(MEMORYSTATUSEX*);
+typedef BOOL(WINAPI* GlobalMemoryStatusEx_t)(MEMORYSTATUSEX*);
 
 extern GlobalMemoryStatusEx_t g_GlobalMemoryStatusEx;
 

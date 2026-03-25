@@ -1,9 +1,9 @@
 #ifndef CRYOCALC_STRESS_REPORTING_H_
 #define CRYOCALC_STRESS_REPORTING_H_
 
-#include "common.h"
-#include "../utils.h"
 #include "../ui_utils.h"
+#include "../utils.h"
+#include "common.h"
 
 // Whether to use older functions
 extern bool g_legacy_fallback;
