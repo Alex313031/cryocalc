@@ -362,7 +362,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           if (hMonitorStatusBar) {
             wchar_t sb_text[MAX_LOADSTRING];
             swprintf(sb_text, MAX_LOADSTRING,
-                     L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%%",
+                     L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%% ",
                      snap.cpu_percent, snap.ram_used_mb, g_total_ram_mb, snap.comm_used_mb,
                      g_total_commit_mb, snap.io_percent);
             SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(sb_text));

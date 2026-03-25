@@ -315,7 +315,9 @@ void InitMeters(HWND hWnd) {
                       0, hWnd, nullptr, this_hinst, nullptr);
   if (hMonitorStatusBar) {
     SendMessageW(hMonitorStatusBar, WM_SIZE, 0, 0);
-    SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(L" CPU: 0%"));
+    static constexpr LPCWSTR init_status =
+         L" CPU: 0%%   RAM: OMB/OMB   Commit: 0MB/0MB   I/O: O%% ";
+    SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(init_status));
   }
 }
 
