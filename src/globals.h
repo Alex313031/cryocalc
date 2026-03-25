@@ -48,7 +48,7 @@ extern HWND hCPUBar; // Vertical progress bar for CPU usage
 
 extern HWND hCPUPercent; // Edit control showing CPU percentage usage
 
-extern HWND hMEMBar; // Vertical progress bar for RAM usage
+extern HWND hMemBar; // Vertical progress bar for RAM usage
 
 extern HWND hMemPercent; // Edit control showing RAM percentage usage
 

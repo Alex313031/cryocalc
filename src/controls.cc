@@ -3,6 +3,7 @@
 #include <os_info_dll.h>
 
 #include "painting.h"
+#include "stress/cpu.h"
 #include "stress/reporting.h"
 #include "ui_utils.h"
 
@@ -47,8 +48,8 @@ HWND hAllocMemButton;
 static HWND hCPUBarLabel;
 HWND hCPUBar;
 HWND hCPUPercent;
-static HWND hMEMBarLabel;
-HWND hMEMBar;
+static HWND hMemBarLabel;
+HWND hMemBar;
 HWND hMemPercent;
 static HWND hCommitBarLabel;
 HWND hCommitBar;
@@ -447,7 +448,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hCPUBarLabel = CreateWindowExW(0, WC_STATIC, L"CPU", dwCHILD | dwLABEL | SS_NOTIFY,
                                  cpubar_label_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                                  hWnd, nullptr, hInst, nullptr);
-  hMEMBarLabel = CreateWindowExW(0, WC_STATIC, L"RAM", dwCHILD | dwLABEL | SS_NOTIFY,
+  hMemBarLabel = CreateWindowExW(0, WC_STATIC, L"RAM", dwCHILD | dwLABEL | SS_NOTIFY,
                                  mem_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                                  hWnd, nullptr, hInst, nullptr);
   hCommitBarLabel = CreateWindowExW(0, WC_STATIC, L"PF", dwCHILD | dwLABEL | SS_NOTIFY,
@@ -472,7 +473,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                                io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
                                hWnd, nullptr, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-  hMEMBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
+  hMemBar = CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL,
                             membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                             hWnd, (HMENU)IDC_MEMBAR, hInst, nullptr);
   const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING);
@@ -506,11 +507,11 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
     SendMessageW(hProgressBar, PBM_SETMARQUEE, FALSE, 0);
   }
   SendMessageW(hCPUBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
-  SendMessageW(hMEMBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+  SendMessageW(hMemBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hCommitBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hIOBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
-  SendMessageW(hMEMBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hMemBar, PBM_SETPOS, 0, 0);
   SendMessageW(hCommitBar, PBM_SETPOS, 0, 0);
   SendMessageW(hIOBar, PBM_SETPOS, 0, 0);
   // Make output edit controls read only.
@@ -563,8 +564,8 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hCPUBar, hInst, L"Total CPU Usage");
   AddTooltip(hWnd, hCPUBarLabel, hInst, L"Total CPU Usage");
   AddTooltip(hWnd, hCPUPercent, hInst, L"CPU Usage Percent");
-  AddTooltip(hWnd, hMEMBar, hInst, L"Total RAM Usage");
-  AddTooltip(hWnd, hMEMBarLabel, hInst, L"Total RAM Usage");
+  AddTooltip(hWnd, hMemBar, hInst, L"Total RAM Usage");
+  AddTooltip(hWnd, hMemBarLabel, hInst, L"Total RAM Usage");
   AddTooltip(hWnd, hMemPercent, hInst, L"RAM Usage Percent");
   AddTooltip(hWnd, hCommitBar, hInst, L"Commit Charge (RAM + Pagefile Usage)");
   AddTooltip(hWnd, hCommitBarLabel, hInst, L"Commit Charge (RAM + Pagefile Usage)");
@@ -572,19 +573,18 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hIOBar, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOBarLabel, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOPercent, hInst, L"Disk I/O Usage %");
-  // Start the unified monitoring timer on the main window.
+  // Start system Monitoring at end of controls initialization
   if (!InitPerfData()) {
     ErrorBox(hWnd, L"Perf Data Init Failure", L"InitPerfData failed!");
     return;
-  }
-  SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
-  // Radio-check "High" as the default speed in the main window menu.
-  // Settings is index 2 in the menu bar; Update Speed is index 1 within Settings.
-  HMENU hBar      = GetMenu(hWnd);
-  HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
-  HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
-  if (hSpeed) {
-    CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
+  } else {
+    SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
+    HMENU hBar      = GetMenu(hWnd);
+    HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
+    HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
+    if (hSpeed) {
+      CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
+    }
   }
 }
 
@@ -717,7 +717,7 @@ void HandleResize(HWND hWnd) {
     hdwp = DeferWindowPos(hdwp, hCPUBarLabel, nullptr,
                           cpubar_label_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
-    hdwp = DeferWindowPos(hdwp, hMEMBarLabel, nullptr,
+    hdwp = DeferWindowPos(hdwp, hMemBarLabel, nullptr,
                           mem_perc_left, cpubar_label_top, cpubar_label_width, cpubar_label_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     hdwp = DeferWindowPos(hdwp, hCommitBarLabel, nullptr,
@@ -742,7 +742,7 @@ void HandleResize(HWND hWnd) {
                           io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING);
-    hdwp = DeferWindowPos(hdwp, hMEMBar, nullptr,
+    hdwp = DeferWindowPos(hdwp, hMemBar, nullptr,
                           membar_left, cpubar_top, CPUBAR_WIDTH, cpubar_height,
                           SWP_NOZORDER | SWP_NOACTIVATE);
     const int commitbar_left = membar_left + CPUBAR_WIDTH + (INTRA_PADDING);

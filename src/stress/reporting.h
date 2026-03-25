@@ -23,8 +23,7 @@ void SetCommitBarPos(float commit_percent);
 // Sets I/O progress bar position according to usage %
 void SetIOBarPos(float io_percent);
 
-// Stop the monitoring timer, reset bars to zero, close monitor window, and
-// release perf-data resources. Call before destroying the main window.
+// Helper function to stop all monitoring
 void StopMonitoring();
 
 // Returns a const reference to the last snapshot produced by UpdatePerfData().

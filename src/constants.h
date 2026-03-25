@@ -43,17 +43,26 @@ constexpr long double kDummyFahrenheit = 212.000L; // Boiling point of water
 constexpr long double kDummyRankine    = 671.641L; // Boiling point of water
 
 // Static values
-constexpr unsigned int MAINWIDTH = 640u; // Default width of main window
+constexpr unsigned int MAINWIDTH  = 640u; // Default width of main window
 constexpr unsigned int MAINHEIGHT = 480u; // Default height of main window
+constexpr unsigned int MINWIDTH   = 480u; // Min width of main window
+constexpr unsigned int MINHEIGHT  = 384u; // Min height of main window
+constexpr unsigned int MAXWIDTH   = 868u; // Max width of main window
+constexpr unsigned int MAXHEIGHT  = 680u; // Max height of main window
 
-constexpr unsigned int MINWIDTH  = 480u; // Min. width of main window
-constexpr unsigned int MINHEIGHT  = 384u; // Min. height of main window
+constexpr unsigned int OSINFO_WIDTH     = 400u; // Default width of OS Info Window
+constexpr unsigned int OSINFO_HEIGHT    = 320u; // Default height of OS Info window
+constexpr unsigned int OSINFO_MINWIDTH  = 340u; // Min width of OS Info Window
+constexpr unsigned int OSINFO_MINHEIGHT = 300u; // Min height of OS Info window
+constexpr unsigned int OSINFO_MAXWIDTH  = MAINWIDTH; // Max width of OS Info Window
+constexpr unsigned int OSINFO_MAXHEIGHT = MAXHEIGHT; // Max height of OS Info window
 
-constexpr unsigned int MAXWIDTH  = 868u; // Max. width of main window
-constexpr unsigned int MAXHEIGHT  = 680u; // Max. height of main window
-
-constexpr unsigned int MONWIN_WIDTH  = MAINWIDTH; // Default width of monitor Window
-constexpr unsigned int MONWIN_HEIGHT = MAINHEIGHT; // Default height of monitor window
+constexpr unsigned int MONWIN_WIDTH     = MAINWIDTH;  // Default width of monitor Window
+constexpr unsigned int MONWIN_HEIGHT    = MAINHEIGHT; // Default height of monitor window
+constexpr unsigned int MONWIN_MINWIDTH  = 200u; // Min width of monitor window
+constexpr unsigned int MONWIN_MINHEIGHT = 180u; // Min height of monitor window
+constexpr unsigned int MONWIN_MAXWIDTH  = (MAXWIDTH * 2u); // Max. width of monitor window
+constexpr unsigned int MONWIN_MAXHEIGHT = (MAXHEIGHT * 2u); // Max. height of monitor window
 
 constexpr unsigned int STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 constexpr int SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels
@@ -115,6 +124,9 @@ inline constexpr DWORD dwComCtl32TargetVer =
 #define RGB_YELLOWISH RGB(192, 192, 0)
 #define RGB_CYAN      RGB(192, 255, 255)
 #define RGB_DARKGREY  RGB(32, 32, 32)
+#define RGB_DARKRED   RGB(96, 0, 0)
+#define RGB_DARKGREEN RGB(0, 96, 0)
+#define RGB_DARKBLUE  RGB(0, 0, 96)
 
 // Internal temp scale representation
 enum Scale {

@@ -273,6 +273,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_OSINFO_BUTTON:
           ShowOsInfo(hWnd);
           break;
+        case IDM_SYSMON:
+        case IDC_SYSMON_BUTTON:
+          PostMessageW(hWnd, WM_OPEN_MONITOR_WIN, 0, 0);
+          break;
         case IDM_PASTE:
           HandlePaste(hWnd);
           break;
@@ -353,8 +357,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.io_percent)));
         SetWindowTextW(hIOPercent, pct_text);
         if (hMonitorWin) {
-          PushSamples(snap.cpu_percent, snap.ram_percent,
-                      snap.comm_percent, snap.io_percent);
+          PushSamples(snap.cpu_percent, snap.kernel_percent,
+                      snap.ram_percent, snap.comm_percent, snap.io_percent);
           if (hMonitorStatusBar) {
             wchar_t sb_text[MAX_LOADSTRING];
             swprintf(sb_text, MAX_LOADSTRING,

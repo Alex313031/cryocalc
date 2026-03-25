@@ -92,15 +92,15 @@ BEGIN
     END
     POPUP "&Dev"
     BEGIN
-        MENUITEM "&Clear Console",  IDM_CLEAR_CON
-        MENUITEM "Clear &Log File", IDM_CLEAR_LOG
+        MENUITEM "&System Monitor", IDM_SYSMON
         MENUITEM "&Open Log File",  IDM_OPEN_LOG
         MENUITEM SEPARATOR
         POPUP "&More"
         BEGIN
             MENUITEM "&Attach Console", IDM_ATTACH_CON
             MENUITEM "&Detach Console", IDM_DETACH_CON
-            MENUITEM "OS &Info",        IDM_OSINFO
+            MENUITEM "&Clear Console",  IDM_CLEAR_CON
+            MENUITEM "Clear &Log File", IDM_CLEAR_LOG
             MENUITEM "&Test Logging",   IDM_TEST_LOG
         END
     END
@@ -128,7 +128,8 @@ BEGIN
       MENUITEM "&High (0.5 sec.)",   IDM_SPEED_HIGH
     END
     MENUITEM SEPARATOR
-    MENUITEM "&Close", IDM_CLOSE_MON
+    MENUITEM "Show &Kernel Times", IDM_SHOW_KERNEL, CHECKED
+    MENUITEM "&Close",             IDM_CLOSE_MON
   END
   POPUP "&About"
   BEGIN

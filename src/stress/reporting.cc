@@ -45,14 +45,14 @@ void SetMEMBarPos(float mem_percent) {
     LOG(ERROR) << __FUNC__ << L" mem_percent out of bounds! " << mem_percent;
     return;
   }
-  DCHECK(hMEMBar);
+  DCHECK(hMemBar);
   static float last_percent = 0.0f;
   if (std::abs(mem_percent - last_percent) <= 0.9f) {
     return;
   }
   last_percent = mem_percent;
   const int membar_position = static_cast<int>(std::round(mem_percent));
-  SendMessageW(hMEMBar, PBM_SETPOS, static_cast<WPARAM>(membar_position), 0);
+  SendMessageW(hMemBar, PBM_SETPOS, static_cast<WPARAM>(membar_position), 0);
 }
 
 void SetCommitBarPos(float commit_percent) {
@@ -94,10 +94,10 @@ static bool CloseMonitorWindow() {
 
 void StopMonitoring() {
   KillTimer(hMainWindow, kUpdateTimerId);
-  SendMessageW(hCPUBar,    PBM_SETPOS, 0, 0);
-  SendMessageW(hMEMBar,    PBM_SETPOS, 0, 0);
+  SendMessageW(hCPUBar, PBM_SETPOS, 0, 0);
+  SendMessageW(hMemBar, PBM_SETPOS, 0, 0);
   SendMessageW(hCommitBar, PBM_SETPOS, 0, 0);
-  SendMessageW(hIOBar,     PBM_SETPOS, 0, 0);
+  SendMessageW(hIOBar, PBM_SETPOS, 0, 0);
   CloseMonitorWindow();
   CleanupPerfData();
 }

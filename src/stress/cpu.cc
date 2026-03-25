@@ -105,9 +105,11 @@ void UpdateCPUPerfData() {
       const ULONGLONG d_total  = d_kernel + d_user;
       if (d_total > 0) {
         // kernel includes idle, so busy = (kernel - idle) + user = total - idle
-        const ULONGLONG busy = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
-        const float pct = static_cast<float>(busy * 100ULL) / static_cast<float>(d_total);
-        g_snapshot.cpu_percent = std::clamp(pct, 0.0f, 100.0f);
+        const ULONGLONG busy      = (d_idle <= d_total) ? (d_total - d_idle) : 0ULL;
+        const ULONGLONG kbusy     = (d_idle <= d_kernel) ? (d_kernel - d_idle) : 0ULL;
+        const float final_total   = static_cast<float>(d_total);
+        g_snapshot.cpu_percent    = std::clamp(static_cast<float>(busy  * 100ULL) / final_total, 0.0f, 100.0f);
+        g_snapshot.kernel_percent = std::clamp(static_cast<float>(kbusy * 100ULL) / final_total, 0.0f, 100.0f);
       }
     }
 

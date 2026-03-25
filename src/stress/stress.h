@@ -1,6 +1,8 @@
 #ifndef CRYOCALC_STRESS_STRESS_H_
 #define CRYOCALC_STRESS_STRESS_H_
 
+#include <atomic>
+
 #include "common.h"
 #include "cpu.h"
 #include "mem.h"

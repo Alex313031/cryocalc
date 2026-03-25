@@ -39,11 +39,11 @@
 #define IDM_CLEAR_LOG               214
 #define IDM_TEST_LOG                215
 #define IDM_OPEN_LOG                216
-// TODO
 #define IDM_SPEED_LOW               217
 #define IDM_SPEED_MED               218
 #define IDM_SPEED_HIGH              219
-#define IDM_DISABLE_CON             220
+#define IDM_DISABLE_CON             220 // TODO
+#define IDM_SYSMON                  221
 
 // Buttons
 #define IDC_CONVERT                 300
@@ -60,6 +60,7 @@
 #define IDC_CLOSE_OSINFO            311
 #define IDC_CLOSE_OSINFO_BUTTON     312
 #define IDC_PROGRESS                313
+#define IDC_SYSMON_BUTTON           314
 
 // User input controls
 #define IDC_INPUT                   320
@@ -99,6 +100,7 @@
 #define IDC_WPERF                   390
 #define IDM_CLOSE_MON               391
 #define IDM_ABOUT_MON               392
+#define IDM_SHOW_KERNEL             393
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC

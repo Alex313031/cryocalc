@@ -236,10 +236,10 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     } break;
     case WM_GETMINMAXINFO: {
       LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);
-      pMinMaxInfo->ptMinTrackSize.x = 320;
-      pMinMaxInfo->ptMinTrackSize.y = 280;
-      pMinMaxInfo->ptMaxTrackSize.x = 640;
-      pMinMaxInfo->ptMaxTrackSize.y = MAXHEIGHT;
+      pMinMaxInfo->ptMinTrackSize.x = OSINFO_MINWIDTH;
+      pMinMaxInfo->ptMinTrackSize.y = OSINFO_MINHEIGHT;
+      pMinMaxInfo->ptMaxTrackSize.x = OSINFO_MAXWIDTH;
+      pMinMaxInfo->ptMaxTrackSize.y = OSINFO_MAXHEIGHT;
     } break;
     case WM_CLOSE: {
       if (!ResetFocus(hMainWindow, nullptr)) {

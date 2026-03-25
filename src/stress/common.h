@@ -1,8 +1,6 @@
 #ifndef CRYOCALC_STRESS_COMMON_H_
 #define CRYOCALC_STRESS_COMMON_H_
 
-#include <atomic>
-
 #include "../framework.h"
 
 enum kMonType {
@@ -15,12 +13,13 @@ enum kMonType {
 
 // Snapshot of the most recently measured system performance counters.
 struct PerfSnapshot {
-  float cpu_percent;   // CPU utilization %
-  float ram_percent;   // RAM utilization %
-  float comm_percent;  // Commit Charge utilization %
-  float io_percent;    // Disk I/O utilization %
-  float ram_used_mb;   // Physical RAM currently in use (MB)
-  float comm_used_mb;  // Commit charge currently in use (MB)
+  float cpu_percent;    // Total CPU utilization % (user + kernel, excluding idle)
+  float kernel_percent; // Kernel-only CPU utilization % (excluding idle)
+  float ram_percent;    // RAM utilization %
+  float comm_percent;   // Commit Charge utilization %
+  float io_percent;     // Disk I/O utilization %
+  float ram_used_mb;    // Physical RAM currently in use (MB)
+  float comm_used_mb;   // Commit charge currently in use (MB)
 };
 
 extern PerfSnapshot g_snapshot;

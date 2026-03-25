@@ -4,6 +4,7 @@
 
 #include <deque>
 
+#include "resource.h"
 #include "stress/cpu.h"
 #include "strings.h"
 #include "ui_utils.h"
@@ -23,9 +24,12 @@ static HINSTANCE this_hinst = nullptr;
 // <graph_width> of them right-aligned (oldest on the left, newest on the right).
 static constexpr int kHistoryMax = 1024; // more than enough history for any window size
 static std::deque<float> g_cpu_history;
+static std::deque<float> g_kernel_history;
 static std::deque<float> g_ram_history;
 static std::deque<float> g_comm_history;
 static std::deque<float> g_io_history;
+
+static bool g_show_kernel = true; // Draw kernel-time overlay on CPU graph
 
 UINT g_update_interval = kSpeedHigh; // Shared; also read by controls.cc on init
 
@@ -45,7 +49,7 @@ static HMENU GetMonitorSpeedMenu() {
 // "Update Speed" popup from the main CryoCalc window menu (Settings=index 2, submenu index 1).
 static HMENU GetMainSpeedMenu() {
   HMENU hBar      = GetMenu(hMainWindow);
-  HMENU hSettings = hBar      ? GetSubMenu(hBar,      2) : nullptr;
+  HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
   return hSettings ? GetSubMenu(hSettings, 1) : nullptr;
 }
 
@@ -114,6 +118,7 @@ bool OpenMonitorWindow(HWND hWnd) {
   // Put to right of main window
   int left, top;
   GetRightOfWindow(hMainWindow, &left, &top);
+  left = left - kDesiredClientW / 3u;
 
   hMonitorWin = CreateWindowExW(
       ex_style,
@@ -146,12 +151,19 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
   switch (uMsg) {
     case WM_CREATE: {
       InitMeters(hWnd);
-      // Sync the speed radio check to whatever the main window timer is using.
-      HMENU hSpd = GetMonitorSpeedMenu();
+      // hMonitorWin is not yet assigned at WM_CREATE time, so use hWnd directly.
+      HMENU hBar  = GetMenu(hWnd);
+      HMENU hOpts = hBar  ? GetSubMenu(hBar,  0) : nullptr;
+      HMENU hSpd  = hOpts ? GetSubMenu(hOpts, 0) : nullptr;
       if (hSpd) {
         UINT cur_id = IDM_SPEED_HIGH;
-        if (g_update_interval == kSpeedLow)      { cur_id = IDM_SPEED_LOW; }
-        else if (g_update_interval == kSpeedMed) { cur_id = IDM_SPEED_MED; }
+        if (g_update_interval == kSpeedLow) {
+          cur_id = IDM_SPEED_LOW;
+        } else if (g_update_interval == kSpeedMed) {
+          cur_id = IDM_SPEED_MED;
+        } else if (g_update_interval == kSpeedHigh) {
+          cur_id = IDM_SPEED_HIGH;
+        }
         CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, cur_id, MF_BYCOMMAND);
       }
     } break;
@@ -196,14 +208,23 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       break;
     case WM_GETMINMAXINFO: {
       LPMINMAXINFO pMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
-      pMinMaxInfo->ptMinTrackSize.x = kMinOuterW;
-      pMinMaxInfo->ptMinTrackSize.y = kMinOuterH;
-      pMinMaxInfo->ptMaxTrackSize.x = MAXWIDTH;
-      pMinMaxInfo->ptMaxTrackSize.y = MAXHEIGHT;
+      pMinMaxInfo->ptMinTrackSize.x = MONWIN_MINWIDTH;
+      pMinMaxInfo->ptMinTrackSize.y = MONWIN_MINHEIGHT;
+      pMinMaxInfo->ptMaxTrackSize.x = MONWIN_MAXWIDTH;
+      pMinMaxInfo->ptMaxTrackSize.y = MONWIN_MAXHEIGHT;
     } break;
     case WM_COMMAND: {
       int wmId = LOWORD(wParam);
       switch (wmId) {
+        case IDM_SHOW_KERNEL: {
+          g_show_kernel = !g_show_kernel;
+          HMENU hMenu = GetMenu(hWnd);
+          if (hMenu) {
+            CheckMenuItem(hMenu, IDM_SHOW_KERNEL,
+                          MF_BYCOMMAND | (g_show_kernel ? MF_CHECKED : MF_UNCHECKED));
+          }
+          InvalidateRect(hWnd, nullptr, false);
+        } break;
         case IDM_CLOSE_MON:
           PostMessageW(hWnd, WM_CLOSE, 0, 0); // Will be picked up on next MonitorWindowProc loop
           break;
@@ -304,13 +325,18 @@ void InitMeters(HWND hWnd) {
   }
 }
 
-void PushSamples(float cpu_percent, float ram_percent, float comm_percent, float io_percent) {
+void PushSamples(float cpu_percent, float kernel_percent,
+                 float ram_percent, float comm_percent, float io_percent) {
   g_cpu_history.push_back(cpu_percent);
+  g_kernel_history.push_back(kernel_percent);
   g_ram_history.push_back(ram_percent);
   g_comm_history.push_back(comm_percent);
   g_io_history.push_back(io_percent);
   while (static_cast<int>(g_cpu_history.size()) > kHistoryMax) {
     g_cpu_history.pop_front();
+  }
+  while (static_cast<int>(g_kernel_history.size()) > kHistoryMax) {
+    g_kernel_history.pop_front();
   }
   while (static_cast<int>(g_ram_history.size()) > kHistoryMax) {
     g_ram_history.pop_front();
@@ -329,11 +355,11 @@ void PushSamples(float cpu_percent, float ram_percent, float comm_percent, float
 static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   int iw = inner.right - inner.left;
   int ih = inner.bottom - inner.top;
-  bool make_grid = false;
+  bool make_graph = false;
   if (iw <= 0 || ih <= 0) {
     return;
   } else {
-    make_grid = true;
+    make_graph = true;
   }
 
   // Select the correct history ring based on graph type.
@@ -366,62 +392,100 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   int start_x      = iw - n_valid;
   int hist_offset  = static_cast<int>(history->size()) - n_valid;
 
-  // Grid lines - 9 horizontal + 9 vertical, dividing the area into 10 equal sized cells
-  if (make_grid) {
-    HPEN grid_pen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 128)); // Blue grid lines
-    HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, grid_pen));
-    for (int i = 1; i <= 9; i++) {
-      // Horizontal lines evenly spaced in Y
-      int gy = inner.top + (ih * i) / 10;
-      MoveToEx(hdc, inner.left, gy, nullptr);
-      LineTo(hdc, inner.right, gy);
-      // Vertical lines evenly spaced in X
-      int gx = inner.left + (iw * i) / 10;
-      MoveToEx(hdc, gx, inner.top, nullptr);
-      LineTo(hdc, gx, inner.bottom);
-    }
-    SelectObject(hdc, saved_pen);
-    DeleteObject(grid_pen);
-  }
-
   if (n_valid < 2) {
-    return; // need at least 2 points for a line
+    make_graph = false; // need at least 2 points for a line
   }
 
-  // Build top-contour point array
-  std::vector<POINT> pts;
-  pts.reserve(static_cast<size_t>(n_valid));
-  for (int i = 0; i < n_valid; i++) {
-    float pct = (*history)[static_cast<size_t>(hist_offset + i)];
-    int y   = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
-    pts.push_back({inner.left + start_x + i, y});
+  // Grid lines: 9 x + 9 y, dividing the area into 10 equal sized cells, always draw this
+  const HPEN grid_pen  = CreatePen(PS_SOLID, 1, RGB(0, 0, 128)); // Blue grid lines
+  HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, grid_pen));
+  for (int i = 1; i <= 9; i++) {
+    // Horizontal lines evenly spaced in Y
+    int gy = inner.top + (ih * i) / 10;
+    MoveToEx(hdc, inner.left, gy, nullptr);
+    LineTo(hdc, inner.right, gy);
+    // Vertical lines evenly spaced in X
+    int gx = inner.left + (iw * i) / 10;
+    MoveToEx(hdc, gx, inner.top, nullptr);
+    LineTo(hdc, gx, inner.bottom);
   }
+  SelectObject(hdc, saved_pen);
+  DeleteObject(grid_pen);
+  
+  if (!make_graph) {
+    return; // Don't do anything if make_graph is false for whatever reason
+  } else {
+    // Build cpu line top-contour point array
+    std::vector<POINT> pts;
+    pts.reserve(static_cast<size_t>(n_valid));
+    for (int i = 0; i < n_valid; i++) {
+      float pct = (*history)[static_cast<size_t>(hist_offset + i)];
+      int y   = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
+      pts.push_back({inner.left + start_x + i, y});
+    }
 
-  // Filled area below the line (dark green)
-  if (make_grid) {
+    // Compute lower filled area below the cpu line
     std::vector<POINT> poly;
     poly.reserve(pts.size() + 2);
     poly.insert(poly.end(), pts.begin(), pts.end());
     poly.push_back({pts.back().x,  inner.bottom - 1}); // bottom-right corner
     poly.push_back({pts.front().x, inner.bottom - 1}); // bottom-left corner
 
+    // Build kernel line top-contour point array (when enabled)
+    std::vector<POINT> kpts;
+    std::vector<POINT> kpoly;
+    if (type == CPU_TYPE && g_show_kernel && n_valid >= 2) {
+      kpts.reserve(static_cast<size_t>(n_valid));
+      const int k_offset = static_cast<int>(g_kernel_history.size()) - n_valid;
+      for (int i = 0; i < n_valid; i++) {
+        float pct = g_kernel_history[static_cast<size_t>(k_offset + i)];
+        int y = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
+        kpts.push_back({inner.left + start_x + i, y});
+      }
+      kpoly.reserve(kpts.size() + 2);
+      kpoly.insert(kpoly.end(), kpts.begin(), kpts.end());
+      kpoly.push_back({kpts.back().x,  inner.bottom - 1});
+      kpoly.push_back({kpts.front().x, inner.bottom - 1});
+    }
+
+    // Draw fills first, then lines on top (painter's algorithm)
+    // Fill with dark green
     HPEN null_pen     = static_cast<HPEN>(GetStockObject(NULL_PEN));
-    HBRUSH fill_brush = CreateSolidBrush(RGB(0, 96, 0)); // Dark green
+    HBRUSH fill_brush = CreateSolidBrush(RGB_DARKGREEN); // Dark green
     HPEN saved_pen    = static_cast<HPEN>(SelectObject(hdc, null_pen));
     HBRUSH saved_br   = static_cast<HBRUSH>(SelectObject(hdc, fill_brush));
     Polygon(hdc, poly.data(), static_cast<int>(poly.size()));
     SelectObject(hdc, saved_pen);
     SelectObject(hdc, saved_br);
     DeleteObject(fill_brush);
-  }
 
-  // Bright green line along the top contour
-  if (make_grid) {
-    HPEN line_pen  = CreatePen(PS_SOLID, 1, RGB(0, 255, 0)); // Full bright green
-    HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, line_pen));
+    if (!kpoly.empty()) {
+      // Fill with dark red
+      HPEN null_pen      = static_cast<HPEN>(GetStockObject(NULL_PEN));
+      HBRUSH kfill_brush = CreateSolidBrush(RGB_DARKRED); // Dark red
+      HPEN saved_pen     = static_cast<HPEN>(SelectObject(hdc, null_pen));
+      HBRUSH saved_br    = static_cast<HBRUSH>(SelectObject(hdc, kfill_brush));
+      Polygon(hdc, kpoly.data(), static_cast<int>(kpoly.size()));
+      SelectObject(hdc, saved_pen);
+      SelectObject(hdc, saved_br);
+      DeleteObject(kfill_brush);
+    }
+
+    // Bright green line along the top cpu contour
+    HPEN line_pen = CreatePen(PS_SOLID, 1, RGB_GREEN); // Full bright green
+    saved_pen     = static_cast<HPEN>(SelectObject(hdc, line_pen));
     Polyline(hdc, pts.data(), static_cast<int>(pts.size()));
     SelectObject(hdc, saved_pen);
     DeleteObject(line_pen);
+
+    if (!kpts.empty()) {
+      // Bright red line along the top kernel contour
+      HPEN kern_pen  = CreatePen(PS_SOLID, 1, RGB_RED);
+      HPEN saved_pen = static_cast<HPEN>(SelectObject(hdc, kern_pen));
+      Polyline(hdc, kpts.data(), static_cast<int>(kpts.size()));
+      SelectObject(hdc, saved_pen);
+      DeleteObject(kern_pen);
+    }
   }
 }
 
@@ -518,6 +582,7 @@ void CleanupMeters() {
   }
   g_monitor_font = nullptr;
   g_cpu_history.clear();
+  g_kernel_history.clear();
   g_ram_history.clear();
   g_comm_history.clear();
   g_io_history.clear();
