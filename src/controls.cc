@@ -471,16 +471,16 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
                       CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_CPUBAR, hInst, nullptr);
   hCPUPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
                                 cpu_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd,
-                                nullptr, hInst, nullptr);
+                                (HMENU)IDC_CPUPERC, hInst, nullptr);
   hMemPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
                                 mem_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd,
-                                nullptr, hInst, nullptr);
+                                (HMENU)IDC_MEMPERC, hInst, nullptr);
   hCommitPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
                                    commit_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height,
-                                   hWnd, nullptr, hInst, nullptr);
-  hIOPercent =
-      CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY, io_perc_left,
-                      cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd, nullptr, hInst, nullptr);
+                                   hWnd, (HMENU)IDC_COMPERC, hInst, nullptr);
+  hIOPercent = CreateWindowExW(0, WC_STATIC, L"NaN", dwCHILD | dwLABEL | SS_SUNKEN | SS_NOTIFY,
+                               io_perc_left, cpu_perc_top, cpu_perc_width, cpu_perc_height, hWnd,
+                               (HMENU)IDC_IOPERC, hInst, nullptr);
   const int membar_left = cpubar_left + CPUBAR_WIDTH + (INTRA_PADDING);
   hMemBar =
       CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, membar_left, cpubar_top,

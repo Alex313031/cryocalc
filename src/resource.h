@@ -91,6 +91,10 @@
 #define IDC_KELVIN                  341
 #define IDC_FAHRENHEIT              342
 #define IDC_RANKINE                 343
+#define IDC_CPUPERC                 344
+#define IDC_MEMPERC                 345
+#define IDC_COMPERC                 346
+#define IDC_IOPERC                  347
 
 // Progress bars
 #define IDC_PROGRESS                350

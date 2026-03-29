@@ -407,13 +407,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       // Create brushes once and reuse them (static prevents GDI handle leaks)
       static const COLORREF bgColorDefault = GetSysColor(COLOR_WINDOW);
       static const HBRUSH hBrushDefault    = CreateSolidBrush(bgColorDefault);
+      static HBRUSH hBrushWhite            = CreateSolidBrush(RGB_WHITE);
       static HBRUSH hBrushRed              = CreateSolidBrush(RGB_REDISH);
       static HBRUSH hBrushGreen            = CreateSolidBrush(RGB_GREENISH);
       static HBRUSH hBrushCyan             = CreateSolidBrush(RGB_CYAN);
       // Initially set to default color
       COLORREF bgColor   = bgColorDefault;
       HBRUSH hBrushToUse = hBrushDefault;
-      bool set_color     = false;
+      bool set_color     = true;
       switch (GetDlgCtrlID(hThisEditControl)) {
         case IDC_LABEL_C:
         case IDC_LABEL_K:
@@ -421,7 +422,17 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_R:
           bgColor     = RGB_REDISH;
           hBrushToUse = hBrushRed;
-          set_color   = true;
+          break;
+        case IDC_CELSIUS:
+        case IDC_KELVIN:
+        case IDC_FAHRENHEIT:
+        case IDC_RANKINE:
+        case IDC_CPUPERC:
+        case IDC_MEMPERC:
+        case IDC_COMPERC:
+        case IDC_IOPERC:
+          bgColor     = RGB_WHITE;
+          hBrushToUse = hBrushWhite;
           break;
         case IDC_LABEL_INPUT:
         case IDC_LABEL_PREC:
@@ -429,13 +440,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDC_LABEL_CACHE:
           bgColor     = RGB_GREENISH;
           hBrushToUse = hBrushGreen;
-          set_color   = true;
           break;
         case IDC_INPUT:
         case IDC_THREADS:
           bgColor     = RGB_CYAN;
           hBrushToUse = hBrushCyan;
-          set_color   = true;
           break;
         default:
           set_color = false;
