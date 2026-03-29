@@ -1,11 +1,9 @@
 #include "monitor_window.h"
 
-#include <windowsx.h>
-
 #include <deque>
 
 #include "resource.h"
-#include "stress/cpu.h"
+#include "stress/stress.h"
 #include "strings.h"
 #include "ui_utils.h"
 

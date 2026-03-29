@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <random>
 
+#include "../ui_utils.h"
+
 std::atomic<bool> running{false};
 
 bool use_sse2_simd = false;

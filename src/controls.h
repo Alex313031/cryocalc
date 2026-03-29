@@ -5,10 +5,6 @@
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
-#include "monitor_window.h"
-#include "osinfo_window.h"
-#include "resource.h"
-#include "strings.h"
 #include "utils.h"
 
 Scale parseScale(const std::wstring& wscale);

@@ -1,6 +1,7 @@
 #include "cpu.h"
 
 #include "reporting.h"
+#include "../utils.h"
 
 static GetNativeSystemInfo_t pfnGetNativeSystemInfo = nullptr;
 

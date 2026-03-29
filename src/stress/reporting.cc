@@ -5,6 +5,8 @@
 #include "cpu.h"
 #include "io.h"
 #include "mem.h"
+#include "../ui_utils.h"
+#include "../utils.h"
 
 NtQuerySystemInformation_t g_NtQSI            = nullptr;
 GetSystemTimes_t g_GetSystemTimes             = nullptr;

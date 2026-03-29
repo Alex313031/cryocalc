@@ -2,6 +2,8 @@
 
 #include <winioctl.h>
 
+#include <logging.h>
+
 #include "reporting.h"
 
 // Gets the current total disk I/O usage % and is supposed

@@ -40,6 +40,13 @@
 #include <thread>    // For threading support
 #include <vector>    // std::vector
 
+// Defines for missing windowsx.h definitions, don't want to inlcude
+// the heavy .h file just for this one thing.
+#if !defined(GET_X_LPARAM) || !defined(GET_Y_LPARAM)
+ #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
+ #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
+#endif
+
 /* Defines handling */
 
 #ifndef __FUNC__

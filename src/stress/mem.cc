@@ -3,6 +3,7 @@
 #include <os_info_dll.h>
 
 #include "reporting.h"
+#include "../utils.h"
 
 // Gets the current total RAM usage % and is supposed
 // to return it as a float between 0.0 and 100.0.

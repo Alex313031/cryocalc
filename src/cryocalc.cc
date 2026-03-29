@@ -1,5 +1,9 @@
 #include "cryocalc.h"
 
+#include "monitor_window.h"
+#include "osinfo_window.h"
+#include "stress/stress.h"
+#include "strings.h"
 #include "ui_utils.h"
 
 // Global instance
@@ -143,7 +147,7 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.hIcon         = nullptr;                 // Load our main app icon
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(
-      COLOR_3DSHADOW); // Choose window client area background color (dialog gray)
+      COLOR_3DSHADOW + 1); // Choose window client area background color (dialog gray)
   wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName = szWindowClass;                  // Use our unique window class name
   wcex.hIconSm       = main_icon;                      // Load titlebar icon

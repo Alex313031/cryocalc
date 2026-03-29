@@ -1,8 +1,6 @@
 #ifndef CRYOCALC_STRESS_REPORTING_H_
 #define CRYOCALC_STRESS_REPORTING_H_
 
-#include "../ui_utils.h"
-#include "../utils.h"
 #include "common.h"
 
 // Whether to use older functions

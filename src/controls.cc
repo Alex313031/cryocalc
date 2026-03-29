@@ -2,9 +2,14 @@
 
 #include <os_info_dll.h>
 
+#include "monitor_window.h"
+#include "osinfo_window.h"
 #include "painting.h"
+#include "resource.h"
 #include "stress/cpu.h"
 #include "stress/reporting.h"
+#include "stress/stress.h"
+#include "strings.h"
 #include "ui_utils.h"
 
 // Static labels
@@ -431,12 +436,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       static_cast<int>(sys_monitor_left + ((sys_monitor_width + INTRA_PADDING) / 2)) -
       static_cast<int>((4 * CPUBAR_WIDTH) + (INTRA_PADDING * 4)) / 2;
   const int cpubar_top =
-      std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
-               STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+      std::max(static_cast<int>(STATIC_TOP + STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
+               static_cast<int>((STATIC_TOP + sys_monitor_height) / 2) -
                    static_cast<int>(CPUBAR_HEIGHT) / 2) -
       (INTRA_PADDING * 2);
   const int cpubar_height =
-      std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top, 0,
+      std::clamp(static_cast<int>(STATIC_TOP + sys_monitor_height) - cpubar_top, 0,
                  static_cast<int>(CPUBAR_HEIGHT));
   const int cpubar_label_left   = cpubar_left;
   const int cpu_perc_left       = cpubar_label_left;
@@ -691,12 +696,12 @@ void HandleResize(HWND hWnd) {
     const unsigned int cpubar_left = std::clamp(static_cast<unsigned int>(cpubar_left_candidate),
                                                 orig_sys_monitor_left + INTRA_PADDING, MAXWIDTH);
     const int cpubar_top =
-        std::max(STATIC_TOP + static_cast<int>(STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
-                 STATIC_TOP + static_cast<int>(sys_monitor_height) / 2 -
+        std::max(static_cast<int>(STATIC_TOP + STATICLABEL_HEIGHT + SMALLLABEL_HEIGHT),
+                 static_cast<int>((STATIC_TOP + sys_monitor_height) / 2) -
                      static_cast<int>(CPUBAR_HEIGHT) / 2) -
         (INTRA_PADDING * 2);
     const int cpubar_height =
-        std::clamp(STATIC_TOP + static_cast<int>(sys_monitor_height) - cpubar_top, 0,
+        std::clamp(static_cast<int>(STATIC_TOP + sys_monitor_height) - cpubar_top, 0,
                    static_cast<int>(CPUBAR_HEIGHT));
     const int cpubar_label_left   = cpubar_left;
     const int cpu_perc_left       = cpubar_label_left;

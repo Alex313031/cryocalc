@@ -3,6 +3,7 @@
 #include "converters.h"
 #include "resource.h"
 #include "strings.h"
+#include "stress/stress.h"
 
 unsigned int g_precision_;
 

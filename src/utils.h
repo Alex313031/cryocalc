@@ -9,7 +9,6 @@
 #include "converters.h"
 #include "framework.h"
 #include "globals.h"
-#include "stress/stress.h"
 
 // Global precision to use
 extern unsigned int g_precision_;
