@@ -45,10 +45,11 @@
 #define IDM_DISABLE_CON             220 // TODO
 #define IDM_SYSMON                  221
 
-// Monitor Window menu
-#define IDM_CLOSE_MON               250
-#define IDM_ABOUT_MON               251
-#define IDM_SHOW_KERNEL             252
+// Monitor Window menu items
+#define IDM_SHOW_KERNEL             250
+#define IDM_FILL_LINES              251
+#define IDM_CLOSE_MON               252
+#define IDM_ABOUT_MON               253
 
 // Buttons
 #define IDC_CONVERT                 300

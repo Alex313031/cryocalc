@@ -25,21 +25,29 @@ inline const wchar_t* kMainFont = L"MS Shell Dlg 2"; // Font to use for all cont
 constexpr bool use_antialiasing = false;             // Whether to use ClearType and antialiasing
 
 // Color constants
-#define RGB_BLACK     RGB(0, 0, 0)
-#define RGB_WHITE     RGB(255, 255, 255)
-#define RGB_RED       RGB(255, 0, 0)
-#define RGB_GREEN     RGB(0, 255, 0)
-#define RGB_BLUE      RGB(0, 0, 255)
-#define RGB_YELLOW    RGB(255, 255, 0)
-#define RGB_REDISH    RGB(255, 192, 192)
-#define RGB_GREENISH  RGB(192, 255, 192)
-#define RGB_BLUEISH   RGB(0, 0, 128)
-#define RGB_YELLOWISH RGB(192, 192, 0)
-#define RGB_CYAN      RGB(192, 255, 255)
-#define RGB_DARKGREY  RGB(32, 32, 32)
-#define RGB_DARKRED   RGB(96, 0, 0)
-#define RGB_DARKGREEN RGB(0, 96, 0)
-#define RGB_DARKBLUE  RGB(0, 0, 96)
+#define RGB_BLACK   RGB(0, 0, 0)
+#define RGB_WHITE   RGB(255, 255, 255)
+#define RGB_RED     RGB(255, 0, 0)
+#define RGB_GREEN   RGB(0, 255, 0)
+#define RGB_BLUE    RGB(0, 0, 255)
+#define RGB_YELLOW  RGB(255, 255, 0)
+#define RGB_CYAN    RGB(0, 255, 255)
+#define RGB_MAGENTA RGB(255, 0, 255)
+
+#define RGB_REDISH     RGB(255, 192, 192)
+#define RGB_GREENISH   RGB(192, 255, 192)
+#define RGB_BLUEISH    RGB(0, 0, 128)
+#define RGB_YELLOWISH  RGB(192, 192, 0)
+#define RGB_CYANISH    RGB(192, 255, 255)
+#define RGB_MAGENTAISH RGB(255, 128, 255)
+
+#define RGB_DARKGREY    RGB(32, 32, 32)
+#define RGB_DARKRED     RGB(96, 0, 0)
+#define RGB_DARKGREEN   RGB(0, 96, 0)
+#define RGB_DARKBLUE    RGB(0, 0, 96)
+#define RGB_DARKYELLOW  RGB(96, 96, 0)
+#define RGB_DARKCYAN    RGB(0, 96, 96)
+#define RGB_DARKMAGENTA RGB(96, 0, 96)
 
 // Internal temp scale representation
 enum Scale {

@@ -28,15 +28,15 @@ static std::deque<float> g_comm_history;
 static std::deque<float> g_io_history;
 
 static bool g_show_kernel = true; // Draw kernel-time overlay on CPU graph
+static bool g_fill_lines  = true; // Fill area below lines with color
 
 UINT g_update_interval = kSpeedHigh; // Shared; also read by controls.cc on init
 
 // Layout constants
-static inline constexpr int kMarginH   = 4; // left/right margin outside the graph box
-static inline constexpr int kMarginTop = 4; // top margin above the label
-static inline constexpr int kMarginBot = 4; // bottom margin below the graph box
-static inline constexpr int kLabelH =
-    16; // height of the label above the graph box, also used for hit-testing
+static constexpr int kMarginH   = static_cast<int>(PADDING_X); // left/right margin outside the graph box
+static constexpr int kMarginTop = static_cast<int>(PADDING_Y); // top margin above the label
+static constexpr int kMarginBot = kMarginTop; // bottom margin below the graph box
+static constexpr int kLabelH = 16; // height of the label above the graph box, also used for hit-testing
 
 // "Update Speed" popup from the monitor window menu (Settings > index 0).
 static HMENU GetMonitorSpeedMenu() {
@@ -146,21 +146,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
   switch (uMsg) {
     case WM_CREATE: {
       InitMeters(hWnd);
-      // hMonitorWin is not yet assigned at WM_CREATE time, so use hWnd directly.
-      HMENU hBar  = GetMenu(hWnd);
-      HMENU hOpts = hBar ? GetSubMenu(hBar, 0) : nullptr;
-      HMENU hSpd  = hOpts ? GetSubMenu(hOpts, 0) : nullptr;
-      if (hSpd) {
-        UINT cur_id = IDM_SPEED_HIGH;
-        if (g_update_interval == kSpeedLow) {
-          cur_id = IDM_SPEED_LOW;
-        } else if (g_update_interval == kSpeedMed) {
-          cur_id = IDM_SPEED_MED;
-        } else if (g_update_interval == kSpeedHigh) {
-          cur_id = IDM_SPEED_HIGH;
-        }
-        CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, cur_id, MF_BYCOMMAND);
-      }
+      InitMonMenuItems(hWnd);
     } break;
     // Painting
     case WM_ERASEBKGND:
@@ -212,13 +198,10 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       int wmId = LOWORD(wParam);
       switch (wmId) {
         case IDM_SHOW_KERNEL: {
-          g_show_kernel = !g_show_kernel;
-          HMENU hMenu   = GetMenu(hWnd);
-          if (hMenu) {
-            CheckMenuItem(hMenu, IDM_SHOW_KERNEL,
-                          MF_BYCOMMAND | (g_show_kernel ? MF_CHECKED : MF_UNCHECKED));
-          }
-          InvalidateRect(hWnd, nullptr, false);
+          ShowKernelLines(hWnd);
+        } break;
+        case IDM_FILL_LINES: {
+          ShowFillLines(hWnd);
         } break;
         case IDM_CLOSE_MON:
           PostMessageW(hWnd, WM_CLOSE, 0, 0); // Will be picked up on next MonitorWindowProc loop
@@ -246,12 +229,12 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       if (hOpts) {
         int screen_x = GET_X_LPARAM(lParam);
         int screen_y = GET_Y_LPARAM(lParam);
-        // -1/-1 means keyboard invocation, in that case centre in this window.
+        // -1/-1 means keyboard invocation; show at current cursor position.
         if (screen_x == -1 && screen_y == -1) {
-          RECT wr;
-          GetWindowRect(hWnd, &wr);
-          screen_x = (wr.left + wr.right) / 2;
-          screen_y = (wr.top + wr.bottom) / 2;
+          POINT pt;
+          GetCursorPos(&pt);
+          screen_x = pt.x;
+          screen_y = pt.y;
         }
         TrackPopupMenu(hOpts, TPM_RIGHTBUTTON, screen_x, screen_y, 0, hWnd, nullptr);
       }
@@ -265,8 +248,8 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       POINT pt = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
       RECT cr;
       GetClientRect(hWnd, &cr);
-      // Only initiate drag when the click is within the graph area (below the label).
-      if (pt.y >= kMarginTop + kLabelH) {
+      // Only initiate drag when the click is within the graph area (below the margin).
+      if (pt.y >= kMarginTop) {
         ClientToScreen(hWnd, &pt);
         ReleaseCapture();
         SendMessageW(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(pt.x, pt.y));
@@ -277,6 +260,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         LOG(ERROR) << L"ResetFocus failed!";
       }
       DestroyWindow(hWnd);
+      LOG(DEBUG) << L"Closed System Monitor Window";
       break;
     case WM_DESTROY:
       CleanupMeters();
@@ -293,6 +277,60 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       return DefWindowProc(hWnd, uMsg, wParam, lParam);
   }
   return 0;
+}
+
+bool InitMonMenuItems(HWND hWnd) {
+  if (!hWnd) {
+    return false;
+  }
+  // hMonitorWin is not yet assigned at WM_CREATE time, so use hWnd directly.
+  HMENU hMenu  = GetMenu(hWnd);
+  HMENU hOpts = hMenu ? GetSubMenu(hMenu, 0) : nullptr;
+  HMENU hSpd  = hOpts ? GetSubMenu(hOpts, 0) : nullptr;
+  if (hSpd) {
+    UINT cur_id = IDM_SPEED_HIGH;
+    if (g_update_interval == kSpeedLow) {
+      cur_id = IDM_SPEED_LOW;
+    } else if (g_update_interval == kSpeedMed) {
+      cur_id = IDM_SPEED_MED;
+    } else if (g_update_interval == kSpeedHigh) {
+      cur_id = IDM_SPEED_HIGH;
+    }
+    CheckMenuRadioItem(hSpd, IDM_SPEED_LOW, IDM_SPEED_HIGH, cur_id, MF_BYCOMMAND);
+  }
+  if (hMenu) {
+    CheckMenuItem(hMenu, IDM_SHOW_KERNEL,
+                  MF_BYCOMMAND | (g_show_kernel ? MF_CHECKED : MF_UNCHECKED));
+    CheckMenuItem(hMenu, IDM_FILL_LINES,
+                  MF_BYCOMMAND | (g_fill_lines ? MF_CHECKED : MF_UNCHECKED));
+  }
+  return hMenu != nullptr;
+}
+
+void ShowKernelLines(HWND hWnd) {
+  if (!hWnd) {
+    return;
+  }
+  g_show_kernel = !g_show_kernel;
+  HMENU hMenu   = GetMenu(hWnd);
+  if (hMenu) {
+    CheckMenuItem(hMenu, IDM_SHOW_KERNEL,
+                  MF_BYCOMMAND | (g_show_kernel ? MF_CHECKED : MF_UNCHECKED));
+  }
+  InvalidateRect(hWnd, nullptr, false);
+}
+
+void ShowFillLines(HWND hWnd) {
+  if (!hWnd) {
+    return;
+  }
+  g_fill_lines = !g_fill_lines;
+  HMENU hMenu  = GetMenu(hWnd);
+  if (hMenu) {
+    CheckMenuItem(hMenu, IDM_FILL_LINES,
+                  MF_BYCOMMAND | (g_fill_lines ? MF_CHECKED : MF_UNCHECKED));
+  }
+  InvalidateRect(hWnd, nullptr, false);
 }
 
 void InitMeters(HWND hWnd) {
@@ -324,6 +362,16 @@ void PushSamples(float cpu_percent,
                  float ram_percent,
                  float comm_percent,
                  float io_percent) {
+  // On the very first push after the window opens, seed all histories with 0
+  // so the line starts from the bottom rather than jumping to the current
+  // value (classic Task Manager behavior).
+  if (g_cpu_history.empty()) {
+    g_cpu_history.push_back(0.0f);
+    g_kernel_history.push_back(0.0f);
+    g_ram_history.push_back(0.0f);
+    g_comm_history.push_back(0.0f);
+    g_io_history.push_back(0.0f);
+  }
   g_cpu_history.push_back(cpu_percent);
   g_kernel_history.push_back(kernel_percent);
   g_ram_history.push_back(ram_percent);
@@ -361,20 +409,34 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
 
   // Select the correct history ring based on graph type.
   const std::deque<float>* history = nullptr;
+  static const HPEN null_pen = static_cast<HPEN>(GetStockObject(NULL_PEN));
+  static const HBRUSH null_brush = static_cast<HBRUSH>(GetStockObject(NULL_BRUSH));
+  HBRUSH fill_brush = null_brush;
+  HPEN line_pen = null_pen;
   switch (type) {
+    case CPU_TYPE:
+      line_pen = CreatePen(PS_SOLID, 1, RGB_GREEN);
+      fill_brush = CreateSolidBrush(RGB_DARKGREEN);
+      history = &g_cpu_history;
+      break;
     case RAM_TYPE:
+      line_pen = CreatePen(PS_SOLID, 1, RGB_YELLOW);
+      fill_brush = CreateSolidBrush(RGB_DARKYELLOW);
       history = &g_ram_history;
       break;
     case COMM_TYPE:
+      line_pen = CreatePen(PS_SOLID, 1, RGB_CYAN);
+      fill_brush = CreateSolidBrush(RGB_DARKCYAN);
       history = &g_comm_history;
       break;
     case IO_TYPE:
+      line_pen = CreatePen(PS_SOLID, 1, RGB_MAGENTA);
+      fill_brush = CreateSolidBrush(RGB_DARKMAGENTA);
       history = &g_io_history;
       break;
-    case CPU_TYPE:
-      history = &g_cpu_history;
-      break;
     default:
+      line_pen = null_pen;
+      fill_brush = null_brush;
       LOG(FATAL) << L"Unhandled kMonType type!";
       break;
   }
@@ -394,7 +456,7 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   }
 
   // Grid lines: 9 x + 9 y, dividing the area into 10 equal sized cells, always draw this
-  const HPEN grid_pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 128)); // Blue grid lines
+  const HPEN grid_pen = CreatePen(PS_SOLID, 1, RGB_BLUEISH); // Dark Blue grid lines
   HPEN saved_pen      = static_cast<HPEN>(SelectObject(hdc, grid_pen));
   for (int i = 1; i <= 9; i++) {
     // Horizontal lines evenly spaced in Y
@@ -412,7 +474,7 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
   if (!make_graph) {
     return; // Don't do anything if make_graph is false for whatever reason
   } else {
-    // Build cpu line top-contour point array
+    // Build line top-contour point array
     std::vector<POINT> pts;
     pts.reserve(static_cast<size_t>(n_valid));
     for (int i = 0; i < n_valid; i++) {
@@ -421,7 +483,7 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
       pts.push_back({inner.left + start_x + i, y});
     }
 
-    // Compute lower filled area below the cpu line
+    // Compute lower filled area below the line
     std::vector<POINT> poly;
     poly.reserve(pts.size() + 2);
     poly.insert(poly.end(), pts.begin(), pts.end());
@@ -446,30 +508,30 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
     }
 
     // Draw fills first, then lines on top (painter's algorithm)
-    // Fill with dark green
-    HPEN null_pen     = static_cast<HPEN>(GetStockObject(NULL_PEN));
-    HBRUSH fill_brush = CreateSolidBrush(RGB_DARKGREEN); // Dark green
-    HPEN saved_pen    = static_cast<HPEN>(SelectObject(hdc, null_pen));
-    HBRUSH saved_br   = static_cast<HBRUSH>(SelectObject(hdc, fill_brush));
-    Polygon(hdc, poly.data(), static_cast<int>(poly.size()));
-    SelectObject(hdc, saved_pen);
-    SelectObject(hdc, saved_br);
-    DeleteObject(fill_brush);
+    if (g_fill_lines) {
+      // Fill under line with darkened color of line
+      if (!poly.empty()) {
+        HPEN saved_pen    = static_cast<HPEN>(SelectObject(hdc, null_pen));
+        HBRUSH saved_br   = static_cast<HBRUSH>(SelectObject(hdc, fill_brush));
+        Polygon(hdc, poly.data(), static_cast<int>(poly.size()));
+        SelectObject(hdc, saved_pen);
+        SelectObject(hdc, saved_br);
+        DeleteObject(fill_brush);
+      }
 
-    if (!kpoly.empty()) {
-      // Fill with dark red
-      HPEN null_pen      = static_cast<HPEN>(GetStockObject(NULL_PEN));
-      HBRUSH kfill_brush = CreateSolidBrush(RGB_DARKRED); // Dark red
-      HPEN saved_pen     = static_cast<HPEN>(SelectObject(hdc, null_pen));
-      HBRUSH saved_br    = static_cast<HBRUSH>(SelectObject(hdc, kfill_brush));
-      Polygon(hdc, kpoly.data(), static_cast<int>(kpoly.size()));
-      SelectObject(hdc, saved_pen);
-      SelectObject(hdc, saved_br);
-      DeleteObject(kfill_brush);
+      if (!kpoly.empty()) {
+        // Fill under kernel line with dark red
+        HBRUSH kfill_brush = CreateSolidBrush(RGB_DARKRED); // Dark red
+        HPEN saved_pen     = static_cast<HPEN>(SelectObject(hdc, null_pen));
+        HBRUSH saved_br    = static_cast<HBRUSH>(SelectObject(hdc, kfill_brush));
+        Polygon(hdc, kpoly.data(), static_cast<int>(kpoly.size()));
+        SelectObject(hdc, saved_pen);
+        SelectObject(hdc, saved_br);
+        DeleteObject(kfill_brush);
+      }
     }
 
-    // Bright green line along the top cpu contour
-    HPEN line_pen = CreatePen(PS_SOLID, 1, RGB_GREEN); // Full bright green
+    // Bright line along the top contour
     saved_pen     = static_cast<HPEN>(SelectObject(hdc, line_pen));
     Polyline(hdc, pts.data(), static_cast<int>(pts.size()));
     SelectObject(hdc, saved_pen);

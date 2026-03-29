@@ -128,7 +128,8 @@ BEGIN
       MENUITEM "&High (0.5 sec.)",   IDM_SPEED_HIGH
     END
     MENUITEM SEPARATOR
-    MENUITEM "Show &Kernel Times", IDM_SHOW_KERNEL, CHECKED
+    MENUITEM "&Fill Graph Lines",  IDM_FILL_LINES
+    MENUITEM "Show &Kernel Times", IDM_SHOW_KERNEL
     MENUITEM "&Close",             IDM_CLOSE_MON
   END
   POPUP "&About"
@@ -140,7 +141,7 @@ END
 // Keyboard Accelerators
 IDC_CRYOCALC ACCELERATORS
 BEGIN
-    //VK_F1,     IDM_HELPEX,  VIRTKEY, NOINVERT        // "F1" key
+    //VK_F1,     IDM_HELPEX, VIRTKEY, NOINVERT       // "F1" key
     "?",       IDM_ABOUT, ASCII,   ALT             // "?" key
     VK_OEM_2,  IDM_ABOUT, VIRTKEY, ALT             // "/" key
     0x57,      IDM_CLEAR, VIRTKEY, CONTROL         // Ctrl+W

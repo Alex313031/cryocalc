@@ -410,7 +410,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       static HBRUSH hBrushWhite            = CreateSolidBrush(RGB_WHITE);
       static HBRUSH hBrushRed              = CreateSolidBrush(RGB_REDISH);
       static HBRUSH hBrushGreen            = CreateSolidBrush(RGB_GREENISH);
-      static HBRUSH hBrushCyan             = CreateSolidBrush(RGB_CYAN);
+      static HBRUSH hBrushCyan             = CreateSolidBrush(RGB_CYANISH);
       // Initially set to default color
       COLORREF bgColor   = bgColorDefault;
       HBRUSH hBrushToUse = hBrushDefault;
@@ -443,7 +443,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           break;
         case IDC_INPUT:
         case IDC_THREADS:
-          bgColor     = RGB_CYAN;
+          bgColor     = RGB_CYANISH;
           hBrushToUse = hBrushCyan;
           break;
         default:

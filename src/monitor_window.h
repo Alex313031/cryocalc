@@ -29,6 +29,15 @@ void HandleMonitorWindowResize(HWND hWnd);
 // Window procedure for monitor popup window
 LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+// Sets proper checkmark state for menus on window creation, depending on default settings.
+bool InitMonMenuItems(HWND hWnd);
+
+// Toggles whether kernel times are shown
+void ShowKernelLines(HWND hWnd);
+
+// Toggles whether to fill lower area of line with color
+void ShowFillLines(HWND hWnd);
+
 // Create GDI resources used by the graph drawing routines and status bar
 void InitMeters(HWND hWnd);
 
