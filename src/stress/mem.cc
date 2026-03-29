@@ -5,6 +5,8 @@
 #include "reporting.h"
 #include "../utils.h"
 
+bool g_first_mem_sample = true;
+
 // Gets the current total RAM usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetMemPercent.
@@ -108,6 +110,13 @@ const float GetCommitChargePercent() {
 }
 
 void UpdateMemPerfData() {
-  g_snapshot.ram_percent  = GetMemPercent();
-  g_snapshot.comm_percent = GetCommitChargePercent();
+  const float mem    = GetMemPercent();
+  const float commit = GetCommitChargePercent();
+  if (mem > 0.0f && commit > 0.0f) {
+    g_first_mem_sample = false;
+  }
+  if (!g_first_mem_sample) {
+    g_snapshot.ram_percent  = mem;
+    g_snapshot.comm_percent = commit;
+  }
 }

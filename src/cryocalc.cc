@@ -146,8 +146,7 @@ ATOM RegisterWndClass(HINSTANCE hInstance) {
   wcex.hInstance     = hInstance;               // This instance
   wcex.hIcon         = nullptr;                 // Load our main app icon
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW); // Choose default cursor style to show
-  wcex.hbrBackground = reinterpret_cast<HBRUSH>(
-      COLOR_3DSHADOW + 1); // Choose window client area background color (dialog gray)
+  wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1); // Choose client area background color
   wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_CRYOCALC); // Attach menu to window
   wcex.lpszClassName = szWindowClass;                  // Use our unique window class name
   wcex.hIconSm       = main_icon;                      // Load titlebar icon
@@ -439,11 +438,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
           set_color   = true;
           break;
         default:
+          set_color = false;
           break;
       }
       if (set_color) {
         SetBkColor(hdc, bgColor);
         return reinterpret_cast<LRESULT>(hBrushToUse);
+      } else {
+        return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
     } break;
     // Handle resize events

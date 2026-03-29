@@ -200,7 +200,7 @@ logging::LogMessage& logging::LogMessage::operator<<(HWND value) {
   return *this;
 }
 
-// TODO: Add DCHECK/DLOG
+// TODO: Add DCHECK/DLOG with more Chromium like
 bool logging::LogMessage::IsDCheck() {
   return dcheck_log_;
 }

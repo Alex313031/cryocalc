@@ -1,12 +1,12 @@
 #include "stress.h"
 
 #include <emmintrin.h>
-#include <logging.h>
 #include <os_info_dll.h>
 
 #include <algorithm>
 #include <random>
 
+#include "common.h"
 #include "../ui_utils.h"
 
 std::atomic<bool> running{false};

@@ -5,7 +5,7 @@
 
 static GetNativeSystemInfo_t pfnGetNativeSystemInfo = nullptr;
 
-static bool g_first_cpu_sample = true; // Tracks whether this is first CPU sample, for delta seeding
+bool g_first_cpu_sample = true; // Tracks whether this is first CPU sample, for delta seeding
 
 static ULONGLONG g_prev_idle   = 0;
 static ULONGLONG g_prev_kernel = 0;
@@ -27,15 +27,14 @@ DWORD GetLogicalProcessorCount() {
   std::wstring whichfunc;
 #if _WIN32_WINNT >= 0x0502 && defined(_WIN64)
   whichfunc = L"GetNativeSystemInfo";
-  GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo
+  GetNativeSystemInfo(&sysInfo); // Directly run GetNativeSystemInfo, we're on x64
   pfnGetNativeSystemInfo = nullptr;
 #else
   // Note: Do not call FreeLibrary() on GetModuleHandle() results
   HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
   if (!hKernel32) {
-    // Fallback if kernel32.dll handle couldn't be obtained
-    whichfunc = L"GetSystemInfo";
-    GetSystemInfo(&sysInfo);
+    LOG(ERROR) << L"Failed to get kernel32.dll!";
+    return static_cast<DWORD>(0x0000);
   } else {
     // Dynamically get GetNativeSystemInfo
     pfnGetNativeSystemInfo =
@@ -46,7 +45,7 @@ DWORD GetLogicalProcessorCount() {
       pfnGetNativeSystemInfo(&sysInfo);
     } else {
       whichfunc = L"GetSystemInfo";
-      GetSystemInfo(&sysInfo);
+      GetSystemInfo(&sysInfo); // Directly run GetSystemInfo, even NT 4 has this.
     }
   }
   if (debug_mode) {
@@ -67,7 +66,7 @@ void UpdateCPUPerfData() {
     return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
   };
 
-  ULONGLONG idle = 0, kernel = 0, user = 0;
+  ULONGLONG idle = 0ULL, kernel = 0ULL, user = 0ULL;
   bool got_sample = false;
 
   if (g_GetSystemTimes && !g_legacy_fallback) {

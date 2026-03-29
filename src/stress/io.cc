@@ -2,15 +2,20 @@
 
 #include <winioctl.h>
 
-#include <logging.h>
-
 #include "reporting.h"
+
+bool g_first_io_sample = true; // Tracks whether this is first IO sample, for delta seeding
+
+struct DiskPerfState {
+  LONGLONG prev_read_time  = 0;
+  LONGLONG prev_write_time = 0;
+  LONGLONG prev_query_time = 0;
+};
 
 // Gets the current total disk I/O usage % and is supposed
 // to return it as a float between 0.0 and 100.0.
 // The ONLY caller of this function should be GetDiskIOPercent.
 static float GetDiskIOPercentImpl() {
-  static bool first_call = true;
   static std::vector<DiskPerfState> disk_states;
 
   float max_percent = 0.0f;
@@ -39,7 +44,7 @@ static float GetDiskIOPercentImpl() {
 
     DiskPerfState& state = disk_states[i];
 
-    if (first_call) {
+    if (g_first_io_sample) {
       state.prev_read_time  = perf.ReadTime.QuadPart;
       state.prev_write_time = perf.WriteTime.QuadPart;
       state.prev_query_time = perf.QueryTime.QuadPart;
@@ -63,8 +68,8 @@ static float GetDiskIOPercentImpl() {
     max_percent = std::max(max_percent, percent);
   }
 
-  if (first_call) {
-    first_call = false;
+  if (g_first_io_sample) {
+    g_first_io_sample = false;
     return 0.0f;
   }
 
@@ -81,5 +86,9 @@ const float GetDiskIOPercent() {
 }
 
 void UpdateIOPerfData() {
-  g_snapshot.io_percent = GetDiskIOPercent();
+  if (g_first_io_sample) {
+    GetDiskIOPercent();
+  } else {
+    g_snapshot.io_percent = GetDiskIOPercent();
+  }
 }

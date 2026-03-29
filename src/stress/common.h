@@ -1,9 +1,25 @@
 #ifndef CRYOCALC_STRESS_COMMON_H_
 #define CRYOCALC_STRESS_COMMON_H_
 
+// clang-format off
 #include "../framework.h"
 
-enum kMonType { CPU_TYPE = 0, RAM_TYPE = 1, COMM_TYPE = 2, IO_TYPE = 3, MAX_TYPE = 4 };
+#include <logging.h> // Keep this below framework.h
+
+#ifndef NT_SUCCESS
+ #define NT_SUCCESS(s) (((LONG)(s)) >= 0)
+#endif
+
+enum kMonType {
+  CPU_TYPE  = 0,
+  RAM_TYPE  = 1,
+  COMM_TYPE = 2,
+  IO_TYPE   = 3,
+  MAX_TYPE  = 4
+};
+// clang-format on
+
+typedef float ufloat;
 
 // Snapshot of the most recently measured system performance counters.
 struct PerfSnapshot {

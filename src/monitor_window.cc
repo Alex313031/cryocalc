@@ -491,7 +491,7 @@ void DrawMeter(HDC hdc, const RECT& area) {
   int ch = (area.bottom - area.top);
 
   // Regular dialog gray color
-  FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DSHADOW)));
+  FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DFACE + 1)));
 
   // Label centered at the top
   RECT label_rect = {0, kMarginTop, cw, kMarginTop + kLabelH};
@@ -517,7 +517,7 @@ void DrawMeter(HDC hdc, const RECT& area) {
 
 void DrawMeters(HDC hdc, const RECT& area) {
   // Regular dialog gray color
-  FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DSHADOW)));
+  FillRect(hdc, &area, reinterpret_cast<HBRUSH>(static_cast<LONG_PTR>(COLOR_3DFACE + 1)));
 
   // Layout constants for the 4 graphs
   const int halfwidth    = (area.right - area.left) / 2;

@@ -3,7 +3,6 @@
 
 #include <atomic>
 
-#include "common.h"
 #include "cpu.h"
 #include "mem.h"
 #include "reporting.h"

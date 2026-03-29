@@ -3,11 +3,7 @@
 
 #include "common.h"
 
-struct DiskPerfState {
-  LONGLONG prev_read_time  = 0;
-  LONGLONG prev_write_time = 0;
-  LONGLONG prev_query_time = 0;
-};
+extern bool g_first_io_sample;
 
 const float GetDiskIOPercent();
 

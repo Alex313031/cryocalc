@@ -42,7 +42,7 @@ bool ShowOsInfo(HWND hWnd) {
   wcex.hInstance     = this_hinst;
   wcex.hIcon         = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_CRYOCALC));
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW);
-  wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+  wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1);
   wcex.lpszMenuName  = nullptr;
   wcex.lpszClassName = szOSInfoWindowClass;
   wcex.hIconSm       = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));

@@ -1,9 +1,10 @@
 #ifndef MINI_LOGGER_CHECK_H_
 #define MINI_LOGGER_CHECK_H_
 
-#include <intrin.h>
-
+// clang-format off
 #include "logging_base.h"
+
+#include <intrin.h> // Keep this below logging_base.h
 
 // DCHECK is a debug-only assertion macro. It checks if the condition is true,
 // and if not, triggers a debug break. In release builds (NDEBUG defined),
@@ -13,7 +14,7 @@
 //   DCHECK(ptr != nullptr);
 //   DCHECK(index < array_size);
 //   DCHECK(number >= int);
-// clang-format off
+
 // Macro to convert to string
 #if !defined(_STRINGIZER_)
  #define _STRINGIZER_
@@ -34,6 +35,7 @@ namespace logging {
 
 #define CHECK(condition) logging::CheckImpl(STRINGIZE(condition), !(condition))
 
+// TODO: Add better check for DCHECK define, instead of just "non debug"
 #if !defined(NDEBUG)
  #define DCHECK(condition) CHECK(condition)
 #else // NDEBUG defined (release build)

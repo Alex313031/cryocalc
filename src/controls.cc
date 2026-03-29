@@ -537,6 +537,20 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Stuff to do after controls are initialized
   SetFontAllControls(hWnd, kMainFont); // Set initial font for all controls in main Window
   AppendTooltips(hWnd, hInst);         // Add hover tooltips to everything, lol
+  // Start system Monitoring at end of controls initialization
+  if (!InitPerfData()) {
+    ErrorBox(hWnd, L"Perf Data Init Failure", L"InitPerfData failed!");
+    return;
+  } else {
+    // Start monitor timer and set default update speed to high
+    SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
+    HMENU hBar      = GetMenu(hWnd);
+    HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
+    HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
+    if (hSpeed) {
+      CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
+    }
+  }
 }
 
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
@@ -582,19 +596,6 @@ void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
   AddTooltip(hWnd, hIOBar, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOBarLabel, hInst, L"Disk I/O Usage");
   AddTooltip(hWnd, hIOPercent, hInst, L"Disk I/O Usage %");
-  // Start system Monitoring at end of controls initialization
-  if (!InitPerfData()) {
-    ErrorBox(hWnd, L"Perf Data Init Failure", L"InitPerfData failed!");
-    return;
-  } else {
-    SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
-    HMENU hBar      = GetMenu(hWnd);
-    HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
-    HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
-    if (hSpeed) {
-      CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
-    }
-  }
 }
 
 void HandleResize(HWND hWnd) {

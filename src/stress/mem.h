@@ -5,6 +5,8 @@
 
 typedef BOOL(WINAPI* GlobalMemoryStatusEx_t)(MEMORYSTATUSEX*);
 
+extern bool g_first_mem_sample;
+
 extern GlobalMemoryStatusEx_t g_GlobalMemoryStatusEx;
 
 // Get total system memory usage

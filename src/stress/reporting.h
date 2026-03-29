@@ -35,7 +35,7 @@ const bool IsPerfDataInitialized();
 bool InitPerfData();
 
 // Helper function to update global snapshot
-void UpdatePerfData();
+bool UpdatePerfData();
 
 // Release any resources from InitPerfData().
 void CleanupPerfData();
