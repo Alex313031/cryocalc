@@ -45,6 +45,11 @@
 #define IDM_DISABLE_CON             220 // TODO
 #define IDM_SYSMON                  221
 
+// Monitor Window menu
+#define IDM_CLOSE_MON               250
+#define IDM_ABOUT_MON               251
+#define IDM_SHOW_KERNEL             252
+
 // Buttons
 #define IDC_CONVERT                 300
 #define IDC_CONVERT_BUTTON          301
@@ -59,8 +64,7 @@
 #define IDC_ALLOC_MEM               310
 #define IDC_CLOSE_OSINFO            311
 #define IDC_CLOSE_OSINFO_BUTTON     312
-#define IDC_PROGRESS                313
-#define IDC_SYSMON_BUTTON           314
+#define IDC_SYSMON_BUTTON           313
 
 // User input controls
 #define IDC_INPUT                   320
@@ -88,19 +92,18 @@
 #define IDC_FAHRENHEIT              342
 #define IDC_RANKINE                 343
 
-#define IDC_CPUBAR                  350
-#define IDC_MEMBAR                  351
-#define IDC_COMMITBAR               352
-#define IDC_IOBAR                   353
+// Progress bars
+#define IDC_PROGRESS                350
+#define IDC_CPUBAR                  351
+#define IDC_MEMBAR                  352
+#define IDC_COMMITBAR               353
+#define IDC_IOBAR                   354
 
 // Os Info Logging Output Window
 #define IDC_OSINFO_OUT              380
 
 // Monitor Window
-#define IDC_WPERF                   390
-#define IDM_CLOSE_MON               391
-#define IDM_ABOUT_MON               392
-#define IDM_SHOW_KERNEL             393
+#define IDC_WPERF                   381
 
 // For resources to be loaded without an ID from the system.
 #ifndef IDC_STATIC
