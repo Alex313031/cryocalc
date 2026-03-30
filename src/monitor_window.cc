@@ -2,6 +2,7 @@
 
 #include <deque>
 
+#include "painting.h"
 #include "resource.h"
 #include "stress/stress.h"
 #include "strings.h"
@@ -96,7 +97,7 @@ bool OpenMonitorWindow(HWND hWnd) {
   wcex.cbClsExtra    = 0;
   wcex.cbWndExtra    = 0;
   wcex.hInstance     = this_hinst;
-  wcex.hIcon         = LoadIconW(wcex.hInstance, MAKEINTRESOURCEW(IDI_WPERF));
+  wcex.hIcon         = LoadIconW(wcex.hInstance, MAKEINTRESOURCEW(IDI_SYSMON));
   wcex.hCursor       = LoadCursor(nullptr, IDC_ARROW);
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1);
   wcex.lpszMenuName  = MAKEINTRESOURCEW(IDC_WPERF);
@@ -147,6 +148,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_CREATE: {
       InitMeters(hWnd);
       InitMonMenuItems(hWnd);
+      SetFontAllControls(hWnd, kMainFont);
     } break;
     // Painting
     case WM_ERASEBKGND:
@@ -334,16 +336,8 @@ void ShowFillLines(HWND hWnd) {
 }
 
 void InitMeters(HWND hWnd) {
-  /* g_monitor_font = CreateFontW(-11, 0, 0, 0, FW_NORMAL,
-                       FALSE, FALSE, FALSE,
-                       DEFAULT_CHARSET,
-                       OUT_DEFAULT_PRECIS,
-                       CLIP_DEFAULT_PRECIS,
-                       DEFAULT_QUALITY,
-                       DEFAULT_PITCH | FF_SWISS,
-                       L"MS Shell Dlg"); */
   if (!g_monitor_font) {
-    g_monitor_font = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+    g_monitor_font = GetFont(kMainFont);
   }
   // Create the status bar.
   hMonitorStatusBar =
@@ -355,6 +349,7 @@ void InitMeters(HWND hWnd) {
          L" CPU: 0%%   RAM: OMB/OMB   Commit: 0MB/0MB   I/O: O%% ";
     SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(init_status));
   }
+  //AddTooltip(hWnd, hCPUGraph, this_hinst, L"");
 }
 
 void PushSamples(float cpu_percent,
@@ -646,7 +641,7 @@ void DrawMeters(HDC hdc, const RECT& area) {
 
 // TODO Rename
 void CleanupMeters() {
-  if (g_monitor_font && g_monitor_font != GetStockObject(DEFAULT_GUI_FONT)) {
+  if (g_monitor_font) {
     DeleteObject(g_monitor_font);
   }
   g_monitor_font = nullptr;

@@ -18,11 +18,11 @@ typedef BOOL(WINAPI* GetSystemTimes_t)(LPFILETIME lpIdleTime,
                                        LPFILETIME lpKernelTime,
                                        LPFILETIME lpUserTime);
 
-extern bool g_first_cpu_sample;
-
 extern NtQuerySystemInformation_t g_NtQSI;
 
 extern GetSystemTimes_t g_GetSystemTimes;
+
+extern bool g_first_cpu_sample;
 
 extern int g_num_cpus;
 

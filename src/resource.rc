@@ -21,8 +21,8 @@
 
 #undef APSTUDIO_READONLY_SYMBOLS
 
-// Embed manifest for common controls and DPI support
-#ifdef __MINGW32__
+// Embed manifest for common controls and UTF-8 support
+#if defined(__MINGW32__) || defined(__clang__)
 APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
 #endif // __MINGW32__
 
@@ -31,9 +31,14 @@ APP_MANIFEST RT_MANIFEST "cryocalc.manifest"
 // remains consistent on all systems.
 
 IDI_CRYOCALC   ICON  "res/cryocalc.ico"
-IDI_SMALL      ICON  "res/small.ico"
+IDI_ABOUT      ICON  "res/small.ico"
 IDI_WINFLAG    ICON  "res/winflag.ico"
 IDI_WPERF      ICON  "res/cpuslice.ico"
+IDI_SYSMON     ICON  "res/sysmon.ico"
+IDI_BALL       ICON  "res/ball.ico"
+
+// Bitmaps
+IDB_BACKGROUND BITMAP "res/background.bmp"
 
 #ifdef APSTUDIO_INVOKED
 
@@ -157,7 +162,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION ABOUT_TITLE
 FONT 8, "MS Shell Dlg 2"
 BEGIN
-    ICON            IDI_SMALL, IDC_STATIC, 8, 8, 32, 32, SS_ICON
+    ICON            IDI_ABOUT, IDC_STATIC, 8, 8, 32, 32, SS_ICON
     LTEXT           ABOUT_CONTENT, IDC_STATIC, 38, 10, 116, 8, SS_NOPREFIX
     LTEXT           ABOUT_COPYRIGHT, IDC_STATIC, 38, 20, 116, 8
     DEFPUSHBUTTON   "OK", IDOK, 50, 35, 40, 14, WS_TABSTOP
@@ -199,13 +204,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "https://github.com/Alex313031/cryocalc"
             VALUE "CompanyName", "Alex313031"
-            VALUE "FileDescription", "Win32 Temperature Unit Converter"
+            VALUE "FileDescription", "Win32 Overclocking Utility"
             VALUE "FileVersion", VERSION_STRING
             VALUE "InternalName", "cryocalc"
             VALUE "LegalCopyright", LEGAL_COPYRIGHT
             VALUE "LegalTrademarks", "BSD-3"
             VALUE "OriginalFilename", "cryocalc.exe"
-            VALUE "ProductName", "CryoCalc"
+            VALUE "ProductName", APP_NAME
             VALUE "ProductVersion", VERSION_STRING
         END
     END

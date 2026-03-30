@@ -351,23 +351,55 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         SetCommitBarPos(snap.comm_percent);
         SetIOBarPos(snap.io_percent);
         wchar_t pct_text[16];
-        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.cpu_percent)));
+        swprintf(pct_text, 16, L"%i%%", static_cast<int>(std::round(snap.cpu_percent)));
         SetWindowTextW(hCPUPercent, pct_text);
-        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.ram_percent)));
+        swprintf(pct_text, 16, L"%i%%", static_cast<int>(std::round(snap.ram_percent)));
         SetWindowTextW(hMemPercent, pct_text);
-        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.comm_percent)));
+        swprintf(pct_text, 16, L"%i%%", static_cast<int>(std::round(snap.comm_percent)));
         SetWindowTextW(hCommitPercent, pct_text);
-        swprintf(pct_text, 16, L"%d%%", static_cast<int>(std::round(snap.io_percent)));
+        swprintf(pct_text, 16, L"%i%%", static_cast<int>(std::round(snap.io_percent)));
         SetWindowTextW(hIOPercent, pct_text);
         if (hMonitorWin) {
           PushSamples(snap.cpu_percent, snap.kernel_percent, snap.ram_percent, snap.comm_percent,
                       snap.io_percent);
           if (hMonitorStatusBar) {
             wchar_t sb_text[MAX_LOADSTRING];
+            std::wstring bytes_suffix = L"Bytes";
+            std::wstring total_suffix = L"Bytes";
+            float used_mem = 0.0f, total_mem = 0.0f, used_comm = 0.0f, total_comm = 0.0f;
+            if (g_total_ram_mb <= 128.0f) {
+              bytes_suffix = L"KB";
+              total_suffix = L"MB";
+              used_mem   = snap.ram_used_mb * 1024.0f;
+              total_mem  = g_total_ram_mb;
+              used_comm  = snap.comm_used_mb * 1024.0f;
+              total_comm = g_total_commit_mb;
+            } else if (g_total_ram_mb > 128.0f && g_total_ram_mb < 1024.0f) {
+              bytes_suffix = L"MB";
+              total_suffix = L"MB";
+              used_mem   = snap.ram_used_mb;
+              total_mem  = g_total_ram_mb;
+              used_comm  = snap.comm_used_mb;
+              total_comm = g_total_commit_mb;
+            } else if (g_total_ram_mb >= 1024.0f && g_total_ram_mb <= 4096.0f) {
+              bytes_suffix = L"MB";
+              total_suffix = L"GB";
+              used_mem   = snap.ram_used_mb;
+              total_mem  = g_total_ram_mb / 1024.0f;
+              used_comm  = snap.comm_used_mb;
+              total_comm = g_total_commit_mb / 1024.0f;
+            } else if (g_total_ram_mb > 4096.0f) {
+              bytes_suffix = L"GB";
+              total_suffix = L"GB";
+              used_mem   = snap.ram_used_mb / 1024.0f;
+              total_mem  = g_total_ram_mb / 1024.0f;
+              used_comm  = snap.comm_used_mb / 1024.0f;
+              total_comm = g_total_commit_mb / 1024.0f;
+            }
             swprintf(sb_text, MAX_LOADSTRING,
-                     L" CPU: %.1f%%   RAM: %.1fMB/%.0fMB   Commit: %.1fMB/%.0fMB   I/O: %.1f%% ",
-                     snap.cpu_percent, snap.ram_used_mb, g_total_ram_mb, snap.comm_used_mb,
-                     g_total_commit_mb, snap.io_percent);
+                     L" CPU: %.1f%%   RAM: %.1f%ls/%.1f%ls   Commit: %.1f%ls/%.1f%ls   I/O: %.1f%% ",
+                     snap.cpu_percent, used_mem, bytes_suffix.c_str(), total_mem, total_suffix.c_str(),
+                     used_comm, bytes_suffix.c_str(), total_comm, total_suffix.c_str(), snap.io_percent);
             SendMessageW(hMonitorStatusBar, SB_SETTEXT, 0, reinterpret_cast<LPARAM>(sb_text));
           }
           InvalidateRect(hMonitorWin, nullptr, FALSE);
@@ -378,6 +410,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_CREATE:
       SetClientRects(hWnd, hInst);
       InitControls(hWnd, hInst);
+      SetFontAllControls(hWnd, kMainFont); // Set initial font for all child windows
       break;
     // Start painting
     case WM_PAINT: {

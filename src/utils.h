@@ -150,9 +150,6 @@ const unsigned int GetDefaultPrecision();
 // Gets if the user set debug mode in .ini file, takes precedence over command line flag.
 const bool GetDefaultWantDebug();
 
-// Util to fill memory with zeros, used to stress VM.
-errno_t AllocateMemory(const size_t num_bytes);
-
 // Compares whether the installed comctl32.dll is at least the supplied version
 // Use DWORD to_compare = _PACKVERSION(major, minor)
 const bool IsCommCtrlAtLeast(const DWORD to_compare);

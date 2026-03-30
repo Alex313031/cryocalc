@@ -120,3 +120,20 @@ void UpdateMemPerfData() {
     g_snapshot.comm_percent = commit;
   }
 }
+
+static void zeromem(void* dest, const size_t count) {
+  ::memset(dest, 0, count);
+}
+
+errno_t AllocateMemory(const size_t num_bytes) {
+  LPVOID pMemory = VirtualAlloc(nullptr, num_bytes, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+  if (pMemory == NULL) {
+    MessageBoxW(nullptr, L"Failed to allocate memory", L"VirtualAlloc Error", MB_OK | MB_ICONERROR);
+    return 12; // ENOMEM
+  } else {
+    LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u)
+               << " Megabytes memory allocated at address: " << std::showbase << std::hex
+               << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
+    return 0;
+  }
+}

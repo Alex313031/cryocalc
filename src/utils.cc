@@ -261,7 +261,7 @@ unsigned int GetDefaultNumThreads() {
 
 long double ConvertInputToLD(const wchar_t* input) {
   wchar_t* endPtr;
-  long double retval = std::wcstold(input, &endPtr);
+  const long double retval = std::wcstold(input, &endPtr);
   return retval;
 }
 
@@ -287,7 +287,8 @@ const int GetPercentInt(const int in, const float percent) {
     LOG(ERROR) << L"Percentage " << percent << L" is too large or zero!";
     return in;
   } else {
-    const int retval = static_cast<int>(in * percent);
+    const float fin = static_cast<float>(in);
+    const int retval = static_cast<int>(fin * percent);
     return retval;
   }
 }
@@ -640,19 +641,6 @@ const bool GetDefaultWantDebug() {
 #else
   return set_settings ? custom_debug_mode : false;
 #endif
-}
-
-errno_t AllocateMemory(const size_t num_bytes) {
-  LPVOID pMemory = VirtualAlloc(nullptr, num_bytes, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-  if (pMemory == NULL) {
-    MessageBoxW(nullptr, L"Failed to allocate memory", L"VirtualAlloc Error", MB_OK | MB_ICONERROR);
-    return 12; // ENOMEM
-  } else {
-    LOG(DEBUG) << static_cast<int>(num_bytes / 1048576u)
-               << " Megabytes memory allocated at address: " << std::showbase << std::hex
-               << reinterpret_cast<unsigned long long>(pMemory) << std::dec << std::noshowbase;
-    return 0;
-  }
 }
 
 const bool IsCommCtrlAtLeast(const DWORD to_compare) {

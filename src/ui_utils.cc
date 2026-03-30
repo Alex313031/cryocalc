@@ -296,7 +296,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   UNREFERENCED_PARAMETER(lParam);
 
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
-  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_SMALL));
+  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_ABOUT));
   switch (message) {
     case WM_INITDIALOG: {
       // Set icon in titlebar of about dialog

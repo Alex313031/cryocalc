@@ -8,18 +8,21 @@
 
 // Icons
 #define IDI_CRYOCALC                101
-#define IDI_SMALL                   102
+#define IDI_ABOUT                   102
 #define IDI_WINFLAG                 103
 #define IDI_WPERF                   104
-
-// Bitmaps
+#define IDI_SYSMON                  105
+#define IDI_BALL                    106
 
 // Main application resource
-#define IDC_CRYOCALC                105
+#define IDC_CRYOCALC                107
 
 // Dialogs
-#define IDD_ABOUT_DIALOG            106
-#define IDD_ABOUTBOX                107
+#define IDD_ABOUT_DIALOG            108
+#define IDD_ABOUTBOX                109
+
+// Bitmaps
+#define IDB_BACKGROUND              150
 
 // Menu items
 #define IDM_ABOUT                   200

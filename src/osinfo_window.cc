@@ -45,7 +45,7 @@ bool ShowOsInfo(HWND hWnd) {
   wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_3DFACE + 1);
   wcex.lpszMenuName  = nullptr;
   wcex.lpszClassName = szOSInfoWindowClass;
-  wcex.hIconSm       = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+  wcex.hIconSm       = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ABOUT));
 
   RegisterClassExW(&wcex);
 
@@ -107,7 +107,6 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
       PADDING_X + kOsInfoButtonWidth + INTRA_PADDING,
       GetYOffset(OSINFO_HEIGHT, 0, 0.60f) + BUTTON_HEIGHT + INTRA_PADDING - END_PADDING,
       kOsInfoButtonWidth, BUTTON_HEIGHT, hWnd, (HMENU)IDC_CLOSE_OSINFO_BUTTON, hInst, nullptr);
-  SetFontAllControls(hWnd, kMainFont);
   AddTooltip(hWnd, hOsInfoTextOut, hInst, L"Windows System Info Log");
   AddTooltip(hWnd, hWinVerButton, hInst, L"Open Windows Version shell dialog");
   AddTooltip(hWnd, hMsInfoButton, hInst, L"Open \"System Information\" Utility");
@@ -197,6 +196,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     } break;
     case WM_CREATE:
       InitOsInfoControls(hWnd, this_hinst);
+      SetFontAllControls(hWnd, kMainFont);
       break;
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORSTATIC: {
