@@ -81,6 +81,8 @@ extern HWND hOsInfoButton; // Os Info button handle
 
 extern HWND hStatusBar; // Our status bar
 
+extern HBITMAP hBeachBall; // Ball bitmap for easter egg animation
+
 extern HINSTANCE GetGlobalHinst(); // Gets our global hInst for the main Window
 
 #endif // CRYOCALC_GLOBALS_H_

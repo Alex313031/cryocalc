@@ -2,6 +2,9 @@
 
 #include "constants.h"
 #include "globals.h"
+#include "ui_utils.h"
+
+HBITMAP hBeachBall = nullptr;
 
 HFONT hCryoFont = nullptr;
 
@@ -71,4 +74,36 @@ static BOOL CALLBACK SetFontProc(HWND hChild, LPARAM lParam) {
     SendMessageW(hChild, WM_SETFONT, reinterpret_cast<WPARAM>(hFont), TRUE);
   }
   return true;
+}
+
+// Loads global beach ball bitmap, to use below in bouncing animation
+bool LoadBeachBall() {
+  static const HICON hIcon = LoadIcon(GetGlobalHinst(), MAKEINTRESOURCE(IDI_BALL));
+  ICONINFO iconInfo = {0};
+  if (GetIconInfo(hIcon, &iconInfo)) {
+    // hbmColor is the actual color bitmap handle
+    // The mask bitmap (hbmMask) is also available in iconInfo.
+
+    // Note: The caller is responsible for deleting the bitmaps 
+    // returned in the ICONINFO structure when they are no longer needed.
+    if (iconInfo.hbmMask != nullptr) {
+      DeleteObject(iconInfo.hbmMask);
+    }
+    hBeachBall = iconInfo.hbmColor;
+    return hBeachBall != nullptr;
+  }
+  return false;
+}
+
+// Bounces the beach ball bitmap around the client area "DVD player style",
+// at the top of the Z-order. This is an easter egg, launch with "Ctrl + B".
+void BounceBeachBall(HBITMAP hBall) {
+  if (hBall == nullptr || hBall != hBeachBall) {
+    LOG(ERROR) << __FUNC__ << L"Ball bounce failed!";
+    ErrorBox(nullptr, L"Easter Egg Error", L"Ball Bounce Failed!");
+    return;
+  } else {
+    LOG(DEBUG) << L"Starting ball bounce!";
+  }
+  // Start bouncing the ball bitmap
 }

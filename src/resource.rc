@@ -107,6 +107,7 @@ BEGIN
             MENUITEM "&Clear Console",  IDM_CLEAR_CON
             MENUITEM "Clear &Log File", IDM_CLEAR_LOG
             MENUITEM "&Test Logging",   IDM_TEST_LOG
+            MENUITEM "&Bounce Ball!",   IDM_EASTEREGG
         END
     END
     POPUP "&Help"
@@ -149,6 +150,7 @@ BEGIN
     //VK_F1,     IDM_HELPEX, VIRTKEY, NOINVERT       // "F1" key
     "?",       IDM_ABOUT, ASCII,   ALT             // "?" key
     VK_OEM_2,  IDM_ABOUT, VIRTKEY, ALT             // "/" key
+    0x42,      IDM_EASTEREGG, VIRTKEY, CONTROL     // Ctrl+B
     0x57,      IDM_CLEAR, VIRTKEY, CONTROL         // Ctrl+W
     0x51,      IDM_EXIT,  VIRTKEY, CONTROL         // Ctrl+Q
     VK_ESCAPE, IDM_EXIT,  VIRTKEY, NOINVERT        // Esc key

@@ -336,6 +336,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDM_SPEED_HIGH:
           SetUpdateSpeed(kSpeedHigh, IDM_SPEED_HIGH);
           break;
+        case IDM_EASTEREGG: {
+          if (hBeachBall) {
+            BounceBeachBall(hBeachBall);
+          }
+        } break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
@@ -407,11 +412,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       }
       break;
     // When window is shown
-    case WM_CREATE:
+    case WM_CREATE: {
       SetClientRects(hWnd, hInst);
       InitControls(hWnd, hInst);
       SetFontAllControls(hWnd, kMainFont); // Set initial font for all child windows
-      break;
+      if (LoadBeachBall()) {
+        LOG(DEBUG) << L"Beach Ball Loaded!";
+      } else {
+        LOG(DEBUG) << L"Beach Ball failed... :( ";
+      }
+    } break;
     // Start painting
     case WM_PAINT: {
       PAINTSTRUCT ps;

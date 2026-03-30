@@ -129,6 +129,9 @@ void CloseAllWindows(HWND hWnd) {
   if (hOsInfoWin != nullptr) {
     PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
   }
+  if (hBeachBall != nullptr) {
+    DeleteObject(hBeachBall);
+  }
   StopMonitoring();                         // Stop CPU/RAM monitoring and close any monitor windows
   logging::DeInitLogging(GetGlobalHinst()); // Can't log anything more after this
   DestroyWindow(hWnd);                      // Send WM_DESTROY message to close main window.
