@@ -34,6 +34,7 @@ static bool g_fill_lines  = true; // Fill area below lines with color
 UINT g_update_interval = kSpeedHigh; // Shared; also read by controls.cc on init
 
 // Layout constants
+static constexpr int kMovePixH  = 2; // Horizontal pixels to move the line each sample;
 static constexpr int kMarginH   = static_cast<int>(PADDING_X); // left/right margin outside the graph box
 static constexpr int kMarginTop = static_cast<int>(PADDING_Y); // top margin above the label
 static constexpr int kMarginBot = kMarginTop; // bottom margin below the graph box
@@ -440,12 +441,12 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
 
   // How many history entries fit in the available pixel width
   int n_valid = static_cast<int>(history->size());
-  if (n_valid > iw) {
-    n_valid = iw;
+  if (n_valid > (iw / kMovePixH)) {
+    n_valid = (iw / kMovePixH);
   }
 
   // Data is right-aligned: most recent sample appears at the far right.
-  int start_x     = iw - n_valid;
+  int start_x     = iw - (n_valid * kMovePixH);
   int hist_offset = static_cast<int>(history->size()) - n_valid;
 
   if (n_valid < 2) {
@@ -477,7 +478,7 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
     for (int i = 0; i < n_valid; i++) {
       float pct = (*history)[static_cast<size_t>(hist_offset + i)];
       int y     = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
-      pts.push_back({inner.left + start_x + i, y});
+      pts.push_back({inner.left + start_x + (i * kMovePixH), y});
     }
 
     // Compute lower filled area below the line
@@ -496,7 +497,7 @@ static void DrawGraph(HDC hdc, const RECT& inner, kMonType type) {
       for (int i = 0; i < n_valid; i++) {
         float pct = g_kernel_history[static_cast<size_t>(k_offset + i)];
         int y = inner.top + ih - 1 - static_cast<int>(pct * static_cast<float>(ih - 1) / 100.0f);
-        kpts.push_back({inner.left + start_x + i, y});
+        kpts.push_back({inner.left + start_x + (i * kMovePixH), y});
       }
       kpoly.reserve(kpts.size() + 2);
       kpoly.insert(kpoly.end(), kpts.begin(), kpts.end());
