@@ -59,7 +59,7 @@ HFONT GetFont(const std::wstring in_font) {
                   GetFontAntiAliasQuality(), // Anti-aliasing quality
                   DEFAULT_PITCH | FF_MODERN, // Horizontal pitch and win32 font family
                   font_to_use);              // Name of font
-  if (!hGetFont || hGetFont == nullptr) {
+  if (hGetFont == nullptr) {
     LOG(ERROR) << __func__ << L" failed to get " << in_font << L" font!";
     return nullptr;
   }

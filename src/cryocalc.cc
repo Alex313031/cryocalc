@@ -46,7 +46,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 #else
   hOsInfoDll = LoadLibraryW(kOsInfoDll);
 #endif
-  if (!hOsInfoDll || hOsInfoDll == nullptr) {
+  if (hOsInfoDll == nullptr) {
     ErrorBox(nullptr, L"Error loading DLL", L"osinfo.dll init failed!");
     return -1;
   }

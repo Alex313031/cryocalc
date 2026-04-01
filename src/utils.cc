@@ -676,7 +676,7 @@ DWORD GetCommCtrlVersion() {
   DLLVERSIONINFO dvi = {sizeof(dvi)};
   DWORD dwVersion    = 0;
   DWORD error;
-  if (!hComCtl32Dll || hComCtl32Dll == nullptr) {
+  if (hComCtl32Dll == nullptr) {
     error = GetLastError();
     LOG(ERROR) << L"Failed to load " << kComCtl32Dll << ", hComCtl32Dll was null! Error: " << error;
     pDllGetVersion = nullptr;

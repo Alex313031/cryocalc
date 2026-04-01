@@ -330,7 +330,7 @@ bool TestDllGetVersion() {
   DWORD dwVersion      = 0;
   DWORD dwVersion2     = 0;
   DWORD error;
-  if (!hOsInfoDll || hOsInfoDll == nullptr) {
+  if (hOsInfoDll == nullptr) {
     error = GetLastError();
     LOG(ERROR) << L"hOsInfoDll was null! Error: " << error;
     fnDllGetVersion = nullptr;
