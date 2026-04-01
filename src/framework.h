@@ -54,7 +54,7 @@
 #endif
 
 inline constexpr bool is_dcheck =
-#ifdef DCHECK
+#ifdef DCHECK_ON
     true;
 #else
     false;
