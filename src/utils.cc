@@ -191,11 +191,14 @@ const int ShowHelpAndExit() {
   return 0;
 }
 
-void HandleDebugMode(const bool debug_mode) {
+void HandleDebugMode(const bool debug_mode, const bool dcheck_mode) {
   std::wostringstream wostr;
   wostr << L" ------ " << "Welcome to " << kAppName << " ver. " << GetVersionWstring();
   if (debug_mode) {
     wostr << L" (Debug Mode)";
+  }
+  if (dcheck_mode) {
+    wostr << L" DCHECK ON";
   }
   wostr << L" ------ " << std::endl;
   std::wcout << wostr.str();

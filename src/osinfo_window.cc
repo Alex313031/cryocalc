@@ -230,9 +230,11 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       }
     } break;
     case WM_SIZE: {
-      this_width  = LOWORD(lParam);
-      this_height = HIWORD(lParam);
-      HandleOsInfoResize(hWnd);
+      if (wParam != SIZE_MINIMIZED) {
+        this_width  = LOWORD(lParam);
+        this_height = HIWORD(lParam);
+        HandleOsInfoResize(hWnd);
+      }
     } break;
     case WM_GETMINMAXINFO: {
       LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);

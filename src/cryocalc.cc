@@ -96,9 +96,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   const bool init_logging           = logging::InitLogging(hInstance, LoggingSettings);
   if (init_logging) {
     logging::SetIsDCheck(is_dcheck);
-    HandleDebugMode(debug_mode ? debug_mode
-                               : is_dcheck); // Handle setting debug mode and welcome message
-    LogOsInfo();                             // Log Windows version info
+    HandleDebugMode(debug_mode, is_dcheck); // Handle setting debug mode and welcome message
+    LogOsInfo();                            // Log Windows version info
   } else {
     ErrorBox(nullptr, L"Logging Initialization Failure", L"InitLogging failed!");
     return 1;
@@ -495,10 +494,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     } break;
     // Handle resize events
     case WM_SIZE: {
-      current_width  = LOWORD(lParam);
-      current_height = HIWORD(lParam);
-      SetClientRects(hWnd, hInst);
-      HandleResize(hWnd);
+      // Skip layout when minimized: current_width/height would be 0
+      if (wParam != SIZE_MINIMIZED) {
+        current_width  = LOWORD(lParam);
+        current_height = HIWORD(lParam);
+        SetClientRects(hWnd, hInst);
+        HandleResize(hWnd);
+      }
     } break;
     case WM_GETMINMAXINFO: {
       // Set the minimum size for the window
@@ -554,7 +556,7 @@ HINSTANCE GetGlobalHinst() {
   if (hInst) {
     return hInst;
   } else {
-    __debugbreak();
+    LOG(FATAL) << L"Could not get global HINSTANCE!";
     return nullptr;
   }
 }

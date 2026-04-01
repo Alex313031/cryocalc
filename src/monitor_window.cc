@@ -84,10 +84,10 @@ bool OpenMonitorWindow(HWND hWnd) {
 
   // If the monitor window is already open, bring it to the foreground.
   if (hMonitorWin != nullptr) {
-    LOG(INFO) << L"Restoring Sys Monitor window to foreground";
+    LOG(INFO) << L"Restoring System Monitor window to foreground";
     return SetForegroundWindow(hMonitorWin);
   } else {
-    LOG(INFO) << L"Opening Sys Monitor window";
+    LOG(INFO) << L"Opening System Monitor window";
   }
 
   WNDCLASSEXW wcex;
@@ -186,9 +186,11 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
       EndPaint(hWnd, &ps);
     } break;
-    case WM_SIZE:
-      HandleMonitorWindowResize(hWnd);
-      break;
+    case WM_SIZE: {
+      if (wParam != SIZE_MINIMIZED) {
+        HandleMonitorWindowResize(hWnd);
+      }
+    } break;
     case WM_GETMINMAXINFO: {
       LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = MONWIN_MINWIDTH;

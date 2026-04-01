@@ -77,8 +77,8 @@ const int ShowVersionAndExit();
 // Shows commandline usage and quits
 const int ShowHelpAndExit();
 
-// Handles the debug mode command line flag
-void HandleDebugMode(const bool debug_mode);
+// Handles the debug mode command line flag and DCHECK
+void HandleDebugMode(const bool debug_mode, const bool dcheck_mode);
 
 // Checks that input only contains 0 - 9 and optionally
 // a decimal point, excluding text and special symbols.

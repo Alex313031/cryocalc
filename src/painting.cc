@@ -19,12 +19,12 @@ static inline const UINT kBallInterval() {
 // Beach ball bounce state
 static UINT_PTR bounce_timer = 0; // Timer for each ball movement
 
-static float ball_x          = 0.0f; // Stores X position of ball
-static float ball_y          = 0.0f; // Stores Y position of ball
-static float ball_offsetx    = 3.0f; // How much to move ball across
-static float ball_offsety    = 2.25f; // How much to move ball down
-static int ball_w            = 32; // Icon is 32 pixels wide
-static int ball_h            = 32; // Icon is 32 pixels high
+static float ball_x       = 0.0f; // Stores X position of ball
+static float ball_y       = 0.0f; // Stores Y position of ball
+static float ball_offsetx = 3.0f; // How much to move ball across
+static float ball_offsety = 2.25f; // How much to move ball down
+static int ball_w         = 32; // Icon is 32 pixels wide
+static int ball_h         = 32; // Icon is 32 pixels high
 
 // Window class for ball child window
 static const LPCWSTR czBallClass = L"CryoCalcBallClass";

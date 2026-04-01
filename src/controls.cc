@@ -428,10 +428,6 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   orig_sys_monitor_left                 = sys_monitor_left;
   const unsigned int sys_monitor_height = kFrameBottom - STATIC_BOTTOM;
   const unsigned int sys_monitor_width  = this_width - sys_monitor_left - (PADDING_X * 3u);
-  hSysMonitorFrame                      = CreateWindowExW(
-      0, WC_BUTTON, L"Sys Monitor", dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME,
-      sys_monitor_left, STATIC_TOP - INTRA_PADDING, sys_monitor_width, sys_monitor_height, hWnd,
-      nullptr, hInst, nullptr);
   const int cpubar_left =
       static_cast<int>(sys_monitor_left + ((sys_monitor_width + INTRA_PADDING) / 2)) -
       static_cast<int>((4 * CPUBAR_WIDTH) + (INTRA_PADDING * 4)) / 2;
@@ -493,6 +489,12 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   hIOBar =
       CreateWindowExW(0, PROGRESS_CLASS, nullptr, dwCHILD | PBS_VERTICAL, iobar_left, cpubar_top,
                       CPUBAR_WIDTH, cpubar_height, hWnd, (HMENU)IDC_IOBAR, hInst, nullptr);
+  // Create outline frame last in Z order
+  hSysMonitorFrame = CreateWindowExW(0, WC_BUTTON, L"Sys Monitor",
+                                     dwCHILD | BS_CENTER | BS_TOP | BS_GROUPBOX | SS_ETCHEDFRAME,
+                                     sys_monitor_left, STATIC_TOP - INTRA_PADDING,
+                                     sys_monitor_width, sys_monitor_height, hWnd,
+                                     nullptr, hInst, nullptr);
 
   // Set temperature selection options in combobox
   SendMessageW(hTempSelectCombo, CB_ADDSTRING, 0, (LPARAM)kTempC.c_str()); // Celsius
