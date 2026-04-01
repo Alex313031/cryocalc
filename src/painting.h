@@ -4,9 +4,6 @@
 #include "framework.h"
 #include "utils.h"
 
-// Creates main hCryoFont
-bool CreateMainFont();
-
 // Returns a font from a given font name string
 HFONT GetFont(const std::wstring in_font);
 
@@ -20,6 +17,6 @@ bool SetFontAllControls(HWND hParentWnd, const std::wstring font);
 bool LoadBeachBall();
 
 // Easter egg that bounces beach ball around the window
-void BounceBeachBall(HBITMAP hBall);
+void BounceBeachBall();
 
 #endif // CRYOCALC_PAINTING_H_

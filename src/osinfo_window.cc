@@ -21,6 +21,9 @@ HWND hCloseOSInfoButton;
 
 static const unsigned int kOsInfoButtonWidth = (BUTTON_WIDTH * 2u);
 
+static inline const wchar_t* kWinVerExe   = L"winver.exe";
+static inline const wchar_t* kMsInfo32Exe = L"msinfo32.exe";
+
 bool ShowOsInfo(HWND hWnd) {
   bool success               = false;
   const HINSTANCE this_hinst = GetGlobalHinst();

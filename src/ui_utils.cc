@@ -160,7 +160,7 @@ void OpenRunDialog(HWND hWnd) {
     wchar_t szCurDir[MAX_PATH];
     GetCurrentDirectoryW(MAX_PATH, szCurDir);
     // Open "Run"
-    HMODULE hShell32Dll = GetModuleHandleW(kShell32Dll);
+    HMODULE hShell32Dll = GetModuleHandleW(L"shell32.dll");
     if (hShell32Dll) {
       pfnRunFileDlg = reinterpret_cast<RUN_FILE_DLG_>(GetProcAddress(hShell32Dll, (LPCSTR)(61)));
       if (pfnRunFileDlg) {

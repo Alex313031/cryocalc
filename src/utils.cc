@@ -21,6 +21,8 @@ bool set_settings = false;
 // Handle to our .ini file
 HANDLE g_ini_file;
 
+static inline const wchar_t* kComCtl32Dll = L"comctl32.dll";
+
 std::wstring& GetTempString(long double in_temperature) {
   std::wcout << __FUNC__ << in_temperature << L"\n\n";
   std::wostringstream wostr;

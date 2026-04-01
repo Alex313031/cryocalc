@@ -550,6 +550,9 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
       CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
     }
   }
+  if (!LoadBeachBall()) {
+    LOG(ERROR) << L"Beach Ball loading failed... :( ";
+  }
 }
 
 void AppendTooltips(HWND hWnd, HINSTANCE hInst) {
