@@ -273,7 +273,7 @@ long double ConvertInputToLD(const wchar_t* input) {
   return retval;
 }
 
-void AppendTextToEditControl(HWND hWnd, const std::wstring line) {
+void AppendTextToEditControl(HWND hWnd, const std::wstring& line) {
   const WCHAR* text = line.c_str();
   int length        = GetWindowTextLength(hWnd); // Get current text length
   SendMessageW(hWnd, EM_SETSEL, static_cast<WPARAM>(length),
@@ -604,7 +604,7 @@ bool SetCustomSettings() {
   return true;
 }
 
-bool OpenIniFileForReading(const std::wstring ini_file) {
+bool OpenIniFileForReading(const std::wstring& ini_file) {
   if (ini_file.length() >= MAX_PATH) {
     return false;
   }

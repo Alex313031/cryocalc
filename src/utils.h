@@ -96,7 +96,7 @@ unsigned int GetDefaultNumThreads();
 long double ConvertInputToLD(const wchar_t* input);
 
 // Appends lines of text to an edit control
-void AppendTextToEditControl(HWND hWnd, const std::wstring line);
+void AppendTextToEditControl(HWND hWnd, const std::wstring& line);
 
 // Sets the precision to use for calculations (usually from hPrecisionCombo).
 void SetCryoCalcPrecision(unsigned int precision);
@@ -142,7 +142,7 @@ bool GetCustomSettings();
 bool SetCustomSettings();
 
 // Opens an .ini file in read only mode to get settings
-bool OpenIniFileForReading(const std::wstring ini_file);
+bool OpenIniFileForReading(const std::wstring& ini_file);
 
 // Gets the default precision to use to set the intial state of the Precision combobox
 const unsigned int GetDefaultPrecision();

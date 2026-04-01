@@ -766,7 +766,7 @@ void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
   }
 }
 
-void UpdateStatusBar(const unsigned int part, const std::wstring text) {
+void UpdateStatusBar(const unsigned int part, const std::wstring& text) {
   if (part < 0 || part > 1) {
     DCHECK(part < 0 || part > 1);
     return;

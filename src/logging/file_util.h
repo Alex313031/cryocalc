@@ -56,10 +56,10 @@ namespace logging {
   const bool ShouldTruncateLogFile();
 
   // Creates new or opens existing logfile, and opens it for writing without a process lock
-  bool OpenFileForWriting(std::wstring logfile_path);
+  bool OpenFileForWriting(const std::wstring& logfile_path);
 
   // Same as above, but if permissions fail, fall back to GetAppDataDir
-  bool OpenFileForWritingAlt(std::wstring alt_logfile_path,
+  bool OpenFileForWritingAlt(const std::wstring& alt_logfile_path,
                              bool should_truncate,
                              bool& out_write_bom);
 

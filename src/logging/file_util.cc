@@ -56,7 +56,7 @@ const bool logging::ShouldTruncateLogFile() {
   return true; // TODO: Add more logic here.
 }
 
-bool logging::OpenFileForWriting(std::wstring logfile_path) {
+bool logging::OpenFileForWriting(const std::wstring& logfile_path) {
   if (logfile_path.length() >= MAX_PATH) {
     return false;
   }
@@ -129,7 +129,7 @@ bool logging::OpenFileForWriting(std::wstring logfile_path) {
 }
 
 // Handles writing logfile to alternate path, usually GetAppDataDir dir.
-bool logging::OpenFileForWritingAlt(std::wstring alt_logfile_path,
+bool logging::OpenFileForWritingAlt(const std::wstring& alt_logfile_path,
                                     bool should_truncate,
                                     bool& out_write_bom) {
   out_write_bom = false;

@@ -36,7 +36,7 @@ static BOOL CALLBACK SetFontProc(HWND hChild, LPARAM lParam);
 static LRESULT CALLBACK BallWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 static VOID CALLBACK BallTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 
-HFONT GetFont(const std::wstring in_font) {
+HFONT GetFont(const std::wstring& in_font) {
   HDC hdc = GetDC(nullptr);
   if (!hdc || in_font.empty()) {
     return nullptr;
@@ -66,7 +66,7 @@ HFONT GetFont(const std::wstring in_font) {
   return hGetFont;
 }
 
-bool SetFontForControl(HWND hWnd, const std::wstring font) {
+bool SetFontForControl(HWND hWnd, const std::wstring& font) {
   if (!hWnd || font.length() == 0) {
     return false;
   }
@@ -80,7 +80,7 @@ bool SetFontForControl(HWND hWnd, const std::wstring font) {
   }
 }
 
-bool SetFontAllControls(HWND hParentWnd, const std::wstring font) {
+bool SetFontAllControls(HWND hParentWnd, const std::wstring& font) {
   if (!hParentWnd || font.length() == 0) {
     return false;
   }

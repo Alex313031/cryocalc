@@ -29,7 +29,7 @@ bool HandleConvert(HWND hWnd);
 void InitStatusBar(HWND hWnd, HINSTANCE hInst);
 
 // Updates status bar contents
-void UpdateStatusBar(const unsigned int part, const std::wstring text);
+void UpdateStatusBar(const unsigned int part, const std::wstring& text);
 
 // Creates main controls
 void InitControls(HWND hWnd, HINSTANCE hInst);
