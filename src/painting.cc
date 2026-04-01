@@ -244,11 +244,10 @@ void BounceBeachBall() {
   GetClientRect(hMainWindow, &client);
   const int max_x = client.right > ball_w ? client.right - ball_w : 0;
   const int max_y = client.bottom > ball_h ? client.bottom - ball_h : 0;
-  const DWORD tick = GetTickCount();
-  ball_x  = max_x > 0 ? static_cast<float>(tick % static_cast<DWORD>(max_x)) : 0.0f;
-  ball_y  = max_y > 0 ? static_cast<float>((tick / 7u) % static_cast<DWORD>(max_y)) : 0.0f;
-  ball_offsetx = 3.0f;
-  ball_offsety = 2.25f;
+  ball_x       = max_x > 0 ? static_cast<float>(RandomUint() % static_cast<UINT>(max_x)) : 0.0f;
+  ball_y       = max_y > 0 ? static_cast<float>(RandomUint() % static_cast<UINT>(max_y)) : 0.0f;
+  ball_offsetx = (RandomUint() & 1u) ? 3.0f : -3.0f;
+  ball_offsety = (RandomUint() & 1u) ? 2.25f : -2.25f;
 
   // Create a frameless child window sized to the icon.
   // WS_EX_TRANSPARENT: paints after all sibling controls (visually on top)

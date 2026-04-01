@@ -10,6 +10,9 @@
 #include "framework.h"
 #include "globals.h"
 
+// Whether to force using std::random
+static constexpr bool force_rand_s = false;
+
 // Global precision to use
 extern unsigned int g_precision_;
 
@@ -159,5 +162,8 @@ DWORD GetCommCtrlVersion();
 
 // Returns if this program is running under WINE, in which case certain assumptions are naught
 bool IsRunningOnWine();
+
+// Returns a random unsigned integer, using Win2K compatible functions if necessary
+UINT RandomUint();
 
 #endif // CRYOCALC_UTILS_H_

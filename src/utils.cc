@@ -1,5 +1,8 @@
 #include "utils.h"
 
+#include <os_info_dll.h>
+#include <random>
+
 #include "converters.h"
 #include "resource.h"
 #include "strings.h"
@@ -717,4 +720,38 @@ bool IsRunningOnWine() {
     LOG(INFO) << L"Running on WINE " << pwine_get_version();
     return true;
   }
+}
+
+UINT RandomUint() {
+  unsigned int seed      = 0;
+  static const bool isXP = IsAtLeast(kWinXP);
+  static const bool is2K = IsAtMost(kWin2000);
+
+  if (isXP || force_rand_s) {
+    if (is_dcheck) {
+      LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
+    }
+    // Causes rand_s() crash on Windows 2000 because it uses RtlGenRandom internally. Bug in MinGW.
+    std::random_device randd;
+    seed = static_cast<unsigned int>(randd());
+  } else if (is2K) {
+    if (is_dcheck) {
+      LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
+    }
+    HCRYPTPROV hProvider    = 0;
+    unsigned int win2k_seed = 0;
+
+    // CryptGenRandom is available on Windows 2000+ (unlike RtlGenRandom/rand_s which requires XP+)
+    if (CryptAcquireContextW(&hProvider, nullptr, nullptr, PROV_RSA_FULL,
+                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+      CryptGenRandom(hProvider, sizeof(seed), (BYTE*)(&win2k_seed));
+      CryptReleaseContext(hProvider, 0);
+    }
+    seed = win2k_seed;
+  }
+  DCHECK(seed != 0);
+  if (seed == 0) {
+    return 69u;
+  }
+  return seed;
 }
