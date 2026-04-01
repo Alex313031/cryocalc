@@ -326,7 +326,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   // Create the Edit controls
   // Temperature input
   hInputEdit = CreateWindowExW(
-      WS_EX_CLIENTEDGE, WC_EDIT, L"77", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
+      WS_EX_CLIENTEDGE, WC_EDIT, L"-195.795", dwCHILD | ES_AUTOHSCROLL | WS_TABSTOP, kTempEditLeft,
       STATIC_TOP, EDIT_WIDTH, EDITCONTROL_HEIGHT, hWnd, (HMENU)IDC_INPUT, hInst, nullptr);
   // Temperature scale Combobox
   hTempSelectCombo =
