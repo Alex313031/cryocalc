@@ -7,8 +7,7 @@
 #include <intrin.h> // Keep this below logging_base.h
 
 // DCHECK is a debug-only assertion macro. It checks if the condition is true,
-// and if not, triggers a debug break. In release builds (NDEBUG defined),
-// the condition is not evaluated.
+// and if not, triggers a debug break. It is only evaluated when DCHECK_ON is true
 //
 // Usage:
 //   DCHECK(ptr != nullptr);
@@ -16,32 +15,35 @@
 //   DCHECK(number >= int);
 
 // Macro to convert to string
-#if !defined(_STRINGIZER_)
- #define _STRINGIZER_
+#ifndef _STRINGIZER
  #define _STRINGIZER(in) #in
  #define STRINGIZE(in) _STRINGIZER(in)
-#endif // !defined(_STRINGIZER_)
+#endif // _STRINGIZER
 // clang-format on
 
 namespace logging {
 
+  // Intentionally kill app, don't use __debugbreak, it isn't reliable.
+  void KillApp();
+
   // Function that runs LOG(FATAL)
-  void CheckImpl(const char* condition, bool check_flag);
+  void CheckImpl(const char* func_sig, const int line_num, const char* condition, bool check_flag);
 
   // for NOTREACHED()
-  void NotReachedImpl();
+  void NotReachedImpl(const char* func_sig, const int line_num);
 
 } // namespace logging
 
-#define CHECK(condition) logging::CheckImpl(STRINGIZE(condition), !(condition))
 
-// TODO: Add better check for DCHECK define, instead of just "non debug"
-#if !defined(NDEBUG)
+// Same as DCHECK, but is always on. Use when a condition should be fatal if false.
+#define CHECK(condition) logging::CheckImpl(__func__, __LINE__, STRINGIZE(condition), !(condition))
+
+#ifdef DCHECK_ON
  #define DCHECK(condition) CHECK(condition)
-#else // NDEBUG defined (release build)
+#else // is_dcheck not set, DCHECKs are no-ops
  #define DCHECK(condition) ((void)0)
-#endif // !defined(NDEBUG)
+#endif // DCHECK
 
-#define NOTREACHED() logging::NotReachedImpl()
+#define NOTREACHED() logging::NotReachedImpl(__func__, __LINE__)
 
 #endif // MINI_LOGGER_CHECK_H_

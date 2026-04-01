@@ -192,7 +192,7 @@ bool logging::CloseFileHandle() {
   return closed;
 }
 
-bool logging::AppendTextToFile(const std::wstring log_line) {
+bool logging::AppendTextToFile(const std::wstring& log_line) {
   if (!IsFileOpen() || !logging_initialized) {
     return false;
   }

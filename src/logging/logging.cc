@@ -94,19 +94,21 @@ logging::LogMessage::~LogMessage() {
   full_prefix += level_prefix;
 
   if (log_to_console_) {
-    // Levels higher than INFO level go to stderr
+    // Levels higher than INFO go to stderr
     if (level_ > LOG_INFO) {
       std::wcerr << full_prefix << stream_.str() << std::endl;
-      if (level_ == LOG_FATAL) {
-        __debugbreak(); // Catch for debugger on FATAL
-        return;
-      }
     } else {
       std::wcout << full_prefix << stream_.str() << std::endl;
     }
   }
   if (log_to_file_) {
     AppendTextToFile(full_prefix + stream_.str());
+  }
+  // FATAL always crashes regardless of log destination, and after any file
+  // write so the last message is flushed before the debugger break.
+  if (level_ == LOG_FATAL) {
+    OutputDebugStringW(stream_.str().c_str());
+    KillApp();
   }
 }
 
