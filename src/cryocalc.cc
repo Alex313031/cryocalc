@@ -118,11 +118,14 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
 
   // Message loop
   MSG msg;
-  // Main window message loop:
+  // Pump Main window message loop:
   while (GetMessage(&msg, nullptr, 0, 0)) {
     if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-      if (!IsDialogMessage(hMainWindow, &msg) &&
-          !(hOsInfoWin && IsDialogMessage(hOsInfoWin, &msg))) {
+      // Pressing Enter key in hInputEdit triggers conversion; intercept before IsDialogMessage consumes it.
+      if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN && GetFocus() == hInputEdit) {
+        HandleConvert(hMainWindow);
+      } else if (!IsDialogMessage(hMainWindow, &msg) &&
+                 !(hOsInfoWin && IsDialogMessage(hOsInfoWin, &msg))) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
