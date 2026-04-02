@@ -245,6 +245,7 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       }
     } break;
     case WM_QUERYENDSESSION:
+      LOG(DEBUG) << L"Stopping monitoring, shutting down...";
       DestroyWindow(hWnd);
       break;
     // Left-click on the graph area drags the whole window,

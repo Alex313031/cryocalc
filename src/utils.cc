@@ -130,12 +130,11 @@ const std::wstring GetVersionWstring() {
 }
 
 void CloseAllWindows(HWND hWnd) {
-  // Tell OsInfo Window to close, if it's open.
   if (hOsInfoWin != nullptr) {
-    PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0);
+    PostMessageW(hOsInfoWin, WM_COMMAND, IDC_CLOSE_OSINFO, 0); // Close OsInfo Window if it's open.
   }
   if (hBeachBall != nullptr) {
-    DeleteObject(hBeachBall);
+    DeleteObject(hBeachBall); // Delete ball bitmap
   }
   StopMonitoring();                         // Stop CPU/RAM monitoring and close any monitor windows
   logging::DeInitLogging(GetGlobalHinst()); // Can't log anything more after this
