@@ -9,6 +9,8 @@ group("cryocalc_all") {
 }
 
 executable("cryocalc") {
+  precompiled_header = "src/framework.h"
+  precompiled_source = "src/pch.cc"
   configs += [
     ":cryocalc_config",
     "src/logging:mini_logger_config",
@@ -32,6 +34,7 @@ executable("cryocalc") {
     "src/resource.h",
     "src/resource.rc",
     "src/strings.h",
+    "src/strings.cc",
     "src/stress/common.h",
     "src/stress/cpu.h",
     "src/stress/cpu.cc",

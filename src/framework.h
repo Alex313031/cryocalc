@@ -1,6 +1,6 @@
-// framwork.h: include file for standard system include files like windows.h,
+// framework.h: include file for standard system include files like windows.h,
 // or project wide specific include files, such as C or C++ standard library
-// headers. It can be precompiled, in which case, add an "framework.cc" file.
+// headers. NOTE: This is a precompiled header (PCH).
 
 #ifndef CRYOCALC_FRAMEWORK_H_
 #define CRYOCALC_FRAMEWORK_H_

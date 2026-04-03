@@ -6,6 +6,8 @@ group("mini_logger_all") {
 
 static_library("mini_logger") {
   configs += [ ":mini_logger_config" ]
+  precompiled_header = "logging_base.h"
+  precompiled_source = "pch.cc"
   sources = [
     "check.h",
     "check.cc",
@@ -20,7 +22,7 @@ static_library("mini_logger") {
 }
 
 config("mini_logger_config") {
-  defines = [ "HAWK_LOGGER" ]
+  #defines = [ "HAWK_LOGGER" ]
   include_dirs = [
     "./",
   ]
