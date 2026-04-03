@@ -112,7 +112,7 @@
 #define IDC_IOBAR                   354
 
 // Os Info Logging Output Window
-#define IDC_OSINFO_OUT              380
+#define IDC_OSINFO                  380
 
 // Monitor Window
 #define IDC_WPERF                   381

@@ -114,13 +114,22 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   }
 
   // Load keyboard accelerators.
-  HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CRYOCALC));
+  HACCEL hAccelTable       = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CRYOCALC));
+  HACCEL hMonAccelTable    = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WPERF));
+  HACCEL hOsInfoAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_OSINFO));
 
   // Message loop
   MSG msg;
   // Pump Main window message loop:
   while (GetMessage(&msg, nullptr, 0, 0)) {
-    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+    HWND hwndAccel = GetAncestor(msg.hwnd, GA_ROOT);
+    if (!hwndAccel) {
+      hwndAccel = hMainWindow;
+    }
+    HACCEL hCurAccel = (hMonitorWin && hwndAccel == hMonitorWin) ? hMonAccelTable
+                     : (hOsInfoWin  && hwndAccel == hOsInfoWin)  ? hOsInfoAccelTable
+                     : hAccelTable;
+    if (!TranslateAccelerator(hwndAccel, hCurAccel, &msg)) {
       // Pressing Enter key in hInputEdit triggers conversion; intercept before IsDialogMessage consumes it.
       if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN && GetFocus() == hInputEdit) {
         HandleConvert(hMainWindow);
@@ -180,40 +189,6 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
     success = UpdateWindow(hMainWindow);
   }
 
-  return success;
-}
-
-bool LaunchHelp(HWND hWnd) {
-  bool success = false;
-  LOG(INFO) << L"Opening chm help";
-  std::wstring help_file = GetExeDir() + kChmHelpFile;
-  HINSTANCE chm_result =
-      ShellExecuteW(hWnd, L"open", help_file.c_str(), nullptr, nullptr, SW_NORMAL);
-  std::wostringstream wostr;
-  if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
-    DWORD error = GetLastError();
-    wostr << L"Opening Help failed! \n";
-    bool treat_as_error = true;
-    if (error == ERROR_FILE_NOT_FOUND) {
-      treat_as_error = false;
-      wostr << kChmHelpFile << L" could not be found." << std::endl;
-    } else {
-      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat
-            << std::endl;
-    }
-    const std::wstring message = wostr.str();
-    if (!treat_as_error) {
-      LOG(WARN) << message;
-    } else {
-      LOG(ERROR) << message;
-    }
-    ErrorBox(hWnd, L"Help Error", message);
-    success = false;
-  } else {
-    success = true;
-  }
-  wostr.str(L"");
-  wostr.clear();
   return success;
 }
 

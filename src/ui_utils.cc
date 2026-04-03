@@ -112,6 +112,40 @@ void InitMenus(HWND hWnd) {
   }
 }
 
+bool LaunchHelp(HWND hWnd) {
+  bool success = false;
+  LOG(INFO) << L"Opening chm help";
+  std::wstring help_file = GetExeDir() + kChmHelpFile;
+  HINSTANCE chm_result =
+      ShellExecuteW(hWnd, L"open", help_file.c_str(), nullptr, nullptr, SW_NORMAL);
+  std::wostringstream wostr;
+  if (reinterpret_cast<INT_PTR>(chm_result) <= 32) {
+    DWORD error = GetLastError();
+    wostr << L"Opening Help failed! \n";
+    bool treat_as_error = true;
+    if (error == ERROR_FILE_NOT_FOUND) {
+      treat_as_error = false;
+      wostr << kChmHelpFile << L" could not be found." << std::endl;
+    } else {
+      wostr << L"Error = " << std::showbase << std::hex << error << std::dec << std::defaultfloat
+            << std::endl;
+    }
+    const std::wstring message = wostr.str();
+    if (!treat_as_error) {
+      LOG(WARN) << message;
+    } else {
+      LOG(ERROR) << message;
+    }
+    ErrorBox(hWnd, L"Help Error", message);
+    success = false;
+  } else {
+    success = true;
+  }
+  wostr.str(L"");
+  wostr.clear();
+  return success;
+}
+
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   // Default position if we can't get the main window rect
   const int kDefaultX = 512;

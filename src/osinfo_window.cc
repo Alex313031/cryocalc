@@ -87,7 +87,7 @@ void InitOsInfoControls(HWND hWnd, HINSTANCE hInst) {
   hOsInfoTextOut = CreateWindowExW(
       0, WC_EDIT, nullptr, dwCHILD | WS_BORDER | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
       PADDING_X, PADDING_Y, OSINFO_WIDTH - END_PADDING,
-      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - (END_PADDING * 2), hWnd, (HMENU)IDC_OSINFO_OUT, hInst,
+      GetYOffset(OSINFO_HEIGHT, 0, 0.60f) - (END_PADDING * 2), hWnd, (HMENU)IDC_OSINFO, hInst,
       nullptr);
   hOsInfoStatusBar =
       CreateWindowExW(0, STATUSCLASSNAME, nullptr, dwCHILD | SBARS_SIZEGRIP | SBARS_TOOLTIPS,
@@ -183,6 +183,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         case IDC_MSINFO_BUTTON:
           RunShellApplet(hWnd, kMsInfo32Exe);
           break;
+        case IDM_RUN:
         case IDC_RUNAPP_BUTTON:
           OpenRunDialog(hWnd);
           break;
@@ -192,6 +193,9 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         case IDC_CLOSE_OSINFO_BUTTON:
           CloseWindow(hWnd); // Animate window close when done from button.
           PostMessageW(hWnd, WM_CLOSE, 0, 0);
+          break;
+        case IDM_ABOUT:
+          ShowAboutDialog(hWnd);
           break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -213,7 +217,7 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       HBRUSH hBrushToUse                   = hBrushDefault;
       // Check which edit control sent the message
       switch (GetDlgCtrlID(hThisEditControl)) {
-        case IDC_OSINFO_OUT: {
+        case IDC_OSINFO: {
           kWindowBackground = RGB_DARKGREY;
           hBrushToUse       = CreateSolidBrush(kWindowBackground);
           set_color         = true;
@@ -243,6 +247,13 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       pMinMaxInfo->ptMaxTrackSize.x = OSINFO_MAXWIDTH;
       pMinMaxInfo->ptMaxTrackSize.y = OSINFO_MAXHEIGHT;
     } break;
+    case WM_HELP:
+      LaunchHelp(hWnd);
+      break;
+    case WM_QUERYENDSESSION:
+      LOG(DEBUG) << L"Closing OS Info Window";
+      DestroyWindow(hWnd);
+      break;
     case WM_CLOSE: {
       if (!ResetFocus(hMainWindow, nullptr)) {
         LOG(ERROR) << L"ResetFocus failed!";

@@ -223,6 +223,12 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         case IDM_SPEED_HIGH:
           SetUpdateSpeed(kSpeedHigh, IDM_SPEED_HIGH);
           break;
+        case IDM_ABOUT:
+          ShowAboutDialog(hWnd);
+          break;
+        case IDM_RUN:
+          OpenRunDialog(hWnd);
+          break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
@@ -244,6 +250,9 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         TrackPopupMenu(hOpts, TPM_RIGHTBUTTON, screen_x, screen_y, 0, hWnd, nullptr);
       }
     } break;
+    case WM_HELP:
+      LaunchHelp(hWnd);
+      break;
     case WM_QUERYENDSESSION:
       LOG(DEBUG) << L"Stopping monitoring, shutting down...";
       DestroyWindow(hWnd);

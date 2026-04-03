@@ -30,6 +30,9 @@ const RECT GetDesktopRect(HINSTANCE hInstance);
 // Initializes menu states
 void InitMenus(HWND hWnd);
 
+// Launches local .chm help file (if any)
+bool LaunchHelp(HWND hWnd);
+
 // Gets the position to place a window to the right of another window
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
 

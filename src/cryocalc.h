@@ -21,9 +21,6 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow);
 // Handles about button being clicked
 bool AboutButtonClicked(HWND hWnd);
 
-// Launches local .chm help file (if any)
-bool LaunchHelp(HWND hWnd);
-
 // Opens link to online help
 bool LaunchHelpEx(HWND hWnd);
 
