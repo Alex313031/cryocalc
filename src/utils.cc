@@ -204,6 +204,12 @@ void HandleDebugMode(const bool debug_mode, const bool dcheck_mode) {
   }
   wostr << L" ------ " << std::endl;
   std::wcout << wostr.str();
+  if (logging::GetCurrentConsole() != nullptr) {
+    static const std::wstring console_title = kAppName +  L" Logging Console";
+    if (!logging::SetLogConsoleTitle(console_title)) {
+      NOTREACHED();
+    }
+  }
 }
 
 bool IsValidNumericInput(const wchar_t* text) {
@@ -320,10 +326,11 @@ bool show_help      = false;
 
 bool ParseCommandLine(int argc, LPWSTR argv[]) {
   bool parsed;
-  const bool default_debug = GetDefaultWantDebug();
-  bool is_debug_mode       = false;
-  bool is_version_mode     = false;
-  bool is_help_mode        = false;
+  bool is_debug_mode   = false;
+  bool is_no_debug     = false;
+  bool is_no_log       = false;
+  bool is_version_mode = false;
+  bool is_help_mode    = false;
   bool is_log_mode =
 #if defined(CRYOCALC_LOGBYDEFAULT)
       true;
@@ -334,20 +341,30 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
     // TODO: Should start at 1 (skip .exe path), but fails on Windows Vista+ for some reason
     // 0 Seems to work fine on all oses
     for (int i = 0; i < argc; ++i) {
-      wchar_t* arg  = argv[i];
-      is_debug_mode = (((wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) ||
-                        (wcscmp(arg, L"-debug") == 0) || (wcscmp(arg, L"/d") == 0) ||
-                        (wcscmp(arg, L"/D") == 0) || default_debug) &&
-                       !(wcscmp(arg, L"--no-debug") == 0));
-      is_log_mode =
-          ((wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) ||
-           (wcscmp(arg, L"-log") == 0) || (wcscmp(arg, L"/l") == 0) || (wcscmp(arg, L"/L") == 0));
-      is_version_mode =
-          ((wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) ||
-           (wcscmp(arg, L"-ver")) == 0 || (wcscmp(arg, L"/v") == 0) || (wcscmp(arg, L"/V") == 0));
-      is_help_mode = ((wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) ||
-                      (wcscmp(arg, L"-?") == 0) || (wcscmp(arg, L"/h") == 0) ||
-                      (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0));
+      wchar_t* arg     = argv[i];
+      is_no_debug     |= (wcscmp(arg, L"--no-debug") == 0) ||
+                         (wcscmp(arg, L"--disable-debug") == 0);
+      is_no_log       |= (wcscmp(arg, L"--no-logging") == 0) ||
+                         (wcscmp(arg, L"--disable-logging") == 0);
+      is_debug_mode   |= (wcscmp(arg, L"--debug") == 0) || (wcscmp(arg, L"-d") == 0) ||
+                         (wcscmp(arg, L"-debug") == 0) || (wcscmp(arg, L"/d") == 0) ||
+                         (wcscmp(arg, L"/D") == 0);
+      is_log_mode     |= (wcscmp(arg, L"--logging") == 0) || (wcscmp(arg, L"-l") == 0) ||
+                         (wcscmp(arg, L"-log") == 0) || (wcscmp(arg, L"/l") == 0) ||
+                         (wcscmp(arg, L"/L") == 0);
+      is_version_mode |= (wcscmp(arg, L"--version") == 0) || (wcscmp(arg, L"-v") == 0) ||
+                         (wcscmp(arg, L"-ver") == 0) || (wcscmp(arg, L"/v") == 0) ||
+                         (wcscmp(arg, L"/V") == 0);
+      is_help_mode    |= (wcscmp(arg, L"--help") == 0) || (wcscmp(arg, L"-h") == 0) ||
+                         (wcscmp(arg, L"-?") == 0) || (wcscmp(arg, L"/h") == 0) ||
+                         (wcscmp(arg, L"/H") == 0) || (wcscmp(arg, L"/?") == 0);
+    }
+    // Apply INI/build default debug, then let --no-debug override everything
+    if (GetDefaultWantDebug()) {
+      is_debug_mode = true;
+    }
+    if (is_no_debug) {
+      is_debug_mode = false;
     }
     parsed = true;
   } else {
@@ -363,7 +380,7 @@ bool ParseCommandLine(int argc, LPWSTR argv[]) {
     debug_mode = true;
   }
   if (is_log_mode || is_debug_mode || is_version_mode || is_help_mode) {
-    enable_logging = true;
+    enable_logging = !is_no_log;
   }
   return parsed;
 }
@@ -436,7 +453,12 @@ bool OpenLogFile(HWND hWnd, const std::wstring& file_path) {
 }
 
 bool AttachConsole() {
-  return logging::AttachConsoleImpl();
+  const int attach_code = logging::AttachConsoleImpl();
+  if (attach_code == 0 || attach_code == 1) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 bool DetachConsole() {

@@ -2,7 +2,7 @@
 ; Only for Inno Setup 5.x to support Windows 2000/XP
 ; Tested with ISS 5.6.1 (Installer can be found in assets/tools directory)
 
-#define AppVer "0.1.8"
+#define AppVer "0.1.9"
 #define AppName "CryoCalc"
 #define ExeName "cryocalc"
 #define Developer "Alex313031"

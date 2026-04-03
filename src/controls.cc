@@ -545,12 +545,7 @@ void InitControls(HWND hWnd, HINSTANCE hInst) {
   } else {
     // Start monitor timer and set default update speed to high
     SetTimer(hWnd, kUpdateTimerId, kSpeedHigh, nullptr);
-    HMENU hBar      = GetMenu(hWnd);
-    HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
-    HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 1) : nullptr;
-    if (hSpeed) {
-      CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
-    }
+    InitMenus(hWnd); // Check menu items depending on startup settings
   }
   if (!LoadBeachBall()) {
     LOG(ERROR) << L"Beach Ball loading failed... :( ";

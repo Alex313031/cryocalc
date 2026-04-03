@@ -224,6 +224,7 @@ bool LaunchHelpEx(HWND hWnd) {
 
 // Window procedure for handling messages
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  static const bool activ_when_toggled = true;
   switch (uMsg) {
     case WM_COMMAND: {
       int wmId = LOWORD(wParam);
@@ -300,17 +301,44 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDM_RUN:
           OpenRunDialog(hWnd); // Open run dialog
           break;
+        case IDM_SHOW_CON: {
+          if (!logging::ShowConsole(activ_when_toggled)) {
+            LOG(ERROR) << L"Failed to show console.";
+          }
+        } break;
+        case IDM_HIDE_CON: {
+          if (!logging::HideConsole()) {
+            LOG(ERROR) << L"Failed to hide console.";
+          }
+        } break;
+        case IDM_TOGGLE_CON: {
+          if (!logging::ToggleShowConsole(activ_when_toggled)) {
+            LOG(ERROR) << L"Failed to toggle console visibility state.";
+          }
+          // Toggle check mark in menu to reflect actual visibility state
+          HMENU hMenu = GetMenu(hWnd);
+          if (hMenu) {
+            const HWND console = logging::GetCurrentConsole();
+            const bool now_visible = console && IsWindowVisible(console);
+            CheckMenuItem(hMenu, IDM_TOGGLE_CON,
+                          MF_BYCOMMAND | (now_visible ? MF_CHECKED : MF_UNCHECKED));
+          }
+        } break;
         case IDM_ATTACH_CON: {
-          // Atach new console
           if (!AttachConsole()) {
             ErrorBox(hWnd, L"Console Error", L"Failed to attach console");
           }
         } break;
         case IDM_DETACH_CON: {
-          // Detach console
           if (!DetachConsole()) {
             ErrorBox(hWnd, L"Console Error", L"Failed to detach console");
           }
+        } break;
+        case IDM_DISABLE_CON: {
+          if (!DetachConsole()) {
+            ErrorBox(hWnd, L"Console Error", L"Failed to detach console");
+          }
+          // TODO: Disable attaching again
         } break;
         case IDM_CLEAR_CON: {
           ClearConsole(hWnd);
@@ -413,6 +441,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       break;
     // When window is shown
     case WM_CREATE: {
+      // Set current process priority class to above normal
+      if (!SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS)) {
+        LOG(WARN) << L"Failed to set PRIORITY_CLASS";
+      }
       SetClientRects(hWnd, hInst);
       InitControls(hWnd, hInst);
       SetFontAllControls(hWnd, kMainFont); // Set initial font for all child windows

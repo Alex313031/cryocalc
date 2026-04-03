@@ -27,6 +27,9 @@ const RECT GetMainClientRect();
 // Gets the size of the desktop window (usually the screen), to position app in the middle of it
 const RECT GetDesktopRect(HINSTANCE hInstance);
 
+// Initializes menu states
+void InitMenus(HWND hWnd);
+
 // Gets the position to place a window to the right of another window
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY);
 

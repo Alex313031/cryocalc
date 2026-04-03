@@ -3,6 +3,7 @@
 #include <io.h>
 
 #include "check.h"
+#include "logging.h"
 
 namespace logging {
   // For tracking console attach state.
@@ -11,22 +12,34 @@ namespace logging {
 }
 
 bool logging::GetIsConsoleAttached() {
+  if (GetCurrentConsole() != nullptr) {
+    CHECK(console_attached); // Should always be true
+  }
   return console_attached;
 }
 
-bool logging::AttachConsoleImpl() {
+int logging::AttachConsoleImpl() {
+  int retval = 0;
   if (GetIsConsoleAttached()) {
-    MessageBoxW(nullptr, L"Console Already Attached!", L"Console Error", MB_OK | MB_ICONERROR);
-    return false;
+    retval = 1;
   }
-  // Allow and allocate conhost for cmd.exe logging window
-  const bool attached_console = RouteStdioToConsole(true /* open cmd if none */);
-  if (!attached_console) {
-    MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error",
-                MB_OK | MB_ICONERROR);
+  if (retval == 1) {
+    // 1 Soft error, already attached
+    MessageBoxW(nullptr, L"Console Already Attached!", L"Console Attach Warning", MB_OK | MB_ICONWARNING);
+  } else {
+    // Allow and allocate conhost for cmd.exe logging window
+    const bool attached_console = RouteStdioToConsole(true /* open cmd if none */);
+
+    if (attached_console) {
+      retval = 0; // 0 Means TRUE/OK
+    } else {
+      MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error",
+                  MB_OK | MB_ICONERROR);
+      retval = 2; // Other error 
+    }
   }
-  console_attached = attached_console;
-  return attached_console;
+  console_attached = retval == 0 || retval == 1;
+  return retval;
 }
 
 bool logging::DetachConsoleImpl() {
@@ -46,9 +59,74 @@ bool logging::DetachConsoleImpl() {
   }
 }
 
+bool logging::SetLogConsoleTitle(const std::wstring& title) {
+  return SetConsoleTitleW(title.c_str());
+}
+
+HWND logging::GetCurrentConsole() {
+  return GetConsoleWindow();
+}
+
+bool logging::ShowConsole(const bool activate) {
+  const int showstate = activate ? SW_SHOW
+                                 : SW_SHOWNOACTIVATE;
+  const HWND console = GetCurrentConsole();
+  if (console == nullptr) {
+    LOG(ERROR) << L"Console not attached.";
+    return false;
+  } else {
+    const bool visible = IsWindowVisible(console);
+    if (visible) {
+      LOG(INFO) << L"Console already visible";
+      return true;
+    } else {
+      return ShowWindow(console, showstate); // Show console
+    }
+  }
+}
+
+bool logging::HideConsole() {
+  const HWND console = GetCurrentConsole();
+  if (console == nullptr) {
+    LOG(WARN) << L"Console not attached.";
+    return false;
+  } else {
+    if (ShowWindow(console, SW_HIDE)) {
+      return true; // Hid console
+    } else {
+      LOG(WARN) << L"Running SW_HIDE on console again!"; // Doesn't work on Win11 Terminal (¬_¬)
+      return ShowWindow(console, SW_HIDE); // It is sometimes necessary to call twice
+    }
+  }
+}
+
+bool logging::ToggleShowConsole(const bool activate) {
+  const int showstate = activate ? SW_SHOW
+                                 : SW_SHOWNOACTIVATE;
+  const HWND console = GetCurrentConsole();
+  if (console == nullptr) {
+    LOG(WARN) << L"Console not attached.";
+    return false;
+  } else {
+    const bool visible = IsWindowVisible(console);
+    if (visible) {
+      // Hide console
+      if (ShowWindow(console, SW_HIDE)) {
+        return true;
+      } else {
+        LOG(WARN) << L"Running SW_HIDE on console again!";
+        return ShowWindow(console, SW_HIDE);
+      }
+    } else {
+      // Show console
+      return ShowWindow(console, showstate);
+    }
+  }
+}
+
 bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
   if (console_attached) {
-    std::wcerr << __func__ << L" console_attached = true";
+    std::wcerr << __func__ << L" console_attached = true" << std::endl;
     return true;
   }
   // We don't use GetStdHandle() to check stdout/stderr here because

@@ -87,25 +87,29 @@ BEGIN
     END
     POPUP "&Settings"
     BEGIN
-        MENUITEM "&Disable Console",       IDM_DISABLE_CON, GRAYED
         POPUP "&Update Speed"
         BEGIN
             MENUITEM "&Low (2.0 sec.)",    IDM_SPEED_LOW
             MENUITEM "&Medium (1.0 sec.)", IDM_SPEED_MED
             MENUITEM "&High (0.5 sec.)",   IDM_SPEED_HIGH
         END
+        MENUITEM SEPARATOR
+        MENUITEM "&Show Console?",  IDM_TOGGLE_CON
     END
     POPUP "&Dev"
     BEGIN
         MENUITEM "&System Monitor", IDM_SYSMON
         MENUITEM "&Open Log File",  IDM_OPEN_LOG
+        MENUITEM "Clear Log File",  IDM_CLEAR_LOG
+        MENUITEM "&Clear Console",  IDM_CLEAR_CON
         MENUITEM SEPARATOR
         POPUP "&More"
         BEGIN
             MENUITEM "&Attach Console", IDM_ATTACH_CON
             MENUITEM "&Detach Console", IDM_DETACH_CON
-            MENUITEM "&Clear Console",  IDM_CLEAR_CON
-            MENUITEM "Clear &Log File", IDM_CLEAR_LOG
+            MENUITEM "&Show Console",   IDM_SHOW_CON
+            MENUITEM "&Hide Console",   IDM_HIDE_CON
+            MENUITEM "Disable Console", IDM_DISABLE_CON, GRAYED
             MENUITEM "&Test Logging",   IDM_TEST_LOG
             MENUITEM "&Bounce Ball!",   IDM_EASTEREGG
         END

@@ -93,6 +93,25 @@ const RECT GetDesktopRect(HINSTANCE hInstance) {
   return desktopWinRect;
 }
 
+void InitMenus(HWND hWnd) {
+  // We should have a hWnd, but hMainWindow shouldn't be defined yet.
+  if (!hWnd || hMainWindow != nullptr) {
+    NOTREACHED();
+  }
+  HMENU hBar      = GetMenu(hWnd);
+  HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
+  HMENU hSpeed    = hSettings ? GetSubMenu(hSettings, 0) : nullptr;
+  if (hSpeed) {
+    CheckMenuRadioItem(hSpeed, IDM_SPEED_LOW, IDM_SPEED_HIGH, IDM_SPEED_HIGH, MF_BYCOMMAND);
+  }
+  if (hBar) {
+    const HWND console = logging::GetCurrentConsole();
+    const bool con_visible = console && IsWindowVisible(console);
+    CheckMenuItem(hBar, IDM_TOGGLE_CON,
+                  MF_BYCOMMAND | (con_visible ? MF_CHECKED : MF_UNCHECKED));
+  }
+}
+
 void GetRightOfWindow(HWND hWnd, int* outX, int* outY) {
   // Default position if we can't get the main window rect
   const int kDefaultX = 512;

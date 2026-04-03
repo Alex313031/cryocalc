@@ -45,9 +45,12 @@
 #define IDM_SPEED_LOW               217
 #define IDM_SPEED_MED               218
 #define IDM_SPEED_HIGH              219
-#define IDM_DISABLE_CON             220 // TODO
+#define IDM_DISABLE_CON             220
 #define IDM_SYSMON                  221
 #define IDM_EASTEREGG               222
+#define IDM_SHOW_CON                223
+#define IDM_HIDE_CON                224
+#define IDM_TOGGLE_CON              225
 
 // Monitor Window menu items
 #define IDM_SHOW_KERNEL             250

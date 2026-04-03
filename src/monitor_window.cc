@@ -47,11 +47,11 @@ static HMENU GetMonitorSpeedMenu() {
   return hOpts ? GetSubMenu(hOpts, 0) : nullptr;
 }
 
-// "Update Speed" popup from the main CryoCalc window menu (Settings=index 2, submenu index 1).
+// "Update Speed" popup from the main CryoCalc window menu (Settings=index 2, submenu index 0).
 static HMENU GetMainSpeedMenu() {
   HMENU hBar      = GetMenu(hMainWindow);
   HMENU hSettings = hBar ? GetSubMenu(hBar, 2) : nullptr;
-  return hSettings ? GetSubMenu(hSettings, 1) : nullptr;
+  return hSettings ? GetSubMenu(hSettings, 0) : nullptr;
 }
 
 // Restart the single monitoring timer on the main window at the new rate and

@@ -212,7 +212,7 @@ void logging::SetIsDCheck(bool set_is_dcheck) {
 }
 
 bool logging::InitLogging(HINSTANCE hInstance, LogInitSettings InitSettings) {
-  DCHECK(!logging_initialized);
+  CHECK(!logging_initialized);
   bool success                    = false;
   LogDest log_sink                = InitSettings.log_sink;
   const std::wstring logfile_name = InitSettings.logfile_name;
@@ -242,7 +242,8 @@ bool logging::InitLogging(HINSTANCE hInstance, LogInitSettings InitSettings) {
       break;
     case LOG_TO_ALL: {
       if (!is_console_attached) {
-        if (AttachConsoleImpl()) {
+        const int attach_code = AttachConsoleImpl();
+        if (attach_code == 0 || attach_code == 1) {
           success = OpenFileForWriting(logfile);
         } else {
           success = false;
@@ -253,7 +254,8 @@ bool logging::InitLogging(HINSTANCE hInstance, LogInitSettings InitSettings) {
     } break;
     case LOG_TO_STDERR: {
       if (!is_console_attached) {
-        success = AttachConsoleImpl();
+        const int attach_code = AttachConsoleImpl();
+        success = attach_code == 0 || attach_code == 1;
       } else {
         success = true;
       }
