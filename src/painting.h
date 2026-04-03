@@ -16,7 +16,9 @@ bool SetFontAllControls(HWND hParentWnd, const std::wstring& font);
 // Loads funny beach ball .ico as a bitmap, to use later for animations
 bool LoadBeachBall();
 
-// Easter egg that bounces beach ball around the window
-void BounceBeachBall();
+// Easter egg that bounces beach ball around hWnd's client area.
+// Calling again with the same window stops the animation (toggle).
+// Calling with a different window stops the current bounce and starts a new one.
+void BounceBeachBall(HWND hWnd);
 
 #endif // CRYOCALC_PAINTING_H_

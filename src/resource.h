@@ -51,6 +51,7 @@
 #define IDM_SHOW_CON                223
 #define IDM_HIDE_CON                224
 #define IDM_TOGGLE_CON              225
+#define IDM_BSOD                    226
 
 // Monitor Window menu items
 #define IDM_SHOW_KERNEL             250

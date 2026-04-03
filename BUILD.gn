@@ -36,6 +36,7 @@ executable("cryocalc") {
     "src/strings.h",
     "src/strings.cc",
     "src/stress/common.h",
+    "src/stress/common.cc",
     "src/stress/cpu.h",
     "src/stress/cpu.cc",
     "src/stress/io.h",

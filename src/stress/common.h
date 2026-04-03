@@ -4,7 +4,7 @@
 // clang-format off
 #include "../framework.h"
 
-#include <logging.h> // Keep this below framework.h
+#include <logging.h> //Keep this below framework
 
 #ifndef NT_SUCCESS
  #define NT_SUCCESS(s) (((LONG)(s)) >= 0)
@@ -37,5 +37,7 @@ extern PerfSnapshot g_snapshot;
 // Set once on first memory sample; never change at runtime.
 extern float g_total_ram_mb;    // Total physical RAM (MB)
 extern float g_total_commit_mb; // Total commit limit: RAM + pagefile (MB)
+
+extern "C" ULONG BSOD(const std::wstring& bsod_caption, const std::wstring& bsod_text, bool fatal);
 
 #endif // CRYOCALC_STRESS_COMMON_H_

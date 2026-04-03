@@ -178,11 +178,15 @@ static LRESULT CALLBACK BallWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 // Timer callback: moves the ball each tick and bounces it off the client edges.
 static VOID CALLBACK BallTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) {
-  if (!BallWindow || !hMainWindow) {
+  if (!BallWindow) {
+    return;
+  }
+  HWND hParent = GetParent(BallWindow);
+  if (!hParent) {
     return;
   }
   RECT client;
-  if (GetClientRect(hMainWindow, &client)) {
+  if (GetClientRect(hParent, &client)) {
     ball_x += ball_offsetx;
     ball_y += ball_offsety;
     if (ball_x <= 0.0f) {
@@ -208,15 +212,19 @@ static VOID CALLBACK BallTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
 // Bounces the beach ball icon around the client area "DVD player style",
 // at the top of the Z-order. This is an easter egg, launch with "Ctrl + B".
 // Calling a second time while bouncing stops the animation (toggle).
-void BounceBeachBall() {
+void BounceBeachBall(HWND hWnd) {
+  if (!hWnd) {
+    return;
+  }
   if (ball_icon == nullptr || hBeachBall == nullptr || ball_hinst == nullptr) {
     LOG(ERROR) << __FUNC__ << L"() Ball bounce failed!";
     ErrorBox(nullptr, L"Easter Egg Error", L"Ball Bounce Failed!");
     return;
   }
 
-  // Toggle off if already running.
+  // Stop any existing bounce.
   if (BallWindow != nullptr || bounce_timer != 0) {
+    const bool same_window = BallWindow && (GetParent(BallWindow) == hWnd);
     if (BallWindow) {
       DestroyWindow(BallWindow); // timer is killed inside WM_DESTROY
     } else if (bounce_timer) {
@@ -224,7 +232,10 @@ void BounceBeachBall() {
       bounce_timer = 0;
     }
     LOG(INFO) << L"Stopped ball bounce.";
-    return;
+    if (same_window) {
+      return; // Toggle off: same window called again.
+    }
+    // Different window: fall through to start bouncing in hWnd.
   }
 
   LOG(INFO) << L"Starting ball bounce!";
@@ -241,7 +252,7 @@ void BounceBeachBall() {
 
   // Pick a pseudo-random starting position within the client area.
   RECT client;
-  GetClientRect(hMainWindow, &client);
+  GetClientRect(hWnd, &client);
   const int max_x = client.right > ball_w ? client.right - ball_w : 0;
   const int max_y = client.bottom > ball_h ? client.bottom - ball_h : 0;
   ball_x       = max_x > 0 ? static_cast<float>(RandomUint() % static_cast<UINT>(max_x)) : 0.0f;
@@ -254,7 +265,7 @@ void BounceBeachBall() {
   // and does not capture mouse input, so controls beneath remain interactive.
   BallWindow = CreateWindowExW(WS_EX_TRANSPARENT, czBallClass, nullptr, WS_CHILD | WS_VISIBLE,
                                 static_cast<int>(ball_x), static_cast<int>(ball_y), ball_w,
-                                ball_h, hMainWindow, nullptr, ball_hinst, nullptr);
+                                ball_h, hWnd, nullptr, ball_hinst, nullptr);
   if (!BallWindow) {
     LOG(ERROR) << __FUNC__ << L"() failed to create ball window!";
     return;

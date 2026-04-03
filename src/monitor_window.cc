@@ -226,6 +226,9 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
         case IDM_ABOUT:
           ShowAboutDialog(hWnd);
           break;
+        case IDM_EASTEREGG:
+            BounceBeachBall(hWnd);
+          break;
         case IDM_RUN:
           OpenRunDialog(hWnd);
           break;

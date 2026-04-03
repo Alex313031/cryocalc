@@ -197,6 +197,9 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         case IDM_ABOUT:
           ShowAboutDialog(hWnd);
           break;
+        case IDM_EASTEREGG:
+            BounceBeachBall(hWnd);
+          break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }

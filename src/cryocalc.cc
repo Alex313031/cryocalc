@@ -194,6 +194,7 @@ bool InitInstance(HINSTANCE hInstance, int nCmdShow) {
 
 bool LaunchHelpEx(HWND hWnd) {
   LOG(INFO) << L"Opening online help";
+  // TODO: Link to help
   return LaunchHelp(hWnd);
 }
 
@@ -276,6 +277,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDM_RUN:
           OpenRunDialog(hWnd); // Open run dialog
           break;
+        case IDM_BSOD: {
+          static const std::wstring title = L"Hawk";
+          static const std::wstring content = L"Tuah";
+          // Use for experiments only
+          BSOD(title, content, false); // Setting true Hangs the system! 
+        } break;
         case IDM_SHOW_CON: {
           if (!logging::ShowConsole(activ_when_toggled)) {
             LOG(ERROR) << L"Failed to show console.";
@@ -341,9 +348,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case IDM_SPEED_HIGH:
           SetUpdateSpeed(kSpeedHigh, IDM_SPEED_HIGH);
           break;
-        case IDM_EASTEREGG: {
-            BounceBeachBall();
-        } break;
+        case IDM_EASTEREGG:
+            BounceBeachBall(hWnd);
+          break;
         default:
           return DefWindowProc(hWnd, uMsg, wParam, lParam);
       }
