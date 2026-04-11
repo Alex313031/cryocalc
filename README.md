@@ -1,12 +1,16 @@
-# CryoCalc &nbsp;<img src="./assets/icon_256.png" width="38">
+# CryoCalc &nbsp;<img src="./assets/icon_256.png" height="38">
 
-![screenshot](./assets/screenshot.png?raw=true "Screenshot")
+<p align="center">
+<img src="./assets/screenshot.png" width="50%">
+</p>
 
 ## About
 
 A small Windows 2000+ compatible program that converts between temperature units, for cryogenic work and LN2 overclocking.  
 It has a CPU stresser/burner feature similar to cpuburner.exe from [Furmark](https://geeks3d.com/public/jegx/2017q2/furmark-1-19-geforce-gtx1070-stress-test.jpg).  
 I recently also added some system monitoring functionality including a cool mini "Task Manager" style System Monitor window.
+
+<img src="./assets/Windows_2000_logo.svg" height="64">
 
 ### Motivation
 The app is written in raw Win32 API, using C++.
