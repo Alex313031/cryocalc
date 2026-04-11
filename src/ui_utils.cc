@@ -1,5 +1,6 @@
 #include "ui_utils.h"
 
+#include "painting.h"
 #include "resource.h"
 #include "strings.h"
 
@@ -10,6 +11,42 @@ RECT kMainWinRect;
 static RUN_FILE_DLG_ pfnRunFileDlg = nullptr;
 
 static bool _about_handled = false;
+
+// WH_MSGFILTER hook that gives the About dialog a chance to run TranslateAccelerator
+// before IsDialogMessage consumes keyboard messages. Installed on WM_INITDIALOG,
+// removed when the dialog exits. DialogBox has no user-controlled message loop, so
+// this is the approved Win32 way to support accelerator tables in modal dialogs.
+static HHOOK  g_about_hook  = nullptr;
+static HWND   g_about_hwnd  = nullptr;
+static HACCEL g_about_accel = nullptr;
+
+static LRESULT CALLBACK AboutMsgFilterHook(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode == MSGF_DIALOGBOX && g_about_hwnd && g_about_accel) {
+    MSG* pMsg = reinterpret_cast<MSG*>(lParam);
+    if (TranslateAccelerator(g_about_hwnd, g_about_accel, pMsg)) {
+      return 1; // consumed; IsDialogMessage will not process it further
+    }
+  }
+  return CallNextHookEx(g_about_hook, nCode, wParam, lParam);
+}
+
+static void InstallAboutAccelHook(HWND hDlg) {
+  g_about_accel = LoadAccelerators(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDD_ABOUTBOX));
+  g_about_hook  = SetWindowsHookExW(WH_MSGFILTER, AboutMsgFilterHook, nullptr,
+                                    GetCurrentThreadId());
+}
+
+static void RemoveAboutAccelHook() {
+  if (g_about_hook) {
+    UnhookWindowsHookEx(g_about_hook);
+    g_about_hook = nullptr;
+  }
+  if (g_about_accel) {
+    DestroyAcceleratorTable(g_about_accel);
+    g_about_accel = nullptr;
+  }
+  g_about_hwnd = nullptr;
+}
 
 HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_t* tooltipText) {
   if (!hWndParent || !hWndControl || !tooltipText) {
@@ -348,6 +385,10 @@ bool ShowAboutDialog(HWND hWnd) {
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
   UNREFERENCED_PARAMETER(lParam);
 
+  if (g_about_hwnd == nullptr) {
+    g_about_hwnd = hDlg; // Set as early as possible, before any message is processed.
+  }
+
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
   static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_ABOUT));
   switch (message) {
@@ -355,23 +396,36 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
       // Set icon in titlebar of about dialog
       SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
       SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
+      InstallAboutAccelHook(hDlg);
       AboutHandled = true;
       SetAboutHandled(AboutHandled);
     } break;
-    case WM_COMMAND:
-      // Exit the dialog
-      if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-        if (EndDialog(hDlg, LOWORD(wParam))) {
-          AboutHandled = true;
-          SetAboutHandled(AboutHandled);
-          return (INT_PTR)AboutHandled;
-        } else {
-          AboutHandled = false;
-          SetAboutHandled(AboutHandled);
-          break;
-        }
-      }
+    case WM_DESTROY:
+      RemoveAboutAccelHook();
       break;
+    case WM_COMMAND: {
+      int wmId = LOWORD(wParam);
+      switch (wmId) {
+        case IDM_EASTEREGG:
+          BounceBeachBall(hDlg);
+          break;
+        case IDOK:
+        case IDCANCEL: {
+          // Exit the dialog
+           if (EndDialog(hDlg, LOWORD(wParam))) {
+             AboutHandled = true;
+            SetAboutHandled(AboutHandled);
+            return (INT_PTR)AboutHandled;
+          } else {
+            AboutHandled = false;
+            SetAboutHandled(AboutHandled);
+            break;
+          }
+       } break;
+       default:
+         break;
+      }
+    } break;
     default:
       SetAboutHandled(true);
       break;

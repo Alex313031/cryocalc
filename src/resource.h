@@ -3,8 +3,6 @@
 // Used by resource.rc
 
 // clang-format off
-// For importing .manifest in .rc file
-#define APP_MANIFEST                1
 
 // Icons
 #define IDI_CRYOCALC                101

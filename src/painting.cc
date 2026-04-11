@@ -93,6 +93,19 @@ bool SetFontAllControls(HWND hParentWnd, const std::wstring& font) {
   }
 }
 
+// Returns the pixel height of the status bar child of hParent, or 0 if none.
+int GetStatusBarHeight(HWND hParent) {
+  const HWND hSB = FindWindowExW(hParent, nullptr, STATUSCLASSNAME, nullptr);
+  if (!hSB) {
+    return 0;
+  }
+  RECT sbr;
+  if (GetClientRect(hSB, &sbr)) {
+    return sbr.bottom; // top is always 0 in client coords
+  }
+  return 0;
+}
+
 // Default font quality to use
 static const BYTE GetFontAntiAliasQuality() {
   // May also use ANTIALIASED_QUALITY or PROOF_QUALITY
@@ -187,6 +200,11 @@ static VOID CALLBACK BallTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD
   }
   RECT client;
   if (GetClientRect(hParent, &client)) {
+    // If the parent owns a status bar, shrink the bounce area so the ball
+    // appears to bounce off the top of the status bar instead of the true
+    // bottom of the client area.
+    client.bottom -= GetStatusBarHeight(hParent);
+
     ball_x += ball_offsetx;
     ball_y += ball_offsety;
     if (ball_x <= 0.0f) {
@@ -250,9 +268,10 @@ void BounceBeachBall(HWND hWnd) {
     g_ball_class_registered = true;
   }
 
-  // Pick a pseudo-random starting position within the client area.
+  // Pick a pseudo-random starting position within the bounce area.
   RECT client;
   GetClientRect(hWnd, &client);
+  client.bottom -= GetStatusBarHeight(hWnd);
   const int max_x = client.right > ball_w ? client.right - ball_w : 0;
   const int max_y = client.bottom > ball_h ? client.bottom - ball_h : 0;
   ball_x       = max_x > 0 ? static_cast<float>(RandomUint() % static_cast<UINT>(max_x)) : 0.0f;

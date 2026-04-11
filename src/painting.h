@@ -4,6 +4,9 @@
 #include "framework.h"
 #include "utils.h"
 
+// Returns the pixel height of a status bar child of hParent, 0 if none.
+int GetStatusBarHeight(HWND hParent);
+
 // Returns a font from a given font name string
 HFONT GetFont(const std::wstring& in_font);
 
