@@ -1,7 +1,5 @@
 #include "mem.h"
 
-#include <os_info_dll.h>
-
 #include "reporting.h"
 #include "../utils.h"
 
@@ -121,7 +119,7 @@ void UpdateMemPerfData() {
   }
 }
 
-static void zeromem(void* dest, const size_t count) {
+[[maybe_unused]] static void zeromem(void* dest, const size_t count) {
   ::memset(dest, 0, count);
 }
 
