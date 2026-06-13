@@ -64,12 +64,16 @@
  #define _STRINGIZER_
  #define _STRINGIZER(in) #in
  #define STRINGIZE(in) _STRINGIZER(in)
+  // Wide-string variant: L ## "x" -> L"x". Two levels so the argument expands
+ // before the L## paste widens the resulting narrow literal.
+ #define _WIDEN(in) L ## in
+ #define WIDEN(in) _WIDEN(in)
 #endif // !defined(_STRINGIZER_)
 
 // Main version constant
 #ifndef _VERSION
  // Run stringizer above
- #define _VERSION(major,minor,build) STRINGIZE(major) "." STRINGIZE(minor) "." STRINGIZE(build)
+ #define _VERSION(major,minor,build) WIDEN(STRINGIZE(major.minor.build))
 #endif // _VERSION
 
 // These next few lines are where we control version number and copyright year
@@ -80,7 +84,7 @@
 
 #define VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
 #define ABOUT_TITLE    L"About CryoCalc"
-#define ABOUT_CONTENT  L"CryoCalc ver. " VERSION_STRING
+#define ABOUT_CONTENT  WIDEN(STRINGIZE(CryoCalc ver. MAJOR_VERSION.MINOR_VERSION.BUILD_VERSION))
 // TODO: Rebuilt win32devkit with UTF8 rc support and convert to ©
 #define ABOUT_COPYRIGHT L"\251 2025-2026 Alex313031" // \251 is the © symbol
 #define LEGAL_COPYRIGHT L"\251 2025-2026 Alex313031"

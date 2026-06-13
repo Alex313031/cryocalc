@@ -40,6 +40,19 @@
 #include <thread>    // For threading support
 #include <vector>    // std::vector
 
+#ifndef __cplusplus
+ #error APP_NAME requires a C++ compiler
+#endif
+#if __cplusplus < 201103L
+ // For old compilers without constexpr or inline
+ #if !defined(constexpr) || !defined(__cpp_constexpr)
+  #define constexpr const
+ #endif // constexpr
+ #if !defined(inline)
+  #define inline
+ #endif // inline
+#endif
+
 // Defines for missing windowsx.h definitions, don't want to inlcude
 // the heavy .h file just for this one thing.
 #if !defined(GET_X_LPARAM) || !defined(GET_Y_LPARAM)
