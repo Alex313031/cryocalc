@@ -1,8 +1,6 @@
 #ifndef CRYOCALC_UI_UTILS_H_
 #define CRYOCALC_UI_UTILS_H_
 
-#include "utils.h"
-
 typedef int(WINAPI* RUN_FILE_DLG_)(HWND hwndParent,
                                    HICON hIcon,
                                    LPCTSTR lpszWorkingDir,

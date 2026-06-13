@@ -3,6 +3,7 @@
 #include "painting.h"
 #include "resource.h"
 #include "strings.h"
+#include "utils.h"
 
 // Declare rects to use for all future window layout
 RECT kMainClientRect;
@@ -55,16 +56,16 @@ HWND AddTooltip(HWND hWndParent, HWND hWndControl, HINSTANCE hInst, const wchar_
 
   // Create the tooltip window
   HWND hTooltip = CreateWindowExW(
-      0, TOOLTIPS_CLASS, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
+      WS_EX_NOACTIVATE, TOOLTIPS_CLASS, nullptr, TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, hWndParent, nullptr, hInst, nullptr);
 
   if (!hTooltip) {
     return nullptr;
   }
 
-  static const bool can_use_582_controls = IsCommCtrlAtLeast(dwComCtl32TargetVer);
   // Set up the TOOLINFO structure
   TOOLINFOW ti = {0};
+  static const bool can_use_582_controls = IsCommCtrlAtLeast(dwComCtl32TargetVer);
   if (can_use_582_controls) {
     ti.cbSize = sizeof(ti);
   } else {
@@ -371,7 +372,7 @@ bool GetAboutHandledState() {
 bool ShowAboutDialog(HWND hWnd) {
   const HINSTANCE gHinst = GetGlobalHinst();
   // Show "About" dialog box
-  PlaySoundW(L"SystemNotification", nullptr, SND_ASYNC);
+  PlaySoundW(L"SystemNotification", nullptr, SND_ALIAS | SND_ASYNC);
   DialogBoxW(gHinst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
   bool handled_dialog = GetAboutHandledState();
   if (handled_dialog) {
@@ -390,12 +391,12 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
   }
 
   bool AboutHandled = false; // Stores status of whether dialog has been handled user-wise.
-  static const HICON kSmallIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_ABOUT));
   switch (message) {
     case WM_INITDIALOG: {
       // Set icon in titlebar of about dialog
-      SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kSmallIcon);
-      SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kSmallIcon);
+      static const HICON kAboutIcon = LoadIcon(GetInstanceFromHwnd(hDlg), MAKEINTRESOURCE(IDI_ABOUT));
+      SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)kAboutIcon);
+      SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)kAboutIcon);
       InstallAboutAccelHook(hDlg);
       AboutHandled = true;
       SetAboutHandled(AboutHandled);

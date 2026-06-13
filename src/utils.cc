@@ -8,6 +8,10 @@
 #include "strings.h"
 #include "stress/stress.h"
 
+bool IsXP = false;
+bool Is2K = false;
+bool g_set_dispatch = false;
+
 unsigned int g_precision_;
 
 // Declare custom_settings here, to be set later, for all of cryocalc to use
@@ -414,9 +418,6 @@ const std::wstring GetExeDir() {
   } else {
     retval = fullPath;
   }
-  if (debug_mode) {
-    LOG(DEBUG) << __func__ << L" = " << retval;
-  }
   return retval;
 }
 
@@ -677,53 +678,51 @@ const bool GetDefaultWantDebug() {
 
 const bool IsCommCtrlAtLeast(const DWORD to_compare) {
   const DWORD kCommCtrlVer = GetCommCtrlVersion();
-  LOG(DEBUG) << L"Target common controls version: " << std::showbase << std::hex << to_compare
-             << std::noshowbase << std::dec;
-  LOG(DEBUG) << L"Installed common controls version: " << std::showbase << std::hex << kCommCtrlVer
-             << std::noshowbase << std::dec;
+  LOG(DEBUG) << L"Target common controls version: " << logging::Hex(to_compare);
+  LOG(DEBUG) << L"Installed common controls version: " << logging::Hex(kCommCtrlVer);
   return kCommCtrlVer >= to_compare;
 }
 
 DWORD GetCommCtrlVersion() {
-  HINSTANCE hComCtl32Dll = nullptr;
+  // Resolve the system comctl32.dll path explicitly. GetSystemDirectoryW
+  // returns 0 on failure, or >= MAX_PATH if our buffer was too small (in
+  // which case it reports the required size). Either is fatal for us -
+  // bail rather than fall through with an empty path that would let
+  // LoadLibraryW search the standard DLL order and silently bypass the
+  // "explicitly use the system one" intent.
   wchar_t systemDir[MAX_PATH];
-  UINT length = GetSystemDirectoryW(systemDir, MAX_PATH);
-  std::wstring kSystemDir;
-  if (length > 0 && length < MAX_PATH) {
-    kSystemDir = std::wstring(systemDir);
-  } else {
-    // Handle error or buffer too small
-    LOG(ERROR) << "Failed to get system directory!";
+  const UINT length = GetSystemDirectoryW(systemDir, MAX_PATH);
+  if (length == 0 || length >= MAX_PATH) {
+    const DWORD error = GetLastError();
+    LOG(ERROR) << L"Failed to get system directory! Error: " << logging::Hex(error);
+    return 0;
   }
-  const std::wstring comctl32_path =
-      kSystemDir + L"\\" + kComCtl32Dll; // Add \\ backslash before .dll file name
-  hComCtl32Dll =
-      LoadLibraryW(comctl32_path.c_str()); // Explicity reference system installed version
-  DLLGETVERSIONPROC pDllGetVersion;
-  DLLVERSIONINFO dvi = {sizeof(dvi)};
-  DWORD dwVersion    = 0;
-  DWORD error;
+  const std::wstring comctl32_path = std::wstring(systemDir) + L"\\" + kComCtl32Dll;
+
+  HINSTANCE hComCtl32Dll = LoadLibraryW(comctl32_path.c_str());
   if (hComCtl32Dll == nullptr) {
-    error = GetLastError();
-    LOG(ERROR) << L"Failed to load " << kComCtl32Dll << ", hComCtl32Dll was null! Error: " << error;
-    pDllGetVersion = nullptr;
-  } else {
-    pDllGetVersion =
-        reinterpret_cast<DLLGETVERSIONPROC>(GetProcAddress(hComCtl32Dll, "DllGetVersion"));
-    if (!pDllGetVersion) {
-      error = GetLastError();
-      LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << error;
-    } else {
-      HRESULT hr = pDllGetVersion(&dvi);
-      if (hr == S_OK) {
-        dwVersion = _PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
-      } else {
-        error = GetLastError();
-        LOG(ERROR) << L"Failed to run DllGetVersion. Error: " << error;
-      }
-    }
-    FreeLibrary(hComCtl32Dll);
+    const DWORD error = GetLastError();
+    LOG(ERROR) << L"Failed to load " << kComCtl32Dll
+               << L", hComCtl32Dll was null! Error: " << logging::Hex(error);
+    return 0;
   }
+
+  DWORD dwVersion                  = 0;
+  DLLGETVERSIONPROC pDllGetVersion = reinterpret_cast<DLLGETVERSIONPROC>(
+      GetProcAddress(hComCtl32Dll, "DllGetVersion"));
+  if (pDllGetVersion == nullptr) {
+    const DWORD error = GetLastError();
+    LOG(ERROR) << L"Failed to get DllGetVersion address. Error: " << logging::Hex(error);
+  } else {
+    DLLVERSIONINFO dvi = {sizeof(dvi)};
+    const HRESULT hr   = pDllGetVersion(&dvi);
+    if (hr == S_OK) {
+      dwVersion = _PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
+    } else {
+      LOG(ERROR) << L"Failed to run DllGetVersion. HRESULT: " << logging::Hex(hr);
+    }
+  }
+  FreeLibrary(hComCtl32Dll);
   return dwVersion;
 }
 
@@ -745,17 +744,15 @@ bool IsRunningOnWine() {
 
 UINT RandomUint() {
   unsigned int seed      = 0;
-  static const bool isXP = IsAtLeast(kWinXP);
-  static const bool is2K = IsAtMost(kWin2000);
 
-  if (isXP || force_rand_s) {
+  if (IsXP || force_rand_s) {
     if (is_dcheck) {
       LOG(DEBUG) << L"Using std::random_device for " << __FUNC__;
     }
     // Causes rand_s() crash on Windows 2000 because it uses RtlGenRandom internally. Bug in MinGW.
     std::random_device randd;
     seed = static_cast<unsigned int>(randd());
-  } else if (is2K) {
+  } else if (Is2K) {
     if (is_dcheck) {
       LOG(DEBUG) << L"Using CryptGenRandom for " << __FUNC__;
     }
@@ -775,4 +772,27 @@ UINT RandomUint() {
     return 69u;
   }
   return seed;
+}
+
+void SetWinVerDispatch() {
+  IsXP = IsAtLeast(kWinXP);
+  Is2K = IsAtMost(kWin2000);
+  g_set_dispatch = true;
+}
+
+bool PlayWavFile(const std::wstring& wav_file) {
+  const std::wstring cwd = GetExeDir();
+  if (wav_file.empty() || cwd.empty()) {
+    return false;
+  }
+  static const bool IsVista = IsAtLeast(kWinVista);
+  static const DWORD playFlags =
+      IsVista ? SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT | SND_SENTRY
+              : SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT;
+  const std::wstring sound_file = cwd + wav_file;
+  return PlaySoundW(sound_file.c_str(), nullptr, playFlags);
+}
+
+bool StopPlayWav() {
+  return PlaySoundW(nullptr, nullptr, 0);
 }

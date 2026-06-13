@@ -10,6 +10,12 @@
 #include "framework.h"
 #include "globals.h"
 
+// For function dispatch, to select Win32 functions depending on version capabilities
+// These are all set once by SetWinVerDispatch() to avoid multiple calls to osinfo.dll
+extern bool IsXP;
+extern bool Is2K;
+extern bool g_set_dispatch;
+
 // Whether to force using std::random
 static constexpr bool force_rand_s = false;
 
@@ -165,5 +171,14 @@ bool IsRunningOnWine();
 
 // Returns a random unsigned integer, using Win2K compatible functions if necessary
 UINT RandomUint();
+
+// Sets windows version bools to control function dispatch for compatibility.
+void SetWinVerDispatch();
+
+// Plays a .wav file (has to be side by side with the main .exe)
+bool PlayWavFile(const std::wstring& wav_file);
+
+// Stops playing any sound files currently playing
+bool StopPlayWav();
 
 #endif // CRYOCALC_UTILS_H_
