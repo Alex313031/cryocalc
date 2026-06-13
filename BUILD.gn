@@ -69,5 +69,13 @@ config("cryocalc_config") {
   ]
   # Track unused functions
   cflags = [ "-Wunused-function" ]
-  libs = [ "winmm", ]
+  libs = [
+    "kernel32",
+    "user32",
+    "shell32",
+    "comctl32",
+    "comdlg32",
+    "gdi32",
+    "winmm",
+  ]
 }

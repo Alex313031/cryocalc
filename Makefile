@@ -1,4 +1,4 @@
-# winver MAKEFILE for compiling under MinGW32
+# cryocalc MAKEFILE for compiling under MinGW32
 
 # Compiler and tools
 CC       := i686-w64-mingw32-gcc
