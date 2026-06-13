@@ -7,6 +7,7 @@
 namespace logging {
   HANDLE g_log_file       = INVALID_HANDLE_VALUE;
   volatile bool file_open = false;
+  std::wstring g_log_file_path;
 }
 
 const std::wstring logging::GetCurrentRelDir() {
@@ -32,10 +33,80 @@ const std::wstring logging::GetCurrentRelDir() {
   return retval;
 }
 
+typedef HRESULT(WINAPI* FnSHGetFolderPathW)(HWND, int, HANDLE, DWORD, LPWSTR);
+
+// Resolves SHGetFolderPathW at runtime. Tries shfolder.dll first (the
+// redistributable form that shipped with IE5, available on NT4 + IE5,
+// Win98 and Win2k+); falls back to shell32.dll (XP+ exports it directly,
+// Win2k forwards it). Returns nullptr on pure NT4 with no IE5 shell update.
+static FnSHGetFolderPathW ResolveSHGetFolderPathW() {
+  static FnSHGetFolderPathW pfn = nullptr;
+  static bool s_resolved        = false;
+  if (!s_resolved) {
+    HMODULE hShfolder = LoadLibraryW(L"shfolder.dll");
+    if (hShfolder != nullptr) {
+      pfn = reinterpret_cast<FnSHGetFolderPathW>(GetProcAddress(hShfolder, "SHGetFolderPathW"));
+    }
+    if (pfn == nullptr) {
+      HMODULE hShell32 = GetModuleHandleW(L"shell32.dll");
+      if (hShell32 == nullptr) {
+        hShell32 = LoadLibraryW(L"shell32.dll");
+      }
+      if (hShell32 != nullptr) {
+        pfn = reinterpret_cast<FnSHGetFolderPathW>(GetProcAddress(hShell32, "SHGetFolderPathW"));
+      }
+    }
+    s_resolved = true;
+  }
+  return pfn;
+}
+
+static HRESULT SHGetFolderPathWCompat(HWND hWnd,
+                                      int csIdl,
+                                      HANDLE hToken,
+                                      DWORD dwFlags,
+                                      LPWSTR pszPath) {
+  if (pszPath == nullptr) {
+    return E_INVALIDARG;
+  }
+  FnSHGetFolderPathW pfn = ResolveSHGetFolderPathW();
+  if (pfn != nullptr) {
+    return pfn(hWnd, csIdl, hToken, dwFlags, pszPath);
+  }
+  // Pure NT4 (no IE5 shell update) fallback. CSIDL_LOCAL_APPDATA / CSIDL_APPDATA
+  // map to %APPDATA% when set; CSIDL_PERSONAL to %USERPROFILE%. Final fallback
+  // is GetTempPathW so logging always has somewhere writable to land.
+  pszPath[0]              = L'\0';
+  const wchar_t* env_name = nullptr;
+  if (csIdl == CSIDL_LOCAL_APPDATA || csIdl == CSIDL_APPDATA) {
+    env_name = L"APPDATA";
+  } else if (csIdl == CSIDL_PERSONAL) {
+    env_name = L"USERPROFILE";
+  }
+  if (env_name != nullptr) {
+    const DWORD got = GetEnvironmentVariableW(env_name, pszPath, MAX_PATH);
+    if (got > 0 && got < MAX_PATH) {
+      return S_OK;
+    }
+  }
+  // Should never be reached: shfolder.dll has shipped with IE5+ since 1999,
+  // and any sane NT4 install has %APPDATA% / %USERPROFILE% set. Logged so
+  // it's obvious in the log trail when an unusual environment falls through.
+  const DWORD temp = GetTempPathW(MAX_PATH, pszPath);
+  if (temp > 0 && temp < MAX_PATH) {
+    std::wcerr << L"[ERROR] SHGetFolderPathWCompat fell back to GetTempPathW: "
+               << L"no shfolder.dll/shell32.dll export and no env var for "
+               << L"CSIDL " << csIdl << L". Path: " << pszPath << std::endl;
+    return S_OK;
+  }
+  return E_FAIL;
+}
+
 // Usually %LOCALAPPDATA%\kProgName
 const std::wstring logging::GetAppDataDir() {
   wchar_t kLocalAppData[MAX_PATH];
-  HRESULT shAppData = SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, kLocalAppData);
+  HRESULT shAppData =
+      SHGetFolderPathWCompat(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, kLocalAppData);
   if (S_OK == shAppData) {
     const std::wstring log_dir = std::wstring(kLocalAppData) + L"\\" + kProgName + L"\\";
     CreateDirectoryW(log_dir.c_str(), nullptr); // Fails silently if exists
@@ -90,8 +161,9 @@ bool logging::OpenFileForWriting(const std::wstring& logfile_path) {
         file_open = false;
         return false;
       } else {
-        file_open = true;
-        write_bom = should_truncate_file;
+        file_open       = true;
+        g_log_file_path = logfile_path;
+        write_bom       = should_truncate_file;
         if (!should_truncate_file && dwCreationFlag == OPEN_EXISTING) {
           // Move to end of file for append mode
           if (SetFilePointer(g_log_file, 0, nullptr, FILE_END) == INVALID_SET_FILE_POINTER &&
@@ -118,8 +190,9 @@ bool logging::OpenFileForWriting(const std::wstring& logfile_path) {
     if (GetIsConsoleAttached()) {
       std::wcout << L"Note: Creating new log file with UTF-16 BOM: " << logfile_path << std::endl;
     }
-    file_open = true;
-    write_bom = true;
+    file_open       = true;
+    g_log_file_path = logfile_path;
+    write_bom       = true;
   }
   if (file_open && write_bom) {
     return WriteUTF16BOM(g_log_file);
@@ -147,7 +220,8 @@ bool logging::OpenFileForWritingAlt(const std::wstring& alt_logfile_path,
                                FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, dwCreationFlag,
                                FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr);
       if (g_log_file != INVALID_HANDLE_VALUE) {
-        out_write_bom = should_truncate;
+        g_log_file_path = alt_logfile_path;
+        out_write_bom   = should_truncate;
         if (!should_truncate && dwCreationFlag == OPEN_EXISTING) {
           if (SetFilePointer(g_log_file, 0, nullptr, FILE_END) == INVALID_SET_FILE_POINTER &&
               GetLastError() != NO_ERROR) {
@@ -166,7 +240,8 @@ bool logging::OpenFileForWritingAlt(const std::wstring& alt_logfile_path,
       std::wcout << L"Note: Creating new log file with UTF-16 BOM: " << alt_logfile_path
                  << std::endl;
     }
-    out_write_bom = true; // New file always needs BOM
+    g_log_file_path = alt_logfile_path;
+    out_write_bom   = true; // New file always needs BOM
   }
   return g_log_file != INVALID_HANDLE_VALUE;
 }
@@ -184,6 +259,7 @@ bool logging::CloseFileHandle() {
   if (closed) {
     g_log_file = INVALID_HANDLE_VALUE;
     file_open  = false;
+    g_log_file_path.clear();
     std::wcerr << L"[DEBUG] Closed file handle " << this_handle.c_str() << std::endl;
   } else {
     const std::wstring msg = L"Failed to close file handle " + this_handle;
@@ -239,4 +315,11 @@ bool logging::IsFileOpen() {
     return false;
   }
   return file_open;
+}
+
+const std::wstring logging::GetLogFilePath() {
+  if (!IsFileOpen()) {
+    return std::wstring();
+  }
+  return g_log_file_path;
 }

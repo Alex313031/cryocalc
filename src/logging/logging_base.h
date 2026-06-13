@@ -67,9 +67,15 @@
 // Adhere to semver > semver.org
 #define LOGGER_MAJOR_VERSION 0
 #define LOGGER_MINOR_VERSION 2
-#define LOGGER_BUILD_VERSION 3
+#define LOGGER_BUILD_VERSION 7
 
 #define LOGGER_VERSION_STRING _VERSION(MAJOR_VERSION, MINOR_VERSION, BUILD_VERSION)
+
+#define _LIBNAME L"HawkLogger"
+
+#if __cplusplus < 201103L || !defined(__cplusplus)
+ #error _LIBNAME only supports C++11 and above
+#endif
 
 #include <windows.h> // Main Windows include
 #include <wincon.h>  // Console API functions

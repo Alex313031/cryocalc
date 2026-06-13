@@ -33,6 +33,14 @@ int logging::AttachConsoleImpl() {
 
     if (attached_console) {
       retval = 0; // 0 Means TRUE/OK
+      // Title the console so the user can tell at a glance which process's
+      // logging window this is. Only on the fresh-attach path - if a console
+      // was already attached (retval == 1) it was set up by something else
+      // and we shouldn't rename it. kProgName is populated by InitLogging
+      // before it calls us.
+      if (!kProgName.empty()) {
+        SetLogConsoleTitle(kProgName + L" Logging Console");
+      }
     } else {
       MessageBoxW(nullptr, L"Failed to attach console!", L"Console Attach Error",
                   MB_OK | MB_ICONERROR);
@@ -64,25 +72,82 @@ bool logging::SetLogConsoleTitle(const std::wstring& title) {
   return SetConsoleTitleW(title.c_str());
 }
 
-HWND logging::GetCurrentConsole() {
-  return GetConsoleWindow();
+typedef HWND(WINAPI* FnGetConsoleWindow)(void);
+
+// Resolves GetConsoleWindow at runtime. Win2k+ exports it from kernel32.dll;
+// pure NT4 does not. Returns nullptr when unavailable so the caller can
+// dispatch to the FindWindow fallback below.
+static FnGetConsoleWindow ResolveGetConsoleWindow() {
+  static FnGetConsoleWindow pfn = nullptr;
+  static bool s_resolved        = false;
+  if (!s_resolved) {
+    HMODULE hKernel32 = GetModuleHandleW(L"kernel32.dll");
+    if (hKernel32 != nullptr) {
+      pfn = reinterpret_cast<FnGetConsoleWindow>(GetProcAddress(hKernel32, "GetConsoleWindow"));
+    }
+    s_resolved = true;
+  }
+  return pfn;
 }
+
+// NT4 fallback: there is no documented HWND lookup for a console, but a
+// long-standing workaround is to set a unique title, FindWindowW for it,
+// then restore the original. csrss.exe processes the rename asynchronously
+// so a short Sleep gives it time to land. Cached after first success so the
+// title only flickers once per process.
+static HWND FindConsoleHwndNT4() {
+  static HWND s_cached   = nullptr;
+  static bool s_searched = false;
+  if (s_searched) {
+    return s_cached;
+  }
+  s_searched = true;
+
+  wchar_t saved_title[1024];
+  wchar_t unique_title[64];
+  if (GetConsoleTitleW(saved_title, ARRAYSIZE(saved_title)) == 0) {
+    saved_title[0] = L'\0';
+  }
+  swprintf(unique_title, ARRAYSIZE(unique_title), L"__console_hwnd_lookup_%lu__",
+           static_cast<unsigned long>(GetCurrentProcessId()));
+  if (!SetConsoleTitleW(unique_title)) {
+    return nullptr;
+  }
+  Sleep(40u); // Give csrss 40ms. to apply the rename.
+  s_cached = FindWindowW(nullptr, unique_title);
+  SetConsoleTitleW(saved_title);
+  return s_cached;
+}
+
+HWND logging::GetCurrentConsole() {
+  FnGetConsoleWindow pfn = ResolveGetConsoleWindow();
+  if (pfn != nullptr) {
+    return pfn();
+  }
+  return FindConsoleHwndNT4();
+}
+
+// ShowWindow's BOOL return is "was the window previously visible",
+// NOT "did the call succeed" - so SW_SHOW / SW_SHOWNOACTIVATE on a
+// hidden window returns 0 even though the show worked, and SW_HIDE
+// on an already-hidden window also returns 0. We can't use it as a
+// success indicator. Just trust the call to do its job; both
+// helpers report true unless the console isn't even attached.
 
 bool logging::ShowConsole(const bool activate) {
   const int showstate = activate ? SW_SHOW : SW_SHOWNOACTIVATE;
   const HWND console  = GetCurrentConsole();
   if (console == nullptr) {
-    LOG(ERROR) << L"Console not attached.";
+    CLOG(ERROR) << L"ShowConsole() called when console not attached!";
+    FLOG(ERROR) << L"ShowConsole() called when console not attached.";
     return false;
-  } else {
-    const bool visible = IsWindowVisible(console);
-    if (visible) {
-      LOG(INFO) << L"Console already visible";
-      return true;
-    } else {
-      return ShowWindow(console, showstate); // Show console
-    }
   }
+  // IsWindowVisible is unreliable for the conhost pseudo-window on
+  // Win10/11 Terminal (it's the wrong HWND), so we skip the early-out
+  // and just call ShowWindow - it's a no-op when already in the
+  // requested state.
+  ShowWindow(console, showstate);
+  return true;
 }
 
 bool logging::HideConsole() {
@@ -90,14 +155,9 @@ bool logging::HideConsole() {
   if (console == nullptr) {
     LOG(WARN) << L"Console not attached.";
     return false;
-  } else {
-    if (ShowWindow(console, SW_HIDE)) {
-      return true; // Hid console
-    } else {
-      LOG(WARN) << L"Running SW_HIDE on console again!"; // Doesn't work on Win11 Terminal (¬_¬)
-      return ShowWindow(console, SW_HIDE);               // It is sometimes necessary to call twice
-    }
   }
+  ShowWindow(console, SW_HIDE);
+  return true;
 }
 
 bool logging::ToggleShowConsole(const bool activate) {
@@ -106,21 +166,13 @@ bool logging::ToggleShowConsole(const bool activate) {
   if (console == nullptr) {
     LOG(WARN) << L"Console not attached.";
     return false;
-  } else {
-    const bool visible = IsWindowVisible(console);
-    if (visible) {
-      // Hide console
-      if (ShowWindow(console, SW_HIDE)) {
-        return true;
-      } else {
-        LOG(WARN) << L"Running SW_HIDE on console again!";
-        return ShowWindow(console, SW_HIDE);
-      }
-    } else {
-      // Show console
-      return ShowWindow(console, showstate);
-    }
   }
+  // ShowWindow's BOOL return is "was previously visible", not success;
+  // see ShowConsole / HideConsole. Use IsWindowVisible to pick which
+  // direction to flip, then trust the call.
+  const bool visible = IsWindowVisible(console);
+  ShowWindow(console, visible ? SW_HIDE : showstate);
+  return true;
 }
 
 bool logging::RouteStdioToConsole(bool create_console_if_not_found) {
