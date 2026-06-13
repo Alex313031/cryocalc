@@ -16,8 +16,7 @@
 #define IDC_CRYOCALC                107
 
 // Dialogs
-#define IDD_ABOUT_DIALOG            108
-#define IDD_ABOUTBOX                109
+#define IDD_ABOUTBOX                108
 
 // Bitmaps
 #define IDB_BACKGROUND              150

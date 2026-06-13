@@ -5,9 +5,7 @@
 #define APSTUDIO_READONLY_SYMBOLS
 // Generated from the TEXTINCLUDE resource.
 
-#ifndef APSTUDIO_INVOKED
 #include "version.h"
-#endif // APSTUDIO_INVOKED
 
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include <windows.h>
@@ -63,6 +61,7 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+#endif
 
 STRINGTABLE
 BEGIN
@@ -204,14 +203,12 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
-        LEFTMARGIN,   21
-        RIGHTMARGIN,  132
-        TOPMARGIN,    12
-        BOTTOMMARGIN, 56
+        LEFTMARGIN,   7
+        RIGHTMARGIN,  125
+        TOPMARGIN,    7
+        BOTTOMMARGIN, 49
     END
 END
-#endif
-
 #endif
 
 // Version Information
@@ -232,14 +229,14 @@ BEGIN
     BEGIN
         BLOCK "040904B0" // 0x0409 = US English, 0x04B0 = Unicode (1200)
         BEGIN
-            VALUE "Comments", "https://github.com/Alex313031/cryocalc"
-            VALUE "CompanyName", "Alex313031"
-            VALUE "FileDescription", "Win32 Overclocking Utility"
+            VALUE "Comments", "https://github.com/Alex313031/cryocalc\0"
+            VALUE "CompanyName", "Alex313031\0"
+            VALUE "FileDescription", "Win32 Overclocking Utility\0"
             VALUE "FileVersion", VERSION_STRING
-            VALUE "InternalName", "cryocalc"
+            VALUE "InternalName", "cryocalc\0"
             VALUE "LegalCopyright", LEGAL_COPYRIGHT
-            VALUE "LegalTrademarks", "BSD-3"
-            VALUE "OriginalFilename", "cryocalc.exe"
+            VALUE "LegalTrademarks", "BSD-3\0"
+            VALUE "OriginalFilename", "cryocalc.exe\0"
             VALUE "ProductName", APP_NAME
             VALUE "ProductVersion", VERSION_STRING
         END
