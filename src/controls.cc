@@ -1,7 +1,5 @@
 #include "controls.h"
 
-#include <os_info_dll.h>
-
 #include "monitor_window.h"
 #include "osinfo_window.h"
 #include "painting.h"
@@ -11,6 +9,7 @@
 #include "stress/stress.h"
 #include "strings.h"
 #include "ui_utils.h"
+#include "utils.h"
 
 // Static labels
 static HWND hInputLabel;
@@ -73,7 +72,6 @@ static const std::wstring kDummyScale = L"U";
 
 unsigned int num_threads_ = 0;
 
-static BOOL IsXP               = false;
 static volatile bool animating = false; // Whether to animate the progress bar
 
 Scale parseScale(const std::wstring& wscale) {
@@ -271,7 +269,6 @@ static const UINT kButtonCol2Left    = kTempEditLeft + EDIT_WIDTH + INTRA_PADDIN
 static unsigned int orig_sys_monitor_left; // For setting minimum x for cpu bars
 
 void InitControls(HWND hWnd, HINSTANCE hInst) {
-  IsXP                            = IsAtLeast(kWinXP);
   static RECT clientRect          = GetMainClientRect();
   const UINT this_width           = clientRect.right;
   const UINT this_height          = clientRect.bottom;
@@ -748,22 +745,29 @@ void HandleResize(HWND hWnd) {
 }
 
 void InitStatusBar(HWND hWnd, HINSTANCE hInst) {
-  static const std::wstring status_text   = kAppName + L" ver. " + GetVersionWstring();
-  static const std::wstring status_bubble = L"Status";
-  const int kStatusSplit                  = MAINWIDTH - LABEL_WIDTH;
+  static const std::wstring status_text    = kAppName + L" ver. " + GetVersionWstring();
+  static const std::wstring status_bubble  = L"Status";
+  static const std::wstring status_tooltip = L"Current Status";
   if (!hStatusBar) {
     LOG(ERROR) << __FUNC__ << L"() failed: Status bar not initialized";
   } else {
-    const int kStatusParts[2] = {kStatusSplit, -1};
+    static const int kStatusSplit = MAINWIDTH - LABEL_WIDTH;
+    const int kStatusParts[2]     = {kStatusSplit, -1};
     SendMessageW(hStatusBar, SB_SETPARTS, 2, (LPARAM)kStatusParts);
     UpdateStatusBar(0, status_text);
     UpdateStatusBar(1, status_bubble);
+    SendMessageW(hStatusBar, SB_SETTIPTEXT, static_cast<WPARAM>(0), (LPARAM)status_tooltip.c_str());
+    SendMessageW(hStatusBar, SB_SETTIPTEXT, static_cast<WPARAM>(1), (LPARAM)status_tooltip.c_str());
   }
 }
 
 void UpdateStatusBar(const unsigned int part, const std::wstring& text) {
-  if (part < 0 || part > 1) {
-    DCHECK(part < 0 || part > 1);
+  if (part > 1) {
+    DCHECK(part <= 1);
+    return;
+  }
+  if (hStatusBar == nullptr) {
+    LOG(ERROR) << L"hStatusBar was null when trying to update text!";
     return;
   } else {
     SendMessageW(hStatusBar, SB_SETTEXT, static_cast<WPARAM>(part), (LPARAM)text.c_str());
