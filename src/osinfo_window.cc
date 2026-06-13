@@ -4,9 +4,14 @@
 
 #include "painting.h"
 #include "ui_utils.h"
+#include "utils.h"
 
 static int this_width;
 static int this_height;
+
+// True when WS_EX_COMPOSITED was applied at creation (XP+). When false, the
+// Windows 2000 fallback (WM_SETREDRAW + RedrawWindow) is used instead.
+static bool s_composited = false;
 
 const WCHAR* szOSInfoWindowClass = CRYOCALC_OSINFO_WNDCLASS;
 
@@ -207,6 +212,15 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     case WM_CREATE:
       InitOsInfoControls(hWnd, this_hinst);
       SetFontAllControls(hWnd, kMainFont);
+      if (IsXP) {
+        // WS_EX_COMPOSITED (0x02000000): the window manager composites the
+        // entire child-window hierarchy into an off-screen buffer and blits the
+        // finished frame, eliminating resize flicker without any paint changes.
+        // The constant is spelled out because _WIN32_WINNT=0x0500 omits it.
+        const LONG ex = GetWindowLongW(hWnd, GWL_EXSTYLE);
+        SetWindowLongW(hWnd, GWL_EXSTYLE, ex | WS_EX_COMPOSITED);
+        s_composited = true;
+      }
       break;
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORSTATIC: {
@@ -240,7 +254,17 @@ LRESULT CALLBACK OsInfoWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
       if (wParam != SIZE_MINIMIZED) {
         this_width  = LOWORD(lParam);
         this_height = HIWORD(lParam);
+        if (!s_composited) {
+          // Win2000 fallback: suppress individual child repaints during the
+          // DeferWindowPos batch, then force a single repaint at the end.
+          SendMessageW(hWnd, WM_SETREDRAW, FALSE, 0);
+        }
         HandleOsInfoResize(hWnd);
+        if (!s_composited) {
+          SendMessageW(hWnd, WM_SETREDRAW, TRUE, 0);
+          RedrawWindow(hWnd, nullptr, nullptr,
+                       RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+        }
       }
     } break;
     case WM_GETMINMAXINFO: {
