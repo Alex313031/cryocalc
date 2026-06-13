@@ -1,7 +1,7 @@
 # CryoCalc &nbsp;<img src="./assets/icon_256.png" height="38">
 
 <p align="center">
-<img src="./assets/screenshot.png" width="50%">
+<img src="./assets/screenshot.png?raw=true" width="50%">
 </p>
 
 ## About
@@ -42,10 +42,16 @@ It can be used on Windows 7+ or Linux. (Unlike the regular MinGW method above, g
 Really, it is a meta-build system. GN stands for "Generate Ninja" and can use __BUILD.gn__ files to
 generate `.ninja` files. These are used by Ninja (the actual build system), to run the commands to compile it.  
 The compiler itself is dependant on the host platform:  
-On Linux special MinGW build I compiled on Ubuntu 24.04 to support legacy Windows and use static linkage is used.
+On Linux, a special MinGW build I compiled on Ubuntu 24.04 to support legacy Windows and use static linkage is used.
 On Windows, it simply uses an extracted toolchain from win32-devkit mentioned above.
 
 ### With Visual Studio
 Only Visual Studio 2017/2019/2022 are supported.  
  - (Broken right now, need to add configs for osinfo.dll).  
 Open the `CryoCalc.sln` file. You will need the [v141_xp toolchain](https://learn.microsoft.com/en-us/cpp/build/configuring-programs-for-windows-xp) installed to support Windows XP.
+
+### Resources/Credits
+
+Dave Plummer
+
+Charles Petzold
