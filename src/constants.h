@@ -92,8 +92,6 @@ inline constexpr UINT MONWIN_WIDTH     = MAINWIDTH;  // Default width of monitor
 inline constexpr UINT MONWIN_HEIGHT    = MAINHEIGHT; // Default height of monitor window
 inline constexpr UINT MONWIN_MINWIDTH  = 200u; // Min width of monitor window
 inline constexpr UINT MONWIN_MINHEIGHT = 180u; // Min height of monitor window
-inline constexpr UINT MONWIN_MAXWIDTH  = (MAXWIDTH * 2u); // Max. width of monitor window
-inline constexpr UINT MONWIN_MAXHEIGHT = (MAXHEIGHT * 2u); // Max. height of monitor window
 
 inline constexpr UINT STATICLABEL_HEIGHT = 24u;  // Height of static text label controls
 inline constexpr UINT SMALLLABEL_HEIGHT  = 16;  // Height of static text in small labels

@@ -193,6 +193,8 @@ LRESULT CALLBACK MonitorWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       }
     } break;
     case WM_GETMINMAXINFO: {
+      const int MONWIN_MAXWIDTH = GetSystemMetrics(SM_CXMAXIMIZED);
+      const int MONWIN_MAXHEIGHT = GetSystemMetrics(SM_CYMAXIMIZED);
       LPMINMAXINFO pMinMaxInfo      = reinterpret_cast<LPMINMAXINFO>(lParam);
       pMinMaxInfo->ptMinTrackSize.x = MONWIN_MINWIDTH;
       pMinMaxInfo->ptMinTrackSize.y = MONWIN_MINHEIGHT;
