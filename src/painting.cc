@@ -178,6 +178,7 @@ static LRESULT CALLBACK BallWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
     case WM_DESTROY:
       // Kill the move timer when the ball window is destroyed (covers both
       // explicit toggle-off and parent-window teardown).
+      StopPlayWav(); // Stop playing any sound file.
       if (bounce_timer) {
         KillTimer(nullptr, bounce_timer);
         bounce_timer = 0;
@@ -249,11 +250,17 @@ void BounceBeachBall(HWND hWnd) {
       KillTimer(nullptr, bounce_timer);
       bounce_timer = 0;
     }
-    LOG(INFO) << L"Stopped ball bounce.";
+
     if (same_window) {
+      if (StopPlayWav()) {
+        LOG(DEBUG) << L"Stopped PlaySound";
+      } else {
+        LOG(ERROR) << L"Failed to stop PlaySound!";
+      }
+      LOG(INFO) << L"Stopped ball bounce.";
       return; // Toggle off: same window called again.
     }
-    // Different window: fall through to start bouncing in hWnd.
+    // Different window: fall through to start bouncing in current hWnd.
   }
 
   LOG(INFO) << L"Starting ball bounce!";
@@ -266,6 +273,13 @@ void BounceBeachBall(HWND hWnd) {
     wc.lpszClassName = czBallClass;
     RegisterClassW(&wc);
     g_ball_class_registered = true;
+  }
+
+  static const std::wstring wav_file = L"pinball_fantasies_partyland.wav";
+  if (PlayWavFile(wav_file)) {
+    LOG(DEBUG) << L"Started Playing " << wav_file;
+  } else {
+    LOG(ERROR) << L"Failed to start PlaySound on " << wav_file;
   }
 
   // Pick a pseudo-random starting position within the bounce area.
@@ -282,7 +296,7 @@ void BounceBeachBall(HWND hWnd) {
   // Create a frameless child window sized to the icon.
   // WS_EX_TRANSPARENT: paints after all sibling controls (visually on top)
   // and does not capture mouse input, so controls beneath remain interactive.
-  BallWindow = CreateWindowExW(WS_EX_TRANSPARENT, czBallClass, nullptr, WS_CHILD | WS_VISIBLE,
+  BallWindow = CreateWindowExW(WS_EX_TRANSPARENT, czBallClass, nullptr, dwCHILD,
                                 static_cast<int>(ball_x), static_cast<int>(ball_y), ball_w,
                                 ball_h, hWnd, nullptr, ball_hinst, nullptr);
   if (!BallWindow) {
